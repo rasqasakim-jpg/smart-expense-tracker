@@ -1,0 +1,8 @@
+model Otp {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  code       String   @db.VarChar
+  type       String   @db.VarChar
+  expired_at DateTime @db.Timestamp
+  user       User     @relation(fields: [user_id], references: [id])
+}

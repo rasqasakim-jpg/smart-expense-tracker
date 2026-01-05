@@ -1,0 +1,7 @@
+model Category {
+  id           Int           @id @default(autoincrement())
+  name         String        @db.VarChar
+  icon         String?       @db.VarChar
+  type         String        @db.VarChar // Pemasukan atau Pengeluaran
+  transactions Transaction[]
+}

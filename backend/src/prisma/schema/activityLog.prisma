@@ -1,0 +1,8 @@
+model ActivityLog {
+  id          Int      @id @default(autoincrement())
+  user_id     Int
+  action      String   @db.VarChar
+  description String?  @db.Text
+  created_at  DateTime @default(now()) @db.Timestamp
+  user        User     @relation(fields: [user_id], references: [id])
+}

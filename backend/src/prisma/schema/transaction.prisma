@@ -1,0 +1,14 @@
+model Transaction {
+  id               Int          @id @default(autoincrement())
+  user_id          Int
+  category_id      Int
+  wallet_id        Int
+  amount           Decimal      @db.Decimal // Berdasarkan source: 142
+  type             String       @db.VarChar
+  note             String?      @db.Text
+  transaction_date DateTime     @db.Timestamp
+  
+  wallet           Wallet       @relation(fields: [wallet_id], references: [id])
+  category         Category     @relation(fields: [category_id], references: [id])
+  attachments      Attachment[]
+}

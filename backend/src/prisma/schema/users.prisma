@@ -1,0 +1,16 @@
+model User {
+  id            Int            @id @default(autoincrement())
+  full_name     String         @db.VarChar
+  email         String         @unique @db.VarChar // Berdasarkan source: 111
+  password      String         @db.VarChar // Berdasarkan source: 137
+  role          String?        @db.VarChar
+  created_at    DateTime       @default(now()) @db.Timestamp
+  
+  // Relasi
+  wallets       Wallet[]
+  budgets       Budget[]
+  notifications Notification[]
+  otps          Otp[]
+  refresh_tokens RefreshToken[]
+  activity_logs  ActivityLog[]
+}

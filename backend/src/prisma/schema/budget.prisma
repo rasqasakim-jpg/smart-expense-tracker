@@ -1,0 +1,7 @@
+model Budget {
+  id            Int      @id @default(autoincrement())
+  user_id       Int
+  monthly_limit Decimal  @db.Decimal // Berdasarkan source: 134
+  month_year    DateTime @db.Date // Berdasarkan source: 139
+  user          User     @relation(fields: [user_id], references: [id])
+}
