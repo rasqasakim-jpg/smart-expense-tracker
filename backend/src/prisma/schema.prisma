@@ -12,3 +12,20 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+
+// Definisi Enum diletakkan di sini
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+enum OtpType {
+  REGISTRATION
+  PASSWORD_RESET
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}

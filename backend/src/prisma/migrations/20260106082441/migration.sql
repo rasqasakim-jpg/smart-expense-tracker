@@ -1,7 +1,7 @@
 -- CreateTable
 CREATE TABLE "ActivityLog" (
     "id" SERIAL NOT NULL,
-    "user_id" INTEGER NOT NULL,
+    "user_id" TEXT NOT NULL,
     "action" VARCHAR NOT NULL,
     "description" TEXT,
     "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -11,8 +11,8 @@ CREATE TABLE "ActivityLog" (
 
 -- CreateTable
 CREATE TABLE "Attachment" (
-    "id" SERIAL NOT NULL,
-    "transaction_id" INTEGER NOT NULL,
+    "id" TEXT NOT NULL,
+    "transaction_id" TEXT NOT NULL,
     "file_path" VARCHAR NOT NULL,
     "file_type" VARCHAR NOT NULL,
     "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -22,8 +22,8 @@ CREATE TABLE "Attachment" (
 
 -- CreateTable
 CREATE TABLE "Budget" (
-    "id" SERIAL NOT NULL,
-    "user_id" INTEGER NOT NULL,
+    "id" TEXT NOT NULL,
+    "user_id" TEXT NOT NULL,
     "monthly_limit" DECIMAL NOT NULL,
     "month_year" DATE NOT NULL,
 
@@ -43,7 +43,7 @@ CREATE TABLE "Category" (
 -- CreateTable
 CREATE TABLE "Notification" (
     "id" SERIAL NOT NULL,
-    "user_id" INTEGER NOT NULL,
+    "user_id" TEXT NOT NULL,
     "title" VARCHAR NOT NULL,
     "content" TEXT NOT NULL,
     "is_read" BOOLEAN NOT NULL DEFAULT false,
@@ -55,7 +55,7 @@ CREATE TABLE "Notification" (
 -- CreateTable
 CREATE TABLE "Otp" (
     "id" SERIAL NOT NULL,
-    "user_id" INTEGER NOT NULL,
+    "user_id" TEXT NOT NULL,
     "code" VARCHAR NOT NULL,
     "type" VARCHAR NOT NULL,
     "expired_at" TIMESTAMP NOT NULL,
@@ -75,7 +75,7 @@ CREATE TABLE "PasswordReset" (
 -- CreateTable
 CREATE TABLE "RefreshToken" (
     "id" SERIAL NOT NULL,
-    "user_id" INTEGER NOT NULL,
+    "user_id" TEXT NOT NULL,
     "token" VARCHAR NOT NULL,
     "expires_at" TIMESTAMP NOT NULL,
 
@@ -84,10 +84,10 @@ CREATE TABLE "RefreshToken" (
 
 -- CreateTable
 CREATE TABLE "Transaction" (
-    "id" SERIAL NOT NULL,
-    "user_id" INTEGER NOT NULL,
+    "id" TEXT NOT NULL,
+    "user_id" TEXT NOT NULL,
     "category_id" INTEGER NOT NULL,
-    "wallet_id" INTEGER NOT NULL,
+    "wallet_id" TEXT NOT NULL,
     "amount" DECIMAL NOT NULL,
     "type" VARCHAR NOT NULL,
     "note" TEXT,
@@ -98,7 +98,7 @@ CREATE TABLE "Transaction" (
 
 -- CreateTable
 CREATE TABLE "User" (
-    "id" SERIAL NOT NULL,
+    "id" TEXT NOT NULL,
     "full_name" VARCHAR NOT NULL,
     "email" VARCHAR NOT NULL,
     "password" VARCHAR NOT NULL,
@@ -110,8 +110,8 @@ CREATE TABLE "User" (
 
 -- CreateTable
 CREATE TABLE "Wallet" (
-    "id" SERIAL NOT NULL,
-    "user_id" INTEGER NOT NULL,
+    "id" TEXT NOT NULL,
+    "user_id" TEXT NOT NULL,
     "name" VARCHAR NOT NULL,
     "balance" DECIMAL NOT NULL,
     "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -120,13 +120,19 @@ CREATE TABLE "Wallet" (
 );
 
 -- CreateIndex
+CREATE INDEX "Transaction_user_id_idx" ON "Transaction"("user_id");
+
+-- CreateIndex
+CREATE INDEX "Transaction_transaction_date_idx" ON "Transaction"("transaction_date");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- AddForeignKey
 ALTER TABLE "ActivityLog" ADD CONSTRAINT "ActivityLog_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Attachment" ADD CONSTRAINT "Attachment_transaction_id_fkey" FOREIGN KEY ("transaction_id") REFERENCES "Transaction"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Attachment" ADD CONSTRAINT "Attachment_transaction_id_fkey" FOREIGN KEY ("transaction_id") REFERENCES "Transaction"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Budget" ADD CONSTRAINT "Budget_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

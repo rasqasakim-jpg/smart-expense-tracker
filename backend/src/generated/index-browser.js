@@ -222,7 +222,20 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.TransactionType = exports.$Enums.TransactionType = {
+  INCOME: 'INCOME',
+  EXPENSE: 'EXPENSE'
+};
 
+exports.OtpType = exports.$Enums.OtpType = {
+  REGISTRATION: 'REGISTRATION',
+  PASSWORD_RESET: 'PASSWORD_RESET'
+};
+
+exports.UserRole = exports.$Enums.UserRole = {
+  USER: 'USER',
+  ADMIN: 'ADMIN'
+};
 
 exports.Prisma.ModelName = {
   ActivityLog: 'ActivityLog',

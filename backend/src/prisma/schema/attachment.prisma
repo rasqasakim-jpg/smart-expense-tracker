@@ -1,8 +1,8 @@
 model Attachment {
-  id             Int         @id @default(autoincrement())
-  transaction_id Int
+  id             String      @id @default(uuid()) // Diubah ke UUID
+  transaction_id String      // Foreign Key menjadi String (Transaction UUID)
   file_path      String      @db.VarChar
   file_type      String      @db.VarChar
   created_at     DateTime    @default(now()) @db.Timestamp
-  transaction    Transaction @relation(fields: [transaction_id], references: [id])
+  transaction    Transaction @relation(fields: [transaction_id], references: [id], onDelete: Cascade)
 }
