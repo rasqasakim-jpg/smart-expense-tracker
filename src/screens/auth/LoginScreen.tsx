@@ -15,6 +15,7 @@ import { authAPI } from '../../services/api';
 import AuthHeader from '../../components/auth/AuthHeader';
 import { LoginRequest } from '../../types/auth';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { useAuth } from '../../context/AuthContext';
 
 type RootStackParamList = {
   Login: undefined;
@@ -31,25 +32,36 @@ interface Props {
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
 
+  const { signIn } = useAuth();
+
   const handleLogin = async (values: LoginRequest) => {
     try {
       setLoading(true);
       const response = await authAPI.login(values);
       console.log('Login success:', response);
-      // TODO: Simpan token dan navigate ke dashboard
-      Alert.alert('Success', 'Login berhasil!');
+
+      // response is { success, message, data }
+      const token = response?.data?.accessToken || response?.data?.tokens?.accessToken;
+      if (token) {
+        await signIn(token);
+        Alert.alert('Success', 'Login berhasil!');
+        // navigation handled by AuthProvider/App root switch
+        return;
+      }
+
+      Alert.alert('Error', 'Token not returned from server');
     } catch (error: any) {
       console.log('Login error:', error);
-      
+
       const errorMessage = 
-      error?.errors?.[Object.keys(error.errors || {})[0]]?.[0] ||
-      error?.message ||
-      'Login gagal, coba lagi';
-    
-    Alert.alert('Error', errorMessage);
-  } finally {
-    setLoading(false);
-  }
+        error?.errors?.[Object.keys(error.errors || {})[0]]?.[0] ||
+        error?.message ||
+        'Login gagal, coba lagi';
+
+      Alert.alert('Error', errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

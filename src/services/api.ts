@@ -1,4 +1,5 @@
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const BASE_URL = 'https://api.smart-expense.app/api/v1';
 
@@ -9,24 +10,31 @@ const api = axios.create({
   },
 });
 
+// Attach token from AsyncStorage for every request
 api.interceptors.request.use(
-  (config) => {
-    const token = ''; // Nanti ambil dari async storage
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+  async (config) => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        config.headers = config.headers ?? {};
+        (config.headers as any).Authorization = `Bearer ${token}`;
+      }
+    } catch (e) {
+      console.log('Failed to read token from storage', e);
     }
     return config;
   },
   (error) => Promise.reject(error)
 );
 
+// Return response.data directly, map errors
 api.interceptors.response.use(
   (response) => response.data,
   (error) => {
     if (error.response?.status === 401) {
-      console.log('Unauthorized, redirect to login');
+      console.log('Unauthorized, token may be invalid');
     }
-    return Promise.reject(error.response?.data);
+    return Promise.reject(error.response?.data || error);
   }
 );
 
