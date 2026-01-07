@@ -1,0 +1,10 @@
+model Otp {
+  id         Int      @id @default(autoincrement())
+  user_id    String  
+  code       String   @db.VarChar(6)
+  type       OtpType 
+  expired_at DateTime @db.Timestamp
+  
+  // Relasi
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
