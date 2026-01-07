@@ -205,6 +205,7 @@ exports.Prisma.WalletScalarFieldEnum = {
   user_id: 'user_id',
   name: 'name',
   balance: 'balance',
+  type: 'type',
   created_at: 'created_at'
 };
 

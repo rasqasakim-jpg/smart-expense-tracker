@@ -1,19 +1,14 @@
-import type { Request, Response, NextFunction } from 'express';
+import type {  Response } from 'express';
 
-export const errorHandler = (
-  err: any,
-  _req: Request,
-  res: Response,
-  _next: NextFunction
-) => {
-  console.error(`[Error] ${err.message}`);
-  if (err.stack) console.error(err.stack);
-
-  const status = err.status || 500;
-
-  res.status(status).json({
-    success: false, 
-    message: err.message || "Internal Server Error",
-    errors: err.errors || undefined 
-  });
-};
+export class ErrorHandler {
+  // WAJIB 4 parameter: err, req, res, next
+  public handle = (err: any,  res: Response, ) => {
+    const status = err.status || 500;
+    
+    // Format response sesuai API Contract
+    res.status(status).json({
+      success: false,
+      message: err.message || "Internal Server Error"
+    });
+  };
+}
