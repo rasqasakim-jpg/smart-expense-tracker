@@ -206,7 +206,8 @@ exports.Prisma.WalletScalarFieldEnum = {
   name: 'name',
   balance: 'balance',
   type: 'type',
-  created_at: 'created_at'
+  created_at: 'created_at',
+  deleted_at: 'deleted_at'
 };
 
 exports.Prisma.SortOrder = {

@@ -5,6 +5,7 @@ model Wallet {
   balance    Decimal  @default(0) @db.Decimal(12, 2) // Detail: 12 digit, 2 desimal
   type       String
   created_at DateTime @default(now()) @db.Timestamp
+  deleted_at DateTime? 
 
   // Relasi
   user         User          @relation(fields: [user_id], references: [id], onDelete: Cascade)

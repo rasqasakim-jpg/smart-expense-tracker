@@ -12969,6 +12969,7 @@ export namespace Prisma {
     balance: Decimal | null
     type: string | null
     created_at: Date | null
+    deleted_at: Date | null
   }
 
   export type WalletMaxAggregateOutputType = {
@@ -12978,6 +12979,7 @@ export namespace Prisma {
     balance: Decimal | null
     type: string | null
     created_at: Date | null
+    deleted_at: Date | null
   }
 
   export type WalletCountAggregateOutputType = {
@@ -12987,6 +12989,7 @@ export namespace Prisma {
     balance: number
     type: number
     created_at: number
+    deleted_at: number
     _all: number
   }
 
@@ -13006,6 +13009,7 @@ export namespace Prisma {
     balance?: true
     type?: true
     created_at?: true
+    deleted_at?: true
   }
 
   export type WalletMaxAggregateInputType = {
@@ -13015,6 +13019,7 @@ export namespace Prisma {
     balance?: true
     type?: true
     created_at?: true
+    deleted_at?: true
   }
 
   export type WalletCountAggregateInputType = {
@@ -13024,6 +13029,7 @@ export namespace Prisma {
     balance?: true
     type?: true
     created_at?: true
+    deleted_at?: true
     _all?: true
   }
 
@@ -13120,6 +13126,7 @@ export namespace Prisma {
     balance: Decimal
     type: string
     created_at: Date
+    deleted_at: Date | null
     _count: WalletCountAggregateOutputType | null
     _avg: WalletAvgAggregateOutputType | null
     _sum: WalletSumAggregateOutputType | null
@@ -13148,6 +13155,7 @@ export namespace Prisma {
     balance?: boolean
     type?: boolean
     created_at?: boolean
+    deleted_at?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     transactions?: boolean | Wallet$transactionsArgs<ExtArgs>
     _count?: boolean | WalletCountOutputTypeDefaultArgs<ExtArgs>
@@ -13160,6 +13168,7 @@ export namespace Prisma {
     balance?: boolean
     type?: boolean
     created_at?: boolean
+    deleted_at?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["wallet"]>
 
@@ -13170,6 +13179,7 @@ export namespace Prisma {
     balance?: boolean
     type?: boolean
     created_at?: boolean
+    deleted_at?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["wallet"]>
 
@@ -13180,9 +13190,10 @@ export namespace Prisma {
     balance?: boolean
     type?: boolean
     created_at?: boolean
+    deleted_at?: boolean
   }
 
-  export type WalletOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "user_id" | "name" | "balance" | "type" | "created_at", ExtArgs["result"]["wallet"]>
+  export type WalletOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "user_id" | "name" | "balance" | "type" | "created_at" | "deleted_at", ExtArgs["result"]["wallet"]>
   export type WalletInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     transactions?: boolean | Wallet$transactionsArgs<ExtArgs>
@@ -13208,6 +13219,7 @@ export namespace Prisma {
       balance: Prisma.Decimal
       type: string
       created_at: Date
+      deleted_at: Date | null
     }, ExtArgs["result"]["wallet"]>
     composites: {}
   }
@@ -13639,6 +13651,7 @@ export namespace Prisma {
     readonly balance: FieldRef<"Wallet", 'Decimal'>
     readonly type: FieldRef<"Wallet", 'String'>
     readonly created_at: FieldRef<"Wallet", 'DateTime'>
+    readonly deleted_at: FieldRef<"Wallet", 'DateTime'>
   }
     
 
@@ -14207,7 +14220,8 @@ export namespace Prisma {
     name: 'name',
     balance: 'balance',
     type: 'type',
-    created_at: 'created_at'
+    created_at: 'created_at',
+    deleted_at: 'deleted_at'
   };
 
   export type WalletScalarFieldEnum = (typeof WalletScalarFieldEnum)[keyof typeof WalletScalarFieldEnum]
@@ -14956,6 +14970,7 @@ export namespace Prisma {
     balance?: DecimalFilter<"Wallet"> | Decimal | DecimalJsLike | number | string
     type?: StringFilter<"Wallet"> | string
     created_at?: DateTimeFilter<"Wallet"> | Date | string
+    deleted_at?: DateTimeNullableFilter<"Wallet"> | Date | string | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     transactions?: TransactionListRelationFilter
   }
@@ -14967,6 +14982,7 @@ export namespace Prisma {
     balance?: SortOrder
     type?: SortOrder
     created_at?: SortOrder
+    deleted_at?: SortOrderInput | SortOrder
     user?: UserOrderByWithRelationInput
     transactions?: TransactionOrderByRelationAggregateInput
   }
@@ -14981,6 +14997,7 @@ export namespace Prisma {
     balance?: DecimalFilter<"Wallet"> | Decimal | DecimalJsLike | number | string
     type?: StringFilter<"Wallet"> | string
     created_at?: DateTimeFilter<"Wallet"> | Date | string
+    deleted_at?: DateTimeNullableFilter<"Wallet"> | Date | string | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     transactions?: TransactionListRelationFilter
   }, "id">
@@ -14992,6 +15009,7 @@ export namespace Prisma {
     balance?: SortOrder
     type?: SortOrder
     created_at?: SortOrder
+    deleted_at?: SortOrderInput | SortOrder
     _count?: WalletCountOrderByAggregateInput
     _avg?: WalletAvgOrderByAggregateInput
     _max?: WalletMaxOrderByAggregateInput
@@ -15009,6 +15027,7 @@ export namespace Prisma {
     balance?: DecimalWithAggregatesFilter<"Wallet"> | Decimal | DecimalJsLike | number | string
     type?: StringWithAggregatesFilter<"Wallet"> | string
     created_at?: DateTimeWithAggregatesFilter<"Wallet"> | Date | string
+    deleted_at?: DateTimeNullableWithAggregatesFilter<"Wallet"> | Date | string | null
   }
 
   export type ActivityLogCreateInput = {
@@ -15586,6 +15605,7 @@ export namespace Prisma {
     balance?: Decimal | DecimalJsLike | number | string
     type: string
     created_at?: Date | string
+    deleted_at?: Date | string | null
     user: UserCreateNestedOneWithoutWalletsInput
     transactions?: TransactionCreateNestedManyWithoutWalletInput
   }
@@ -15597,6 +15617,7 @@ export namespace Prisma {
     balance?: Decimal | DecimalJsLike | number | string
     type: string
     created_at?: Date | string
+    deleted_at?: Date | string | null
     transactions?: TransactionUncheckedCreateNestedManyWithoutWalletInput
   }
 
@@ -15606,6 +15627,7 @@ export namespace Prisma {
     balance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     type?: StringFieldUpdateOperationsInput | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    deleted_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: UserUpdateOneRequiredWithoutWalletsNestedInput
     transactions?: TransactionUpdateManyWithoutWalletNestedInput
   }
@@ -15617,6 +15639,7 @@ export namespace Prisma {
     balance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     type?: StringFieldUpdateOperationsInput | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    deleted_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     transactions?: TransactionUncheckedUpdateManyWithoutWalletNestedInput
   }
 
@@ -15627,6 +15650,7 @@ export namespace Prisma {
     balance?: Decimal | DecimalJsLike | number | string
     type: string
     created_at?: Date | string
+    deleted_at?: Date | string | null
   }
 
   export type WalletUpdateManyMutationInput = {
@@ -15635,6 +15659,7 @@ export namespace Prisma {
     balance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     type?: StringFieldUpdateOperationsInput | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    deleted_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type WalletUncheckedUpdateManyInput = {
@@ -15644,6 +15669,7 @@ export namespace Prisma {
     balance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     type?: StringFieldUpdateOperationsInput | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    deleted_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type IntFilter<$PrismaModel = never> = {
@@ -16258,6 +16284,17 @@ export namespace Prisma {
     _max?: NestedEnumUserRoleFilter<$PrismaModel>
   }
 
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
   export type WalletCountOrderByAggregateInput = {
     id?: SortOrder
     user_id?: SortOrder
@@ -16265,6 +16302,7 @@ export namespace Prisma {
     balance?: SortOrder
     type?: SortOrder
     created_at?: SortOrder
+    deleted_at?: SortOrder
   }
 
   export type WalletAvgOrderByAggregateInput = {
@@ -16278,6 +16316,7 @@ export namespace Prisma {
     balance?: SortOrder
     type?: SortOrder
     created_at?: SortOrder
+    deleted_at?: SortOrder
   }
 
   export type WalletMinOrderByAggregateInput = {
@@ -16287,10 +16326,25 @@ export namespace Prisma {
     balance?: SortOrder
     type?: SortOrder
     created_at?: SortOrder
+    deleted_at?: SortOrder
   }
 
   export type WalletSumOrderByAggregateInput = {
     balance?: SortOrder
+  }
+
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type UserCreateNestedOneWithoutActivity_logsInput = {
@@ -16805,6 +16859,10 @@ export namespace Prisma {
     connect?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
   }
 
+  export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null
+  }
+
   export type UserUpdateOneRequiredWithoutWalletsNestedInput = {
     create?: XOR<UserCreateWithoutWalletsInput, UserUncheckedCreateWithoutWalletsInput>
     connectOrCreate?: UserCreateOrConnectWithoutWalletsInput
@@ -17066,6 +17124,31 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumUserRoleFilter<$PrismaModel>
     _max?: NestedEnumUserRoleFilter<$PrismaModel>
+  }
+
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type UserCreateWithoutActivity_logsInput = {
@@ -17556,6 +17639,7 @@ export namespace Prisma {
     balance?: Decimal | DecimalJsLike | number | string
     type: string
     created_at?: Date | string
+    deleted_at?: Date | string | null
     user: UserCreateNestedOneWithoutWalletsInput
   }
 
@@ -17566,6 +17650,7 @@ export namespace Prisma {
     balance?: Decimal | DecimalJsLike | number | string
     type: string
     created_at?: Date | string
+    deleted_at?: Date | string | null
   }
 
   export type WalletCreateOrConnectWithoutTransactionsInput = {
@@ -17632,6 +17717,7 @@ export namespace Prisma {
     balance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     type?: StringFieldUpdateOperationsInput | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    deleted_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: UserUpdateOneRequiredWithoutWalletsNestedInput
   }
 
@@ -17642,6 +17728,7 @@ export namespace Prisma {
     balance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     type?: StringFieldUpdateOperationsInput | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    deleted_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type CategoryUpsertWithoutTransactionsInput = {
@@ -17701,6 +17788,7 @@ export namespace Prisma {
     balance?: Decimal | DecimalJsLike | number | string
     type: string
     created_at?: Date | string
+    deleted_at?: Date | string | null
     transactions?: TransactionCreateNestedManyWithoutWalletInput
   }
 
@@ -17710,6 +17798,7 @@ export namespace Prisma {
     balance?: Decimal | DecimalJsLike | number | string
     type: string
     created_at?: Date | string
+    deleted_at?: Date | string | null
     transactions?: TransactionUncheckedCreateNestedManyWithoutWalletInput
   }
 
@@ -17863,6 +17952,7 @@ export namespace Prisma {
     balance?: DecimalFilter<"Wallet"> | Decimal | DecimalJsLike | number | string
     type?: StringFilter<"Wallet"> | string
     created_at?: DateTimeFilter<"Wallet"> | Date | string
+    deleted_at?: DateTimeNullableFilter<"Wallet"> | Date | string | null
   }
 
   export type BudgetUpsertWithWhereUniqueWithoutUserInput = {
@@ -18195,6 +18285,7 @@ export namespace Prisma {
     balance?: Decimal | DecimalJsLike | number | string
     type: string
     created_at?: Date | string
+    deleted_at?: Date | string | null
   }
 
   export type BudgetCreateManyUserInput = {
@@ -18237,6 +18328,7 @@ export namespace Prisma {
     balance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     type?: StringFieldUpdateOperationsInput | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    deleted_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     transactions?: TransactionUpdateManyWithoutWalletNestedInput
   }
 
@@ -18246,6 +18338,7 @@ export namespace Prisma {
     balance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     type?: StringFieldUpdateOperationsInput | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    deleted_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     transactions?: TransactionUncheckedUpdateManyWithoutWalletNestedInput
   }
 
@@ -18255,6 +18348,7 @@ export namespace Prisma {
     balance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     type?: StringFieldUpdateOperationsInput | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    deleted_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type BudgetUpdateWithoutUserInput = {

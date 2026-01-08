@@ -9,28 +9,35 @@ export class AuthController {
     this.authService = new AuthService();
   }
 
-  // Gunakan arrow function agar tidak perlu bind(this) di router
   register = asyncHandler(async (req: Request, res: Response) => {
     const newUser = await this.authService.registerUser(req.body);
 
     res.status(201).json({
       success: true,
-      message: "Operation success",
+      message: "Register berhasil",
       data: newUser
     });
   });
 
-
   login = asyncHandler(async (req: Request, res: Response) => {
     const loginData = await this.authService.loginUser(req.body);
 
-    // Response Format Standard
     res.status(200).json({
       success: true,
-      message: "Operation success",
+      message: "Login berhasil",
       data: loginData
     });
   });
 
-
+  // REVISI: Hapus try-catch, gunakan asyncHandler
+  me = asyncHandler(async (req: Request, res: Response) => {
+    // Karena pakai AuthMiddleware, req.user otomatis terisi
+    // Jika user tidak ada (token invalid), middleware akan error duluan sebelum masuk sini
+    
+    res.status(200).json({
+      success: true,
+      message: "Profile user berhasil diambil",
+      data: req.user 
+    });
+  });
 }

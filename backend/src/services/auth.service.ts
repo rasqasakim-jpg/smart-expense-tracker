@@ -48,12 +48,15 @@ export class AuthService {
         };
 
 
-        const secret = process.env.JWT_SECRET || 'super_secret_key'
         const token = jwt.sign(
-            { id: user.id, email: user.email },
-            secret,
+            {
+                id: user.id,
+                email: user.email,
+                role: user.role
+            },
+            process.env.JWT_SECRET || 'super_secret_key',
             { expiresIn: '1d' }
-        );
+        )
 
 
         return {
