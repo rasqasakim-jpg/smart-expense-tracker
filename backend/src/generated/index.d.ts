@@ -12967,6 +12967,7 @@ export namespace Prisma {
     user_id: string | null
     name: string | null
     balance: Decimal | null
+    type: string | null
     created_at: Date | null
   }
 
@@ -12975,6 +12976,7 @@ export namespace Prisma {
     user_id: string | null
     name: string | null
     balance: Decimal | null
+    type: string | null
     created_at: Date | null
   }
 
@@ -12983,6 +12985,7 @@ export namespace Prisma {
     user_id: number
     name: number
     balance: number
+    type: number
     created_at: number
     _all: number
   }
@@ -13001,6 +13004,7 @@ export namespace Prisma {
     user_id?: true
     name?: true
     balance?: true
+    type?: true
     created_at?: true
   }
 
@@ -13009,6 +13013,7 @@ export namespace Prisma {
     user_id?: true
     name?: true
     balance?: true
+    type?: true
     created_at?: true
   }
 
@@ -13017,6 +13022,7 @@ export namespace Prisma {
     user_id?: true
     name?: true
     balance?: true
+    type?: true
     created_at?: true
     _all?: true
   }
@@ -13112,6 +13118,7 @@ export namespace Prisma {
     user_id: string
     name: string
     balance: Decimal
+    type: string
     created_at: Date
     _count: WalletCountAggregateOutputType | null
     _avg: WalletAvgAggregateOutputType | null
@@ -13139,6 +13146,7 @@ export namespace Prisma {
     user_id?: boolean
     name?: boolean
     balance?: boolean
+    type?: boolean
     created_at?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     transactions?: boolean | Wallet$transactionsArgs<ExtArgs>
@@ -13150,6 +13158,7 @@ export namespace Prisma {
     user_id?: boolean
     name?: boolean
     balance?: boolean
+    type?: boolean
     created_at?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["wallet"]>
@@ -13159,6 +13168,7 @@ export namespace Prisma {
     user_id?: boolean
     name?: boolean
     balance?: boolean
+    type?: boolean
     created_at?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["wallet"]>
@@ -13168,10 +13178,11 @@ export namespace Prisma {
     user_id?: boolean
     name?: boolean
     balance?: boolean
+    type?: boolean
     created_at?: boolean
   }
 
-  export type WalletOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "user_id" | "name" | "balance" | "created_at", ExtArgs["result"]["wallet"]>
+  export type WalletOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "user_id" | "name" | "balance" | "type" | "created_at", ExtArgs["result"]["wallet"]>
   export type WalletInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     transactions?: boolean | Wallet$transactionsArgs<ExtArgs>
@@ -13195,6 +13206,7 @@ export namespace Prisma {
       user_id: string
       name: string
       balance: Prisma.Decimal
+      type: string
       created_at: Date
     }, ExtArgs["result"]["wallet"]>
     composites: {}
@@ -13625,6 +13637,7 @@ export namespace Prisma {
     readonly user_id: FieldRef<"Wallet", 'String'>
     readonly name: FieldRef<"Wallet", 'String'>
     readonly balance: FieldRef<"Wallet", 'Decimal'>
+    readonly type: FieldRef<"Wallet", 'String'>
     readonly created_at: FieldRef<"Wallet", 'DateTime'>
   }
     
@@ -14193,6 +14206,7 @@ export namespace Prisma {
     user_id: 'user_id',
     name: 'name',
     balance: 'balance',
+    type: 'type',
     created_at: 'created_at'
   };
 
@@ -14940,6 +14954,7 @@ export namespace Prisma {
     user_id?: StringFilter<"Wallet"> | string
     name?: StringFilter<"Wallet"> | string
     balance?: DecimalFilter<"Wallet"> | Decimal | DecimalJsLike | number | string
+    type?: StringFilter<"Wallet"> | string
     created_at?: DateTimeFilter<"Wallet"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     transactions?: TransactionListRelationFilter
@@ -14950,6 +14965,7 @@ export namespace Prisma {
     user_id?: SortOrder
     name?: SortOrder
     balance?: SortOrder
+    type?: SortOrder
     created_at?: SortOrder
     user?: UserOrderByWithRelationInput
     transactions?: TransactionOrderByRelationAggregateInput
@@ -14963,6 +14979,7 @@ export namespace Prisma {
     user_id?: StringFilter<"Wallet"> | string
     name?: StringFilter<"Wallet"> | string
     balance?: DecimalFilter<"Wallet"> | Decimal | DecimalJsLike | number | string
+    type?: StringFilter<"Wallet"> | string
     created_at?: DateTimeFilter<"Wallet"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     transactions?: TransactionListRelationFilter
@@ -14973,6 +14990,7 @@ export namespace Prisma {
     user_id?: SortOrder
     name?: SortOrder
     balance?: SortOrder
+    type?: SortOrder
     created_at?: SortOrder
     _count?: WalletCountOrderByAggregateInput
     _avg?: WalletAvgOrderByAggregateInput
@@ -14989,6 +15007,7 @@ export namespace Prisma {
     user_id?: StringWithAggregatesFilter<"Wallet"> | string
     name?: StringWithAggregatesFilter<"Wallet"> | string
     balance?: DecimalWithAggregatesFilter<"Wallet"> | Decimal | DecimalJsLike | number | string
+    type?: StringWithAggregatesFilter<"Wallet"> | string
     created_at?: DateTimeWithAggregatesFilter<"Wallet"> | Date | string
   }
 
@@ -15565,6 +15584,7 @@ export namespace Prisma {
     id?: string
     name: string
     balance?: Decimal | DecimalJsLike | number | string
+    type: string
     created_at?: Date | string
     user: UserCreateNestedOneWithoutWalletsInput
     transactions?: TransactionCreateNestedManyWithoutWalletInput
@@ -15575,6 +15595,7 @@ export namespace Prisma {
     user_id: string
     name: string
     balance?: Decimal | DecimalJsLike | number | string
+    type: string
     created_at?: Date | string
     transactions?: TransactionUncheckedCreateNestedManyWithoutWalletInput
   }
@@ -15583,6 +15604,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     balance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    type?: StringFieldUpdateOperationsInput | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutWalletsNestedInput
     transactions?: TransactionUpdateManyWithoutWalletNestedInput
@@ -15593,6 +15615,7 @@ export namespace Prisma {
     user_id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     balance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    type?: StringFieldUpdateOperationsInput | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     transactions?: TransactionUncheckedUpdateManyWithoutWalletNestedInput
   }
@@ -15602,6 +15625,7 @@ export namespace Prisma {
     user_id: string
     name: string
     balance?: Decimal | DecimalJsLike | number | string
+    type: string
     created_at?: Date | string
   }
 
@@ -15609,6 +15633,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     balance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    type?: StringFieldUpdateOperationsInput | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -15617,6 +15642,7 @@ export namespace Prisma {
     user_id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     balance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    type?: StringFieldUpdateOperationsInput | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -16237,6 +16263,7 @@ export namespace Prisma {
     user_id?: SortOrder
     name?: SortOrder
     balance?: SortOrder
+    type?: SortOrder
     created_at?: SortOrder
   }
 
@@ -16249,6 +16276,7 @@ export namespace Prisma {
     user_id?: SortOrder
     name?: SortOrder
     balance?: SortOrder
+    type?: SortOrder
     created_at?: SortOrder
   }
 
@@ -16257,6 +16285,7 @@ export namespace Prisma {
     user_id?: SortOrder
     name?: SortOrder
     balance?: SortOrder
+    type?: SortOrder
     created_at?: SortOrder
   }
 
@@ -17525,6 +17554,7 @@ export namespace Prisma {
     id?: string
     name: string
     balance?: Decimal | DecimalJsLike | number | string
+    type: string
     created_at?: Date | string
     user: UserCreateNestedOneWithoutWalletsInput
   }
@@ -17534,6 +17564,7 @@ export namespace Prisma {
     user_id: string
     name: string
     balance?: Decimal | DecimalJsLike | number | string
+    type: string
     created_at?: Date | string
   }
 
@@ -17599,6 +17630,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     balance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    type?: StringFieldUpdateOperationsInput | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutWalletsNestedInput
   }
@@ -17608,6 +17640,7 @@ export namespace Prisma {
     user_id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     balance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    type?: StringFieldUpdateOperationsInput | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -17666,6 +17699,7 @@ export namespace Prisma {
     id?: string
     name: string
     balance?: Decimal | DecimalJsLike | number | string
+    type: string
     created_at?: Date | string
     transactions?: TransactionCreateNestedManyWithoutWalletInput
   }
@@ -17674,6 +17708,7 @@ export namespace Prisma {
     id?: string
     name: string
     balance?: Decimal | DecimalJsLike | number | string
+    type: string
     created_at?: Date | string
     transactions?: TransactionUncheckedCreateNestedManyWithoutWalletInput
   }
@@ -17826,6 +17861,7 @@ export namespace Prisma {
     user_id?: StringFilter<"Wallet"> | string
     name?: StringFilter<"Wallet"> | string
     balance?: DecimalFilter<"Wallet"> | Decimal | DecimalJsLike | number | string
+    type?: StringFilter<"Wallet"> | string
     created_at?: DateTimeFilter<"Wallet"> | Date | string
   }
 
@@ -18157,6 +18193,7 @@ export namespace Prisma {
     id?: string
     name: string
     balance?: Decimal | DecimalJsLike | number | string
+    type: string
     created_at?: Date | string
   }
 
@@ -18198,6 +18235,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     balance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    type?: StringFieldUpdateOperationsInput | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     transactions?: TransactionUpdateManyWithoutWalletNestedInput
   }
@@ -18206,6 +18244,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     balance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    type?: StringFieldUpdateOperationsInput | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     transactions?: TransactionUncheckedUpdateManyWithoutWalletNestedInput
   }
@@ -18214,6 +18253,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     balance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    type?: StringFieldUpdateOperationsInput | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 

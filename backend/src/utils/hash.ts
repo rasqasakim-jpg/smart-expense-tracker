@@ -10,4 +10,4 @@ export const hashPassword = async (password: string): Promise<string> => {
 
 export const comparePassword = async (password: string, hash: string): Promise<boolean>  =>{
     return await brcypt.compare(password, hash)
-}; 
+};

@@ -1,9 +1,12 @@
 import express, { type Application, type Request, type Response } from "express";
 import cors from 'cors';
 import authRoutes from './routes/auth.routes'
-import { errorHandler } from './middlewares/error.handler';
+import { ErrorHandler } from './middlewares/error.handler';
 
 const app: Application = express();
+const errorHandler = new ErrorHandler();
+
+
     
 app.use(express.json());
 app.use(cors());
@@ -23,8 +26,7 @@ app.get('/', (_req: Request, res: Response) => {
 
 
 
-app.use(errorHandler);
-
+app.use(errorHandler.handle);
 export default app;
 
 
