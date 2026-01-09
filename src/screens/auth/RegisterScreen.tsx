@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import { Formik } from 'formik';
 import { registerSchema } from '../../utils/validation';
-import { authAPI } from '../../services/api';
 import { RegisterRequest } from '../../types/auth';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Ionicons from '@react-native-vector-icons/ionicons';
@@ -33,31 +32,23 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
   const handleRegister = async (values: RegisterRequest) => {
     try {
       setLoading(true);
-      const response = await authAPI.register(values);
-      console.log('Register success:', response);
-      Alert.alert('Success', 'Registrasi berhasil! Silakan login.');
-      navigation.navigate('Login');
+      console.log('Register attempt:', values);
+      
+      // SIMULASI API CALL DULU (Backend Fairuuz belum ready)
+      await new Promise<void>(resolve => setTimeout(resolve, 1500));
+      
+      // SIMULASI RESPONSE BERHASIL
+      console.log('Register success!');
+      
+      Alert.alert(
+        'Success', 
+        'Registrasi berhasil! Silakan login.',
+        [{ text: 'OK', onPress: () => navigation.navigate('Login') }]
+      );
+      
     } catch (error: any) {
       console.log('Register error:', error);
-      
-      if (error?.errors && typeof error.errors === 'object') {
-        const errorValues = Object.values(error.errors);
-        if (Array.isArray(errorValues) && errorValues.length > 0) {
-          const firstErrorArray = errorValues[0];
-          if (Array.isArray(firstErrorArray) && firstErrorArray.length > 0) {
-            const firstError = firstErrorArray[0];
-            Alert.alert('Error', firstError || 'Terjadi kesalahan');
-          } else {
-            Alert.alert('Error', 'Terjadi kesalahan validasi');
-          }
-        } else {
-          Alert.alert('Error', error.message || 'Registrasi gagal');
-        }
-      } else if (error?.message) {
-        Alert.alert('Error', error.message);
-      } else {
-        Alert.alert('Error', 'Registrasi gagal, coba lagi');
-      }
+      Alert.alert('Error', 'Registrasi gagal, coba lagi');
     } finally {
       setLoading(false);
     }
@@ -67,7 +58,6 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
     <ScrollView contentContainerStyle={styles.container}>
       {/* HEADER DENGAN BACK BUTTON */}
       <View style={styles.header}>
-        {/* Back Button di kiri atas */}
         <TouchableOpacity 
           style={styles.backButton}
           onPress={() => navigation.goBack()}
@@ -89,50 +79,86 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
         >
           {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
             <View style={styles.form}>
+              {/* NAMA LENGKAP */}
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Nama Lengkap</Text>
-                <TextInput
-                  style={[styles.input, 
-                      errors.fullName && touched.fullName ? styles.inputError : null
-                  ]}
-                  placeholder="Nama Anda"
-                  value={values.fullName}
-                  onChangeText={handleChange('fullName')}
-                  onBlur={handleBlur('fullName')}
-                />
+                <View style={styles.inputContainer}>
+                  <Ionicons
+                    name="person-outline" 
+                    size={20} 
+                    color="#999" 
+                    style={styles.inputIcon}
+                  />
+                  <TextInput
+                    style={[
+                      styles.input, 
+                      errors.fullName && touched.fullName && styles.inputError
+                    ]}
+                    placeholder="Nama Anda"
+                    placeholderTextColor="#999"
+                    value={values.fullName}
+                    onChangeText={handleChange('fullName')}
+                    onBlur={handleBlur('fullName')}
+                    autoCapitalize="words"
+                  />
+                </View>
                 {errors.fullName && touched.fullName && (
                   <Text style={styles.errorText}>{errors.fullName}</Text>
                 )}
               </View>
 
+              {/* EMAIL */}
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Email</Text>
-                <TextInput
-                  style={[styles.input, 
-                      errors.email && touched.email ? styles.inputError : undefined]}
-                  placeholder="email@example.com"
-                  value={values.email}
-                  onChangeText={handleChange('email')}
-                  onBlur={handleBlur('email')}
-                  autoCapitalize="none"
-                  keyboardType="email-address"
-                />
+                <View style={styles.inputContainer}>
+                  <Ionicons 
+                    name="mail-outline" 
+                    size={20} 
+                    color="#999" 
+                    style={styles.inputIcon}
+                  />
+                  <TextInput
+                    style={[
+                      styles.input, 
+                      errors.email && touched.email && styles.inputError
+                    ]}
+                    placeholder="email@example.com"
+                    placeholderTextColor="#999"
+                    value={values.email}
+                    onChangeText={handleChange('email')}
+                    onBlur={handleBlur('email')}
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                  />
+                </View>
                 {errors.email && touched.email && (
                   <Text style={styles.errorText}>{errors.email}</Text>
                 )}
               </View>
 
+              {/* PASSWORD */}
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Password</Text>
-                <TextInput
-                  style={[styles.input, 
-                      errors.password && touched.password ? styles.inputError : undefined]}
-                  placeholder="Minimal 6 karakter"
-                  value={values.password}
-                  onChangeText={handleChange('password')}
-                  onBlur={handleBlur('password')}
-                  secureTextEntry
-                />
+                <View style={styles.inputContainer}>
+                  <Ionicons 
+                    name="lock-closed-outline" 
+                    size={20} 
+                    color="#999" 
+                    style={styles.inputIcon}
+                  />
+                  <TextInput
+                    style={[
+                      styles.input, 
+                      errors.password && touched.password && styles.inputError
+                    ]}
+                    placeholder="Minimal 6 karakter"
+                    placeholderTextColor="#999"
+                    value={values.password}
+                    onChangeText={handleChange('password')}
+                    onBlur={handleBlur('password')}
+                    secureTextEntry
+                  />
+                </View>
                 {errors.password && touched.password && (
                   <Text style={styles.errorText}>{errors.password}</Text>
                 )}
@@ -146,7 +172,10 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                 {loading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <Text style={styles.buttonText}>Daftar</Text>
+                  <>
+                    <Ionicons name="person-add" size={20} color="#fff" />
+                    <Text style={styles.buttonText}>  Daftar Sekarang</Text>
+                  </>
                 )}
               </TouchableOpacity>
             </View>
@@ -174,7 +203,6 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingBottom: 30,
     paddingHorizontal: 20,
-    position: 'relative',
   },
   backButton: {
     position: 'absolute',
@@ -188,31 +216,34 @@ const styles = StyleSheet.create({
   },
   headerContent: {
     alignItems: 'center',
-    marginTop: 20, // Memberi ruang untuk back button
+    marginTop: 10,
   },
   headerTitle: {
     fontSize: 28,
     fontWeight: 'bold',
     color: '#fff',
     marginBottom: 8,
-    textAlign: 'center',
-    top: 30,
-    right: 80
   },
   headerSubtitle: {
     fontSize: 16,
     color: '#e0e0e0',
-    textAlign: 'center',
-    top: 20,
-    right: 80
   },
   content: {
     padding: 20,
-    paddingTop: 30, // Tambah padding top untuk konten
+    paddingTop: 30,
   },
   form: {},
   inputGroup: {
     marginBottom: 20,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  inputIcon: {
+    position: 'absolute',
+    left: 12,
+    zIndex: 1,
   },
   label: {
     fontSize: 14,
@@ -224,9 +255,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
-    padding: 12,
+    paddingHorizontal: 40,
+    paddingVertical: 12,
     fontSize: 16,
-    backgroundColor: '#fafafa',
+    backgroundColor: '#fff',
+    flex: 1,
+    color: '#333',
   },
   inputError: {
     borderColor: '#dc3545',
@@ -241,8 +275,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 16,
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: 20,
     marginBottom: 20,
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   buttonDisabled: {
     backgroundColor: '#6c757d',
@@ -255,7 +291,7 @@ const styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 30,
+    marginTop: 20,
   },
   footerText: {
     color: '#666',

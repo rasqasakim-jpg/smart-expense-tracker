@@ -13,52 +13,61 @@ import {
 } from 'react-native';
 import { Formik } from 'formik';
 import { loginSchema } from '../../utils/validation';
-import { authAPI } from '../../services/api';
 import { LoginRequest } from '../../types/auth';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParamList } from '../../navigation/AuthNavigation';
 import Ionicons from '@react-native-vector-icons/ionicons';
+import { useNavigation } from '@react-navigation/native';
 
 type LoginScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Login'>;
 
 interface Props {
   navigation: LoginScreenNavigationProp;
+  onLoginSuccess?: () => void;
 }
 
-const LoginScreen: React.FC<Props> = ({ navigation }) => {
+const LoginScreen: React.FC<Props> = ({ onLoginSuccess }) => {
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const navigation = useNavigation<any>();
 
-  const handleLogin = async (values: LoginRequest) => {
-    try {
-      setLoading(true);
-      const response = await authAPI.login(values);
-      console.log('Login success:', response);
-      Alert.alert('Success', 'Login berhasil!');
-    } catch (error: any) {
-      console.log('Login error:', error);
-      
-      if (error?.errors) {
-        const firstError = Object.values(error.errors as Record<string, string[]>)[0]?.[0];
-        Alert.alert('Error', firstError || 'Terjadi kesalahan');
-      } else if (error?.message) {
-        Alert.alert('Error', error.message);
-      } else {
-        Alert.alert('Error', 'Login gagal, coba lagi');
-      }
-    } finally {
-      setLoading(false);
+ // Di handleLogin function:
+const handleLogin = async (values: LoginRequest) => {
+  try {
+    setLoading(true);
+    
+    console.log('Login attempt:', values);
+    
+    // Simulasi API call
+    await new Promise<void>(resolve => setTimeout(resolve, 1000));
+    
+    console.log('Login success! Calling onLoginSuccess callback...');
+    
+    // HANYA panggil callback, JANGAN navigation.reset
+    if (onLoginSuccess) {
+      onLoginSuccess(); // Ini akan trigger AppNavigator untuk render MainTabNavigator
     }
-  };
+    
+    // JANGAN lakukan ini:
+    // navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
+    
+  } catch (error: any) {
+    console.log('Login error:', error);
+    Alert.alert('Error', 'Login gagal');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar backgroundColor="#007AFF" barStyle="light-content" />
       
-      {/* HEADER DENGAN BACKGROUND BIRU */}
+      {/* HEADER */}
       <View style={styles.header}>
-        <Ionicons style={styles.headerIcon} name='wallet' size={50} color='#fff' />
-        <Text style={styles.headerTitle}>Smart Expense</Text>
-        <Text style={styles.title}>Masuk ke akun Anda</Text>
+        <Ionicons name="wallet" size={50} color="#fff" />
+        <Text style={styles.headerTitle}>Smart Expense Tracker</Text>
+        <Text style={styles.subtitle}>Kelola keuangan dengan mudah</Text>
       </View>
 
       <ScrollView 
@@ -72,52 +81,76 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
         >
           {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
             <View style={styles.form}>
-              {/* EMAIL INPUT */}
+              {/* EMAIL */}
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Email</Text>
-                <TextInput
-                  style={[
-                    styles.input, 
-                    errors.email && touched.email && styles.inputError
-                  ]}
-                  placeholder="email@example.com"
-                  placeholderTextColor="#999"
-                  value={values.email}
-                  onChangeText={handleChange('email')}
-                  onBlur={handleBlur('email')}
-                  autoCapitalize="none"
-                  keyboardType="email-address"
-                  autoCorrect={false}
-                />
+                <View style={styles.inputContainer}>
+                  <Ionicons
+                    name="mail-outline" 
+                    size={20} 
+                    color="#999" 
+                    style={styles.inputIcon}
+                  />
+                  <TextInput
+                    style={[
+                      styles.input, 
+                      errors.email && touched.email && styles.inputError
+                    ]}
+                    placeholder="email@example.com"
+                    placeholderTextColor="#999"
+                    value={values.email}
+                    onChangeText={handleChange('email')}
+                    onBlur={handleBlur('email')}
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                  />
+                </View>
                 {errors.email && touched.email && (
                   <Text style={styles.errorText}>{errors.email}</Text>
                 )}
               </View>
 
-              {/* PASSWORD INPUT */}
+              {/* PASSWORD */}
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Password</Text>
-                <TextInput
-                  style={[
-                    styles.input, 
-                    errors.password && touched.password && styles.inputError
-                  ]}
-                  placeholder="......"
-                  placeholderTextColor="#999"
-                  value={values.password}
-                  onChangeText={handleChange('password')}
-                  onBlur={handleBlur('password')}
-                  secureTextEntry
-                  autoCorrect={false}
-                />
+                <View style={styles.inputContainer}>
+                  <Ionicons
+                    name="lock-closed-outline" 
+                    size={20} 
+                    color="#999" 
+                    style={styles.inputIcon}
+                  />
+                  <TextInput
+                    style={[
+                      styles.input, 
+                      errors.password && touched.password && styles.inputError
+                    ]}
+                    placeholder="Masukkan password"
+                    placeholderTextColor="#999"
+                    value={values.password}
+                    onChangeText={handleChange('password')}
+                    onBlur={handleBlur('password')}
+                    secureTextEntry={!showPassword}
+                  />
+                  <TouchableOpacity
+                    style={styles.eyeIcon}
+                    onPress={() => setShowPassword(!showPassword)}
+                  >
+                    <Ionicons
+                      name={showPassword ? "eye-outline" : "eye-off-outline"}
+                      size={20}
+                      color="#999"
+                    />
+                  </TouchableOpacity>
+                </View>
                 {errors.password && touched.password && (
                   <Text style={styles.errorText}>{errors.password}</Text>
                 )}
               </View>
 
-              {/* FORGOT PASSWORD LINK */}
+              {/* FORGOT PASSWORD */}
               <TouchableOpacity 
-                style={styles.forgotPasswordContainer}
+                style={styles.forgotPassword}
                 onPress={() => navigation.navigate('ForgotPassword')}
               >
                 <Text style={styles.forgotPasswordText}>Lupa password?</Text>
@@ -125,15 +158,17 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
               {/* LOGIN BUTTON */}
               <TouchableOpacity
-                style={[styles.loginButton, loading && styles.buttonDisabled]}
-                onPress={() => handleSubmit()}
+                style={[styles.button, loading && styles.buttonDisabled]}
+                onPress={() => navigation.navigate("MainTabs")}
                 disabled={loading}
-                activeOpacity={0.8}
               >
                 {loading ? (
-                  <ActivityIndicator color="#fff" size="small" />
+                  <ActivityIndicator color="#fff" />
                 ) : (
-                  <Text style={styles.loginButtonText}>Masuk</Text>
+                  <>
+                    <Ionicons name="log-in-outline" size={20} color="#fff" />
+                    <Text style={styles.buttonText}>  Masuk ke Aplikasi</Text>
+                  </>
                 )}
               </TouchableOpacity>
             </View>
@@ -157,48 +192,51 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  // HEADER STYLES
   header: {
     backgroundColor: '#007AFF',
     paddingHorizontal: 20,
-    paddingVertical: 80,
-    width: '100%',
-  },
-  headerIcon: {
-    top: 70
+    paddingTop: 60,
+    paddingBottom: 40,
+    alignItems: 'center',
   },
   headerTitle: {
     color: '#fff',
-    fontSize: 30,
-    fontWeight: '600',
-    textAlign: 'left',
-    top: 25,
-    left: 60
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginTop: 10,
+    marginBottom: 5,
   },
-  // MAIN CONTAINER
+  subtitle: {
+    color: '#fff',
+    fontSize: 14,
+    opacity: 0.9,
+  },
   container: {
     flexGrow: 1,
     paddingHorizontal: 20,
     paddingTop: 40,
     paddingBottom: 30,
   },
-  // TITLE SECTION
-  titleSection: {
-    marginBottom: 30,
-  },
-  title: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#ffffffff',
-    top: 45,
-    textAlign: 'left',
-  },
-  // FORM STYLES
   form: {
     width: '100%',
   },
   inputGroup: {
-    marginBottom: 24,
+    marginBottom: 20,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  inputIcon: {
+    position: 'absolute',
+    left: 12,
+    zIndex: 1,
+  },
+  eyeIcon: {
+    position: 'absolute',
+    right: 12,
+    zIndex: 1,
   },
   label: {
     fontSize: 16,
@@ -210,64 +248,61 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E0E0E0',
     borderRadius: 8,
-    paddingHorizontal: 16,
+    paddingHorizontal: 40,
     paddingVertical: 14,
     fontSize: 16,
     backgroundColor: '#fff',
     color: '#333',
+    flex: 1,
   },
   inputError: {
     borderColor: '#FF3B30',
   },
   errorText: {
     color: '#FF3B30',
-    fontSize: 14,
-    marginTop: 6,
+    fontSize: 12,
+    marginTop: 4,
   },
-  // FORGOT PASSWORD
-  forgotPasswordContainer: {
+  forgotPassword: {
     alignSelf: 'flex-start',
-    marginBottom: 30,
+    marginBottom: 25,
   },
   forgotPasswordText: {
     color: '#007AFF',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '500',
   },
-  // LOGIN BUTTON
-  loginButton: {
+  button: {
     backgroundColor: '#007AFF',
     borderRadius: 8,
-    paddingVertical: 16,
+    padding: 16,
     alignItems: 'center',
+    marginBottom: 20,
+    flexDirection: 'row',
     justifyContent: 'center',
-    marginBottom: 40,
   },
   buttonDisabled: {
-    backgroundColor: '#8E8E93',
+    backgroundColor: '#6c757d',
     opacity: 0.7,
   },
-  loginButtonText: {
+  buttonText: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
   },
-  // SIGN UP SECTION
   signupContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 'auto',
-    paddingTop: 20,
-    bottom: 100
+    marginTop: 20,
   },
   signupText: {
     color: '#666',
-    fontSize: 16,
+    fontSize: 14,
   },
   signupLink: {
     color: '#007AFF',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
   },
 });

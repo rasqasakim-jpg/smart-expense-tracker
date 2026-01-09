@@ -1,30 +1,43 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
+import SplashScreen from '../screens/splash/SplashScreen';
 import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
 import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen';
+import HomeScreen from '../screens/main/HomeScreen';
+import MainTabNavigator from './MainTabNavigator';
 
 export type AuthStackParamList = {
-  Login: undefined;
+  Splash: undefined;
+  Login: { onLoginSuccess?: () => void };
   Register: undefined;
+  MainTabs:undefined;
   ForgotPassword: undefined;
 };
 
 const Stack = createStackNavigator<AuthStackParamList>();
 
-const AuthNavigator = () => {
+interface AuthNavigatorProps {
+  onLoginSuccess?: () => void;
+}
+
+const AuthNavigator: React.FC<AuthNavigatorProps> = ({ onLoginSuccess }) => {
   return (
     <Stack.Navigator
-      initialRouteName="Login"
+      initialRouteName="Splash"
       screenOptions={{
         headerShown: false,
         cardStyle: { backgroundColor: '#f8f9fa' },
       }}
     >
-      <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="Splash" component={SplashScreen} />
+      <Stack.Screen name="Login">
+        {(props) => <LoginScreen {...props} onLoginSuccess={onLoginSuccess} />}
+      </Stack.Screen>
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-    </Stack.Navigator>
+      <Stack.Screen name="MainTabs" component={MainTabNavigator} />    
+      </Stack.Navigator>
   );
 };
 
