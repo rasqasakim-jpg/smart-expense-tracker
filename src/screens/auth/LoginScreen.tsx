@@ -8,23 +8,20 @@ import {
   ActivityIndicator,
   Alert,
   ScrollView,
+  StatusBar,
+  SafeAreaView,
 } from 'react-native';
 import { Formik } from 'formik';
 import { loginSchema } from '../../utils/validation';
 import { authAPI, setDevApiBase } from '../../services/api';
-import AuthHeader from '../../components/auth/AuthHeader';
+import { AuthStackParamList } from '../../navigation/AuthNavigation';
+import Ionicons from '@react-native-vector-icons/ionicons';
 import { LoginRequest } from '../../types/auth';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useAuth } from '../../context/AuthContext';
 import { useEffect, useState } from 'react';
 
-type RootStackParamList = {
-  Login: undefined;
-  Register: undefined;
-  ForgotPassword: undefined;
-};
-
-type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
+type LoginScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Login'>;
 
 interface Props {
   navigation: LoginScreenNavigationProp;
@@ -82,186 +79,223 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   }, []);
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <AuthHeader
-        title="Smart Expense Tracker"
-        subtitle="Kelola keuangan dengan mudah"
-      />
-
-      {__DEV__ && (
-        <View style={{ marginBottom: 10 }}>
-          <Text style={{ fontSize: 12, color: '#666' }}>Dev backend override (optional)</Text>
-          <TextInput
-            value={devBase}
-            onChangeText={setDevBase}
-            placeholder="http://192.168.x.y:5000/api"
-            style={{ borderWidth: 1, borderColor: '#ddd', padding: 8, marginTop: 6, borderRadius: 6 }}
-          />
-          <View style={{ flexDirection: 'row', marginTop: 6 }}>
-            <TouchableOpacity
-              style={[styles.button, { backgroundColor: '#17a2b8', flex: 1, marginRight: 8 }]}
-              onPress={async () => { await setDevApiBase(devBase || null); Alert.alert('Saved', `DEV API set to ${devBase}`); }}
-            >
-              <Text style={styles.buttonText}>Save</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.button, { backgroundColor: '#6c757d', flex: 1 }]}
-              onPress={async () => { setDevBase(''); await setDevApiBase(null); Alert.alert('Cleared', 'DEV API override removed'); }}
-            >
-              <Text style={styles.buttonText}>Clear</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
-
-      <Formik
-        initialValues={{ email: '', password: '' }}
-        validationSchema={loginSchema}
-        onSubmit={handleLogin}
-      >
-        {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
-          <View style={styles.form}>
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Email</Text>
-              <TextInput
-                style={[
-                    styles.input,
-                    errors.email && touched.email ? styles.inputError : null
-                ]}
-                placeholder="email@example.com"
-                value={values.email}
-                onChangeText={handleChange('email')}
-                onBlur={handleBlur('email')}
-                autoCapitalize="none"
-                keyboardType="email-address"
-              />
-              {errors.email && touched.email && (
-                <Text style={styles.errorText}>{errors.email}</Text>
-              )}
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Password</Text>
-              <TextInput
-                style={[
-                    styles.input,
-                    errors.password && touched.password ? styles.inputError : undefined
-                ]}
-                placeholder="Minimal 6 karakter"
-                value={values.password}
-                onChangeText={handleChange('password')}
-                onBlur={handleBlur('password')}
-                secureTextEntry
-              />
-              {errors.password && touched.password && (
-                <Text style={styles.errorText}>{errors.password}</Text>
-              )}
-            </View>
-
-            <TouchableOpacity
-              style={[styles.button, loading && styles.buttonDisabled]}
-              onPress={() => handleSubmit()}
-              disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.buttonText}>Login</Text>
-              )}
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
-              <Text style={styles.linkText}>Lupa Password?</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </Formik>
-
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>Belum punya akun? </Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-          <Text style={styles.footerLink}>Daftar Sekarang</Text>
-        </TouchableOpacity>
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar backgroundColor="#007AFF" barStyle="light-content" />
+      
+      {/* HEADER DENGAN BACKGROUND BIRU */}
+      <View style={styles.header}>
+        <Ionicons style={styles.headerIcon} name='wallet' size={50} color='#fff' />
+        <Text style={styles.headerTitle}>Smart Expense</Text>
+        <Text style={styles.title}>Masuk ke akun Anda</Text>
       </View>
-    </ScrollView>
+
+      <ScrollView 
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Formik
+          initialValues={{ email: '', password: '' }}
+          validationSchema={loginSchema}
+          onSubmit={handleLogin}
+        >
+          {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+            <View style={styles.form}>
+              {/* EMAIL INPUT */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Email</Text>
+                <TextInput
+                  style={[
+                    styles.input, 
+                    errors.email && touched.email && styles.inputError
+                  ]}
+                  placeholder="email@example.com"
+                  placeholderTextColor="#999"
+                  value={values.email}
+                  onChangeText={handleChange('email')}
+                  onBlur={handleBlur('email')}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                  autoCorrect={false}
+                />
+                {errors.email && touched.email && (
+                  <Text style={styles.errorText}>{errors.email}</Text>
+                )}
+              </View>
+
+              {/* PASSWORD INPUT */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Password</Text>
+                <TextInput
+                  style={[
+                    styles.input, 
+                    errors.password && touched.password && styles.inputError
+                  ]}
+                  placeholder="......"
+                  placeholderTextColor="#999"
+                  value={values.password}
+                  onChangeText={handleChange('password')}
+                  onBlur={handleBlur('password')}
+                  secureTextEntry
+                  autoCorrect={false}
+                />
+                {errors.password && touched.password && (
+                  <Text style={styles.errorText}>{errors.password}</Text>
+                )}
+              </View>
+
+              {/* FORGOT PASSWORD LINK */}
+              <TouchableOpacity 
+                style={styles.forgotPasswordContainer}
+                onPress={() => navigation.navigate('ForgotPassword')}
+              >
+                <Text style={styles.forgotPasswordText}>Lupa password?</Text>
+              </TouchableOpacity>
+
+              {/* LOGIN BUTTON */}
+              <TouchableOpacity
+                style={[styles.loginButton, loading && styles.buttonDisabled]}
+                onPress={() => handleSubmit()}
+                disabled={loading}
+                activeOpacity={0.8}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" size="small" />
+                ) : (
+                  <Text style={styles.loginButtonText}>Masuk</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          )}
+        </Formik>
+
+        {/* SIGN UP LINK */}
+        <View style={styles.signupContainer}>
+          <Text style={styles.signupText}>Belum punya akun? </Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+            <Text style={styles.signupLink}>Daftar sekarang</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  // HEADER STYLES
+  header: {
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 20,
+    paddingVertical: 80,
+    width: '100%',
+  },
+  headerIcon: {
+    top: 70
+  },
+  headerTitle: {
+    color: '#fff',
+    fontSize: 30,
+    fontWeight: '600',
+    textAlign: 'left',
+    top: 25,
+    left: 60
+  },
+  // MAIN CONTAINER
   container: {
     flexGrow: 1,
-    padding: 20,
-    justifyContent: 'center',
-    backgroundColor: '#f8f9fa',
+    paddingHorizontal: 20,
+    paddingTop: 40,
+    paddingBottom: 30,
   },
+  // TITLE SECTION
+  titleSection: {
+    marginBottom: 30,
+  },
+  title: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#ffffffff',
+    top: 45,
+    textAlign: 'left',
+  },
+  // FORM STYLES
   form: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    width: '100%',
   },
   inputGroup: {
-    marginBottom: 20,
+    marginBottom: 24,
   },
   label: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 8,
+    fontSize: 16,
+    fontWeight: '500',
     color: '#333',
+    marginBottom: 8,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#E0E0E0',
     borderRadius: 8,
-    padding: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
     fontSize: 16,
-    backgroundColor: '#fafafa',
+    backgroundColor: '#fff',
+    color: '#333',
   },
   inputError: {
-    borderColor: '#dc3545',
+    borderColor: '#FF3B30',
   },
   errorText: {
-    color: '#dc3545',
-    fontSize: 12,
-    marginTop: 4,
+    color: '#FF3B30',
+    fontSize: 14,
+    marginTop: 6,
   },
-  button: {
-    backgroundColor: '#007bff',
+  // FORGOT PASSWORD
+  forgotPasswordContainer: {
+    alignSelf: 'flex-start',
+    marginBottom: 30,
+  },
+  forgotPasswordText: {
+    color: '#007AFF',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  // LOGIN BUTTON
+  loginButton: {
+    backgroundColor: '#007AFF',
     borderRadius: 8,
-    padding: 16,
+    paddingVertical: 16,
     alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 20,
+    justifyContent: 'center',
+    marginBottom: 40,
   },
   buttonDisabled: {
-    backgroundColor: '#6c757d',
+    backgroundColor: '#8E8E93',
+    opacity: 0.7,
   },
-  buttonText: {
+  loginButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '600',
   },
-  linkText: {
-    color: '#007bff',
-    textAlign: 'center',
-    fontSize: 14,
-  },
-  footer: {
+  // SIGN UP SECTION
+  signupContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 30,
+    alignItems: 'center',
+    marginTop: 'auto',
+    paddingTop: 20,
+    bottom: 100
   },
-  footerText: {
+  signupText: {
     color: '#666',
-    fontSize: 14,
+    fontSize: 16,
   },
-  footerLink: {
-    color: '#007bff',
-    fontSize: 14,
+  signupLink: {
+    color: '#007AFF',
+    fontSize: 16,
     fontWeight: '600',
   },
 });

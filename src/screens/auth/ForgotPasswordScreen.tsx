@@ -8,10 +8,11 @@ import {
   ActivityIndicator,
   Alert,
   ScrollView,
+  SafeAreaView,
+  StatusBar,
 } from 'react-native';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import AuthHeader from '../../components/auth/AuthHeader';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParamList } from '../../navigation/AuthNavigation';
 
@@ -40,7 +41,7 @@ const ForgotPasswordScreen: React.FC<Props> = ({ navigation }) => {
       console.log('Request reset password untuk:', values.email);
       
       // Simulasi API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise(resolve => setTimeout(() => resolve(undefined), 1500));
       
       Alert.alert(
         'Email Terkirim',
@@ -55,12 +56,15 @@ const ForgotPasswordScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <AuthHeader
-        title="Lupa Password"
-        subtitle="Masukkan email untuk reset password"
-      />
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar backgroundColor="#007AFF" barStyle="light-content" />
+      
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Lupa Password</Text>
+        <Text style={styles.headerSubtitle}>Masukkan email Anda untuk reset password</Text>
+      </View>
 
+      <ScrollView contentContainerStyle={styles.container}>
       <Formik
         initialValues={{ email: '' }}
         validationSchema={forgotPasswordSchema}
@@ -83,6 +87,10 @@ const ForgotPasswordScreen: React.FC<Props> = ({ navigation }) => {
                 <Text style={styles.errorText}>{errors.email}</Text>
               )}
             </View>
+            <Text style={{fontSize: 13, bottom: 18, color: '#6b6b6bff'}}>
+              Kami akan mengirimkan link reset password ke email Anda
+            </Text>
+              
 
             <TouchableOpacity
               style={[styles.button, loading && styles.buttonDisabled]}
@@ -105,26 +113,44 @@ const ForgotPasswordScreen: React.FC<Props> = ({ navigation }) => {
           </View>
         )}
       </Formik>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  header: {
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 20,
+    paddingVertical: 80,
+    width: '100%',
+  },
+  headerTitle: {
+    color: '#fff',
+    fontSize: 25,
+    fontWeight: '600',
+    textAlign: 'left',
+    top: 35,
+  },
+  headerSubtitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#ffffffff',
+    top: 50,
+    textAlign: 'left',
+  },
   container: {
     flexGrow: 1,
-    padding: 20,
-    justifyContent: 'center',
-    backgroundColor: '#f8f9fa',
+    paddingHorizontal: 20,
+    paddingTop: 40,
+    paddingBottom: 30,
   },
   form: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    width: '100%',
   },
   inputGroup: {
     marginBottom: 25,
@@ -152,7 +178,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   button: {
-    backgroundColor: '#ffc107',
+    backgroundColor: '#007AFF',
     borderRadius: 8,
     padding: 16,
     alignItems: 'center',
@@ -162,7 +188,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#6c757d',
   },
   buttonText: {
-    color: '#212529',
+    color: '#ffffffff',
     fontSize: 16,
     fontWeight: '600',
   },
