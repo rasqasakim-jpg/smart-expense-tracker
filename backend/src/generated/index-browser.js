@@ -173,6 +173,15 @@ exports.Prisma.PasswordResetScalarFieldEnum = {
   created_at: 'created_at'
 };
 
+exports.Prisma.ProfileScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  username: 'username',
+  address: 'address',
+  date_of_birth: 'date_of_birth',
+  occupation: 'occupation'
+};
+
 exports.Prisma.RefreshTokenScalarFieldEnum = {
   id: 'id',
   user_id: 'user_id',
@@ -247,6 +256,7 @@ exports.Prisma.ModelName = {
   Notification: 'Notification',
   Otp: 'Otp',
   PasswordReset: 'PasswordReset',
+  Profile: 'Profile',
   RefreshToken: 'RefreshToken',
   Transaction: 'Transaction',
   User: 'User',

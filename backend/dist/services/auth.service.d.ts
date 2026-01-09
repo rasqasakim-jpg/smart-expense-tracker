@@ -3,6 +3,9 @@ export declare class AuthService {
         id: string;
         full_name: string;
         email: string;
+        profile: {
+            username: string;
+        } | null;
     }>;
     loginUser(data: any): Promise<{
         accessToken: string;
@@ -10,6 +13,7 @@ export declare class AuthService {
             id: string;
             email: string;
             fullName: string;
+            role: import("../generated").$Enums.UserRole;
         };
     }>;
 }

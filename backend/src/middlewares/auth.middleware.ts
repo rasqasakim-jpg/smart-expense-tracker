@@ -29,7 +29,7 @@ export class AuthMiddleware {
 
       // Pakai Zod untuk validasi payload token (OOP + Zod)
       const userData = tokenSchema.parse(decoded);
-      
+
       // Inject data user ke request tanpa interface manual
       req.user = userData;
       next();

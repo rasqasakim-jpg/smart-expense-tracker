@@ -4,14 +4,24 @@ import { comparePassword, hashPassword } from '../utils/hash';
 
 export class AuthService {
     async registerUser(data: any) {
-        const { fullName, email, password } = data; // Sesuai API Contract
+        const { fullName, email, password } = data;
+
+        // Validasi manual jika data kosong (safety net)
+        if (!fullName || !email || !password) {
+            throw new Error("Full name, email, and password are required");
+        }
 
         const existingUser = await prisma.user.findUnique({ where: { email } });
         if (existingUser) {
-            const error: any = new Error("Email sudah terdaftar");
-            error.status = 400;
-            throw error;
+            throw new Error("Email sudah terdaftar");
         }
+
+        // --- PERBAIKAN DI SINI ---
+        // Ganti .replece menjadi .replace
+        const cleanName = fullName.replace(/\s+/g, ' ').toLowerCase();
+
+        const randomSuffix = Math.floor(100 + Math.random() * 900);
+        const defaultUsername = `${cleanName}${randomSuffix}`;
 
         const hashedPassword = await hashPassword(password);
 
@@ -20,33 +30,37 @@ export class AuthService {
                 full_name: fullName,
                 email,
                 password: hashedPassword,
-                role: 'USER'
+                role: 'USER',
+                profile: {
+                    create: {
+                        username: defaultUsername
+                    }
+                }
             },
             select: {
                 id: true,
                 email: true,
-                full_name: true
+                full_name: true,
+                profile: {
+                    select: { username: true }
+                }
             }
         });
     }
-
     async loginUser(data: any) {
         const { email, password } = data;
 
+        // 1. Cek User
         const user = await prisma.user.findUnique({ where: { email } });
         if (!user) {
-            const error: any = new Error("Email atau password salah");
-            error.status = 401
-            throw error
-        };
+            throw new Error("Email atau password salah");
+        }
 
+        // 2. Cek Password
         const isPasswordValid = await comparePassword(password, user.password);
         if (!isPasswordValid) {
-            const error: any = new Error("Email atau password salah");
-            error.status = 401;
-            throw error;
-        };
-
+            throw new Error("Email atau password salah");
+        }
 
         const token = jwt.sign(
             {
@@ -58,15 +72,16 @@ export class AuthService {
             { expiresIn: '1d' }
         )
 
-
         return {
             accessToken: token,
             user: {
                 id: user.id,
                 email: user.email,
-                fullName: user.full_name
+                fullName: user.full_name,
+                role: user.role
             }
         };
     }
 
 }
+

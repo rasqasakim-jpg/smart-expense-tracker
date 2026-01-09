@@ -10,33 +10,35 @@ export class AuthController {
   }
 
   register = asyncHandler(async (req: Request, res: Response) => {
+    // Controller cuma melempar body ke service
     const newUser = await this.authService.registerUser(req.body);
 
     res.status(201).json({
       success: true,
-      message: "Register berhasil",
+      message: "Operation success",
       data: newUser
     });
   });
 
   login = asyncHandler(async (req: Request, res: Response) => {
-    const loginData = await this.authService.loginUser(req.body);
+    // Kita pakai versi HEAD (loginResult & Operation success)
+    const loginResult = await this.authService.loginUser(req.body);
 
     res.status(200).json({
       success: true,
-      message: "Login berhasil",
-      data: loginData
+      message: "Operation success",
+      data: loginResult 
     });
   });
 
-  // REVISI: Hapus try-catch, gunakan asyncHandler
+  // --- AMBIL INI DARI BRANCH fitur-wallet ---
   me = asyncHandler(async (req: Request, res: Response) => {
-    // Karena pakai AuthMiddleware, req.user otomatis terisi
-    // Jika user tidak ada (token invalid), middleware akan error duluan sebelum masuk sini
+    // req.user otomatis terisi dari AuthMiddleware
+    // Karena pakai asyncHandler, tidak perlu try-catch
     
     res.status(200).json({
       success: true,
-      message: "Profile user berhasil diambil",
+      message: "Operation success",
       data: req.user 
     });
   });

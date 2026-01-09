@@ -59,6 +59,20 @@ model PasswordReset {
   created_at DateTime @default(now()) @db.Timestamp
 }
 
+model Profile {
+  id      String @id @default(uuid())
+  user_id String @unique
+
+  // Username pindah ke sini
+  username String @unique @db.VarChar
+
+  address       String?   @db.Text
+  date_of_birth DateTime? @db.Date
+  occupation    String?   @db.VarChar
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
 model RefreshToken {
   id         Int      @id @default(autoincrement())
   user_id    String
@@ -87,12 +101,13 @@ model Transaction {
 
 model User {
   id         String   @id @default(uuid())
-  full_name  String   @db.VarChar
+  full_name  String   @db.VarChar // Tetap di sini
   email      String   @unique @db.VarChar
   password   String   @db.VarChar
-  role       UserRole @default(USER) // Menggunakan Enum
+  role       UserRole @default(USER)
   created_at DateTime @default(now()) @db.Timestamp
 
+  profile        Profile?
   wallets        Wallet[]
   budgets        Budget[]
   notifications  Notification[]
@@ -102,13 +117,14 @@ model User {
 }
 
 model Wallet {
-  id         String    @id @default(uuid()) // UUID untuk keamanan ID Wallet
+  id         String   @id @default(uuid()) // UUID untuk keamanan ID Wallet
   user_id    String // String karena User menggunakan UUID
-  name       String    @db.VarChar
-  balance    Decimal   @default(0) @db.Decimal(12, 2) // Detail: 12 digit, 2 desimal
+  name       String   @db.VarChar
+  balance    Decimal  @default(0) @db.Decimal(12, 2) // Detail: 12 digit, 2 desimal
   type       String
-  created_at DateTime  @default(now()) @db.Timestamp
-  deleted_at DateTime?
+  created_at DateTime @default(now()) @db.Timestamp
+
+  deleted_at DateTime? @db.Timestamp
 
   // Relasi
   user         User          @relation(fields: [user_id], references: [id], onDelete: Cascade)

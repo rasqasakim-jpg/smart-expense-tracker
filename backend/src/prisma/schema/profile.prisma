@@ -1,0 +1,13 @@
+model Profile {
+  id            String    @id @default(uuid())
+  user_id       String    @unique
+  
+  // Username pindah ke sini
+  username      String    @unique @db.VarChar 
+  
+  address       String?   @db.Text
+  date_of_birth DateTime? @db.Date
+  occupation    String?   @db.VarChar
+  
+  user          User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}

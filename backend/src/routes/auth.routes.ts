@@ -4,7 +4,7 @@ import { AuthMiddleware } from '../middlewares/auth.middleware';
 
 const router = Router();
 
-// 1. Instansiasi Class (Dependency Injection sederhana)
+// 1. Instansiasi Class
 const authController = new AuthController();
 const authMiddleware = new AuthMiddleware();
 
@@ -15,7 +15,6 @@ router.post('/register', authController.register);
 router.post('/login', authController.login);
 
 // --- Private Routes (Butuh Token) ---
-// Middleware dipasang sebelum ontrolcler
 router.get(
   '/me', 
   authMiddleware.handle, 
