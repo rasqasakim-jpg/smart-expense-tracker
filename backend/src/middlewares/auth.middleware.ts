@@ -36,7 +36,7 @@ export class AuthMiddleware {
     } catch (error) {
       return res.status(401).json({
         success: false,
-        message: "Unauthorized: Token tidak valid"
+        message: `Unauthorized: Token tidak valid, ${error instanceof Error ? error.message : ''}`
       });
     }
   };

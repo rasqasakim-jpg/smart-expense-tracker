@@ -48,7 +48,7 @@ const ForgotPasswordScreen: React.FC<Props> = ({ navigation }) => {
         [{ text: 'OK', onPress: () => navigation.navigate('Login') }]
       );
     } catch (error) {
-      Alert.alert('Error', 'Gagal mengirim email reset password');
+      Alert.alert('Error', 'Gagal mengirim email reset password', [{ text: error instanceof Error ? error.message : 'Unknown error' }]);
     } finally {
       setLoading(false);
     }

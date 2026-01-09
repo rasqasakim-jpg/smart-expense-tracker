@@ -9,7 +9,7 @@ const Dashboard: React.FC = () => {
     try {
       await signOut();
     } catch (e) {
-      Alert.alert('Error', 'Gagal logout');
+      Alert.alert('Error', 'Gagal logout', [{ text: e instanceof Error ? e.message : 'Unknown error' }]);
     }
   };
 

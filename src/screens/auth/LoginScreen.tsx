@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -11,11 +11,12 @@ import {
 } from 'react-native';
 import { Formik } from 'formik';
 import { loginSchema } from '../../utils/validation';
-import { authAPI } from '../../services/api';
+import { authAPI, setDevApiBase } from '../../services/api';
 import AuthHeader from '../../components/auth/AuthHeader';
 import { LoginRequest } from '../../types/auth';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useAuth } from '../../context/AuthContext';
+import { useEffect, useState } from 'react';
 
 type RootStackParamList = {
   Login: undefined;
@@ -64,12 +65,54 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
+  const [devBase, setDevBase] = useState<string>('');
+
+  useEffect(() => {
+    let mounted = true;
+    // Load current override if any
+    (async () => {
+      try {
+        const v = await (await import('@react-native-async-storage/async-storage')).default.getItem('DEV_API_BASE');
+        if (mounted && v) setDevBase(v);
+      } catch (e) {
+        // ignore
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <AuthHeader
         title="Smart Expense Tracker"
         subtitle="Kelola keuangan dengan mudah"
       />
+
+      {__DEV__ && (
+        <View style={{ marginBottom: 10 }}>
+          <Text style={{ fontSize: 12, color: '#666' }}>Dev backend override (optional)</Text>
+          <TextInput
+            value={devBase}
+            onChangeText={setDevBase}
+            placeholder="http://192.168.x.y:5000/api"
+            style={{ borderWidth: 1, borderColor: '#ddd', padding: 8, marginTop: 6, borderRadius: 6 }}
+          />
+          <View style={{ flexDirection: 'row', marginTop: 6 }}>
+            <TouchableOpacity
+              style={[styles.button, { backgroundColor: '#17a2b8', flex: 1, marginRight: 8 }]}
+              onPress={async () => { await setDevApiBase(devBase || null); Alert.alert('Saved', `DEV API set to ${devBase}`); }}
+            >
+              <Text style={styles.buttonText}>Save</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.button, { backgroundColor: '#6c757d', flex: 1 }]}
+              onPress={async () => { setDevBase(''); await setDevApiBase(null); Alert.alert('Cleared', 'DEV API override removed'); }}
+            >
+              <Text style={styles.buttonText}>Clear</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
 
       <Formik
         initialValues={{ email: '', password: '' }}
