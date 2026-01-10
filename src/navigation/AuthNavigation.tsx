@@ -4,7 +4,6 @@ import SplashScreen from '../screens/splash/SplashScreen';
 import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
 import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen';
-import HomeScreen from '../screens/main/HomeScreen';
 import MainTabNavigator from './MainTabNavigator';
 
 export type AuthStackParamList = {
@@ -24,7 +23,7 @@ interface AuthNavigatorProps {
 const AuthNavigator: React.FC<AuthNavigatorProps> = ({ onLoginSuccess }) => {
   return (
     <Stack.Navigator
-      initialRouteName="Splash"
+      initialRouteName="Login"
       screenOptions={{
         headerShown: false,
         cardStyle: { backgroundColor: '#f8f9fa' },

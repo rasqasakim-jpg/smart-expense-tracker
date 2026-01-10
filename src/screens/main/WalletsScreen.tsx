@@ -3,12 +3,12 @@ import { View, Text, StyleSheet } from 'react-native';
 import AppContainer from '../../components/layout/AppContainer';
 import ScreenHeader from '../../components/layout/ScreenHeader';
 
-const HomeScreen = () => {
+const WalletsScreen = () => {
   return (
     <AppContainer>
-      <ScreenHeader title="Dashboard" />
+      <ScreenHeader title="Dompet" />
       <View style={styles.content}>
-        <Text>Selamat Datang!</Text>
+        <Text>Daftar dompet akan ditampilkan di sini</Text>
       </View>
     </AppContainer>
   );
@@ -23,4 +23,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HomeScreen;
+export default WalletsScreen;
