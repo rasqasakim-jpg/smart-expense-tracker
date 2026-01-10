@@ -11,6 +11,12 @@ export class AuthController {
 
   // Gunakan arrow function agar tidak perlu bind(this) di router
   register = asyncHandler(async (req: Request, res: Response) => {
+    if (process.env.NODE_ENV === 'development') {
+      const { email } = req.body || {};
+      // Never log plaintext passwords — show email and redact password here
+      console.log('[auth] register called from', req.ip || req.hostname, 'email:', email, 'password: [REDACTED]');
+    }
+
     const newUser = await this.authService.registerUser(req.body);
 
     res.status(201).json({
@@ -22,6 +28,12 @@ export class AuthController {
 
 
   login = asyncHandler(async (req: Request, res: Response) => {
+    if (process.env.NODE_ENV === 'development') {
+      const { email } = req.body || {};
+      // Never log plaintext passwords — show email and redact password here
+      console.log('[auth] login called from', req.ip || req.hostname, 'email:', email, 'password: [REDACTED]');
+    }
+
     const loginData = await this.authService.loginUser(req.body);
 
     // Response Format Standard

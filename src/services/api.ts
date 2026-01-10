@@ -22,7 +22,7 @@ const getDevApiBase = (): string => {
   }
 
   // Fallback to device ipv4 (works with adb reverse on physical devices)
-  return 'http://172.10.2.133:5000/api';
+  return 'http://172.10.2.34:5000/api';
 };
 
 // We'll resolve a reachable dev host at request time for physical devices/emulators
@@ -142,6 +142,13 @@ api.interceptors.request.use(
     } catch (_) {
       console.log('Failed to read token from storage');
     }
+
+    if (__DEV__) {
+      const method = (config.method || 'GET').toUpperCase();
+      const url = `${config.baseURL ?? api.defaults.baseURL}${config.url ?? ''}`;
+      console.log(`[api] Request => ${method} ${url}`);
+    }
+
     return config;
   },
   (error) => Promise.reject(error)
@@ -149,7 +156,12 @@ api.interceptors.request.use(
 
 // Return response.data directly, map errors and provide clearer network error messages
 api.interceptors.response.use(
-  (response) => response.data,
+  (response) => {
+    if (__DEV__) {
+      console.log(`[api] Response <= ${response.status} ${response.config?.url}`, response.data);
+    }
+    return response.data;
+  },
   (error) => {
     // Network error (no response)
     if (!error.response) {
@@ -160,6 +172,10 @@ api.interceptors.response.use(
 
     if (error.response?.status === 401) {
       console.log('Unauthorized, token may be invalid');
+    }
+
+    if (__DEV__) {
+      console.log('[api] Response Error <=', error.response?.status, error.response?.data);
     }
 
     return Promise.reject(error.response?.data || { message: 'Request failed' });

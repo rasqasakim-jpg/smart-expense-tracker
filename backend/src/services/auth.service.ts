@@ -15,7 +15,14 @@ export class AuthService {
 
         const hashedPassword = await hashPassword(password);
 
-        return await prisma.user.create({
+        // Safety check: ensure hashing actually changed the value
+        if (!hashedPassword || hashedPassword === password) {
+            const error: any = new Error('Failed to hash password');
+            error.status = 500;
+            throw error;
+        }
+
+        const created = await prisma.user.create({
             data: {
                 full_name: fullName,
                 email,
@@ -28,6 +35,14 @@ export class AuthService {
                 full_name: true
             }
         });
+
+        // In development, include a short debug log (do not expose plaintext password)
+        if (process.env.NODE_ENV === 'development') {
+            // Log the hashed password (safe to expose for debugging) instead of the raw input
+            console.log(`User created: ${created.email} (id: ${created.id}) hashed: ${hashedPassword}`);
+        }
+
+        return created;
     }
 
     async loginUser(data: any) {
@@ -40,7 +55,24 @@ export class AuthService {
             throw error
         };
 
+        // Debug logs in development to help track down mismatches
+        if (process.env.NODE_ENV === 'development') {
+            try {
+                console.log(`loginUser: attempting login for email=${email}`);
+                console.log(`Stored hash length=${user.password?.length ?? 0}, prefix=${String(user.password).slice(0, 6)}`);
+                // For debugging, log the full stored hashed password (will never be the raw password)
+                console.log(`Stored hash=${user.password}`);
+            } catch (_) {
+                // ignore logging errors
+            }
+        }
+
         const isPasswordValid = await comparePassword(password, user.password);
+
+        if (process.env.NODE_ENV === 'development') {
+            console.log(`Password valid: ${isPasswordValid}`);
+        }
+
         if (!isPasswordValid) {
             const error: any = new Error("Email atau password salah");
             error.status = 401;

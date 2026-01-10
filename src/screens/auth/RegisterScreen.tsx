@@ -14,6 +14,7 @@ import { registerSchema } from '../../utils/validation';
 import { RegisterRequest } from '../../types/auth';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Ionicons from '@react-native-vector-icons/ionicons';
+import { authAPI } from '../../services/api';
 
 type RootStackParamList = {
   Login: undefined;
@@ -33,22 +34,25 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
     try {
       setLoading(true);
       console.log('Register attempt:', values);
-      
-      // SIMULASI API CALL DULU (Backend Fairuuz belum ready)
-      await new Promise<void>(resolve => setTimeout(resolve, 1500));
-      
-      // SIMULASI RESPONSE BERHASIL
-      console.log('Register success!');
-      
+
+      const response = await authAPI.register({
+        fullName: values.fullName,
+        email: values.email,
+        password: values.password,
+      });
+
+      console.log('Register response:', response);
+
       Alert.alert(
-        'Success', 
+        'Success',
         'Registrasi berhasil! Silakan login.',
         [{ text: 'OK', onPress: () => navigation.navigate('Login') }]
       );
-      
+
     } catch (error: any) {
       console.log('Register error:', error);
-      Alert.alert('Error', 'Registrasi gagal, coba lagi');
+      const errorMessage = error?.message || 'Registrasi gagal, coba lagi';
+      Alert.alert('Error', errorMessage);
     } finally {
       setLoading(false);
     }
