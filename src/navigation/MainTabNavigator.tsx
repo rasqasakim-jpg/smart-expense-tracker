@@ -1,17 +1,20 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from '@react-native-vector-icons/ionicons';
-
-// Import screens yang sebenarnya
 import HomeScreen from '../screens/main/HomeScreen';
-// import TransactionsScreen from '../screens/main/TransactionsScreen';
-// import AddTransactionScreen from '../screens/main/AddTransactionScreen';
-// import WalletsScreen from '../screens/main/WalletsScreen';
-// import ProfileScreen from '../screens/main/ProfileScreen';
+import TransactionsScreen from '../screens/main/TransactionsScreen';
+import AddTransactionScreen from '../screens/main/AddTransactionScreen';
+import WalletsScreen from '../screens/main/WalletsScreen';
+import ProfileScreen from '../screens/main/ProfileScreen';
 
 const Tab = createBottomTabNavigator();
 
-const MainTabNavigator = () => {
+// Props interface
+interface MainTabNavigatorProps {
+  onLogout?: () => void;
+}
+
+const MainTabNavigator: React.FC<MainTabNavigatorProps> = ({ onLogout }) => {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -21,7 +24,7 @@ const MainTabNavigator = () => {
           if (route.name === 'Home') iconName = 'home';
           else if (route.name === 'Transactions') iconName = 'list';
           else if (route.name === 'Add') iconName = 'add-circle';
-          else if (route.name === 'Wallets') iconName = 'account-balance-wallet';
+          else if (route.name === 'Wallets') iconName = 'wallet';
           else if (route.name === 'Profile') iconName = 'person';
           
           return <Ionicons name={iconName as any} size={size} color={color} />;
@@ -37,7 +40,7 @@ const MainTabNavigator = () => {
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
-      {/* <Tab.Screen name="Transactions" component={TransactionsScreen} />
+      <Tab.Screen name="Transactions" component={TransactionsScreen} />
       <Tab.Screen 
         name="Add" 
         component={AddTransactionScreen}
@@ -46,7 +49,9 @@ const MainTabNavigator = () => {
         }}
       />
       <Tab.Screen name="Wallets" component={WalletsScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} /> */}
+      <Tab.Screen name="Profile">
+        {(props) => <ProfileScreen {...props} onLogout={onLogout} />}
+      </Tab.Screen>
     </Tab.Navigator>
   );
 };

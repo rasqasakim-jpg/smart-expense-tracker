@@ -23,7 +23,7 @@ interface AuthNavigatorProps {
 const AuthNavigator: React.FC<AuthNavigatorProps> = ({ onLoginSuccess }) => {
   return (
     <Stack.Navigator
-      initialRouteName="Splash"
+      initialRouteName="Login"
       screenOptions={{
         headerShown: false,
         cardStyle: { backgroundColor: '#f8f9fa' },

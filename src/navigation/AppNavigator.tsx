@@ -40,7 +40,7 @@ const AppNavigator = () => {
   return (
     <NavigationContainer>
       {isAuthenticated ? (
-        <MainTabNavigator />
+        <MainTabNavigator onLogout={handleLogout} />
       ) : (
         <AuthNavigator onLoginSuccess={handleLoginSuccess} />
       )}
