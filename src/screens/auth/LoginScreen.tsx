@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { Formik } from 'formik';
 import { loginSchema } from '../../utils/validation';
-import { authAPI, setDevApiBase } from '../../services/api';
+import { authAPI } from '../../services/api';
 import { AuthStackParamList } from '../../navigation/AuthNavigation';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import { LoginRequest } from '../../types/auth';
@@ -62,7 +62,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  const [devBase, setDevBase] = useState<string>('');
+  const [_devBase, setDevBase] = useState<string>('');
 
   useEffect(() => {
     let mounted = true;
