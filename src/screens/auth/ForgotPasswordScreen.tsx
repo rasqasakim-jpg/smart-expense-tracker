@@ -15,6 +15,7 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParamList } from '../../navigation/AuthNavigation';
+import Ionicons from '@react-native-vector-icons/ionicons';
 
 type ForgotPasswordScreenNavigationProp = StackNavigationProp<
   AuthStackParamList,
@@ -46,7 +47,7 @@ const ForgotPasswordScreen: React.FC<Props> = ({ navigation }) => {
       Alert.alert(
         'Email Terkirim',
         'Instruksi reset password telah dikirim ke email Anda',
-        [{ text: 'OK', onPress: () => navigation.navigate('Login') }]
+        [{ text: 'OK', onPress: () => navigation.navigate('Login', {onLoginSuccess: undefined}) }]
       );
     } catch (error) {
       Alert.alert('Error', 'Gagal mengirim email reset password', [{ text: error instanceof Error ? error.message : 'Unknown error' }]);
@@ -59,60 +60,82 @@ const ForgotPasswordScreen: React.FC<Props> = ({ navigation }) => {
     <SafeAreaView style={styles.safeArea}>
       <StatusBar backgroundColor="#007AFF" barStyle="light-content" />
       
+      {/* HEADER DENGAN BACK BUTTON */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Lupa Password</Text>
-        <Text style={styles.headerSubtitle}>Masukkan email Anda untuk reset password</Text>
+        {/* Back Button */}
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back" size={28} color="#fff" />
+        </TouchableOpacity>
+        
+        <View style={styles.headerContent}>
+          <Text style={styles.headerTitle}>Lupa Password</Text>
+          <Text style={styles.headerSubtitle}>Masukkan email Anda untuk reset password</Text>
+        </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.container}>
-      <Formik
-        initialValues={{ email: '' }}
-        validationSchema={forgotPasswordSchema}
-        onSubmit={handleForgotPassword}
-      >
-        {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
-          <View style={styles.form}>
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Email</Text>
-              <TextInput
-                style={[styles.input, errors.email && touched.email ? styles.inputError : null]}
-                placeholder="email@example.com"
-                value={values.email}
-                onChangeText={handleChange('email')}
-                onBlur={handleBlur('email')}
-                autoCapitalize="none"
-                keyboardType="email-address"
-              />
-              {errors.email && touched.email && (
-                <Text style={styles.errorText}>{errors.email}</Text>
-              )}
-            </View>
-            <Text style={{fontSize: 13, bottom: 18, color: '#6b6b6bff'}}>
-              Kami akan mengirimkan link reset password ke email Anda
-            </Text>
+        <Formik
+          initialValues={{ email: '' }}
+          validationSchema={forgotPasswordSchema}
+          onSubmit={handleForgotPassword}
+        >
+          {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+            <View style={styles.form}>
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Email</Text>
+                <View style={[
+                  styles.inputContainer,
+                  errors.email && touched.email ? styles.inputContainerError : null
+                ]}>
+                  <Ionicons
+                    name='mail-outline'
+                    size={20}
+                    color='#6b6b6b'
+                    style={styles.inputIcon}
+                  />
+                <TextInput
+                  style={[styles.input, errors.email && touched.email ? styles.inputError : null]}
+                  placeholder="email@example.com"
+                  value={values.email}
+                  onChangeText={handleChange('email')}
+                  onBlur={handleBlur('email')}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                  />
+                </View>
+                {errors.email && touched.email && (
+                  <Text style={styles.errorText}>{errors.email}</Text>
+                )}
+              </View>
               
+              <Text style={styles.infoText}>
+                Kami akan mengirimkan link reset password ke email Anda
+              </Text>
 
-            <TouchableOpacity
-              style={[styles.button, loading && styles.buttonDisabled]}
-              onPress={() => handleSubmit()}
-              disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.buttonText}>Kirim Instruksi Reset</Text>
-              )}
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.button, loading && styles.buttonDisabled]}
+                onPress={() => handleSubmit()}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>Kirim Instruksi Reset</Text>
+                )}
+              </TouchableOpacity>
 
-            <TouchableOpacity 
-              style={styles.backButton}
-              onPress={() => navigation.goBack()}
-            >
-              <Text style={styles.backButtonText}>Kembali ke Login</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </Formik>
+              <TouchableOpacity 
+                style={styles.backToLoginButton}
+                onPress={() => navigation.navigate('Login', {onLoginSuccess: undefined})}
+              >
+                <Text style={styles.backToLoginText}>Kembali ke Login</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </Formik>
       </ScrollView>
     </SafeAreaView>
   );
@@ -126,22 +149,37 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: '#007AFF',
     paddingHorizontal: 20,
-    paddingVertical: 80,
-    width: '100%',
+    paddingTop: 60, // Kurangi padding atas untuk memberi ruang back button
+    paddingBottom: 30,
+    position: 'relative',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 60, // Sesuaikan dengan paddingTop header
+    left: 20,
+    zIndex: 10,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerContent: {
+    marginTop: 30, // Beri ruang untuk back button
   },
   headerTitle: {
     color: '#fff',
     fontSize: 25,
     fontWeight: '600',
     textAlign: 'left',
-    top: 35,
+    top: 25
   },
   headerSubtitle: {
     fontSize: 15,
     fontWeight: '600',
     color: '#ffffffff',
-    top: 50,
+    marginTop: 8,
     textAlign: 'left',
+    top: 23
   },
   container: {
     flexGrow: 1,
@@ -161,13 +199,23 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     color: '#333',
   },
-  input: {
+  inputContainer: {
+     flexDirection: 'row',
+    alignItems: 'center',
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    backgroundColor: '#fafafa',
+    backgroundColor: '#ffffff',
+    paddingHorizontal: 12,
+    paddingVertical: 10
+  },
+   inputContainerError: {
+    borderColor: '#dc3545',
+  },
+  inputIcon: {
+    marginRight: 10,
+  },
+  input: {
   },
   inputError: {
     borderColor: '#dc3545',
@@ -176,6 +224,12 @@ const styles = StyleSheet.create({
     color: '#dc3545',
     fontSize: 12,
     marginTop: 4,
+  },
+  infoText: {
+    fontSize: 13,
+    marginTop: -10,
+    marginBottom: 25,
+    color: '#6b6b6b',
   },
   button: {
     backgroundColor: '#007AFF',
@@ -192,11 +246,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  backButton: {
+  backToLoginButton: {
     padding: 12,
     alignItems: 'center',
   },
-  backButtonText: {
+  backToLoginText: {
     color: '#6c757d',
     fontSize: 14,
   },

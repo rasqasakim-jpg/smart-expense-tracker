@@ -17,7 +17,7 @@ const getDevApiBase = (): string => {
         return `http://${host}:5000/api`;
       }
     }
-  } catch (e) {
+  } catch (_) {
     // ignore and fallback
   }
 
@@ -40,7 +40,7 @@ const candidateHosts = (): string[] => {
     if (matched && matched[1]) {
       hosts.add(matched[1].split(':')[0]);
     }
-  } catch (e) {}
+  } catch (_) {}
 
   hosts.add('10.0.2.2'); // Android emulator
   hosts.add('10.0.3.2'); // Genymotion
@@ -72,7 +72,7 @@ const resolveDevBase = async () => {
       console.log(`[api] Using manual DEV_API_BASE override: ${resolvedDevBase}`);
       return resolvedDevBase;
     }
-  } catch (e) {
+  } catch (_) {
     // ignore
   }
 
@@ -128,7 +128,7 @@ api.interceptors.request.use(
           // ensure the request hits the resolved dev API
           config.baseURL = base;
         }
-      } catch (e) {
+      } catch (_) {
         // ignore; we'll use whatever base is set on the instance
       }
     }
@@ -139,8 +139,8 @@ api.interceptors.request.use(
         config.headers = config.headers ?? {};
         (config.headers as any).Authorization = `Bearer ${token}`;
       }
-    } catch (e) {
-      console.log('Failed to read token from storage', e);
+    } catch (_) {
+      console.log('Failed to read token from storage');
     }
     return config;
   },
