@@ -66,7 +66,7 @@ const handleLogin = async (values: LoginRequest) => {
       {/* HEADER */}
       <View style={styles.header}>
         <Ionicons name="wallet" size={50} color="#fff" />
-        <Text style={styles.headerTitle}>Smart Expense</Text>
+        <Text style={styles.headerTitle}>Smart Expense Tracker</Text>
         <Text style={styles.subtitle}>Kelola keuangan dengan mudah</Text>
       </View>
 
