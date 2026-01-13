@@ -1,26 +1,19 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import AppContainer from '../../components/layout/AppContainer';
-import ScreenHeader from '../../components/layout/ScreenHeader';
+import { createStackNavigator } from '@react-navigation/stack';
+import AddTransactionScreen from '../transaction/AddTransactionScreen';
 
-const AddTransactionScreen = () => {
+export type AddTransactionStackParamList = {
+  AddTransaction: undefined;
+};
+
+const Stack = createStackNavigator<AddTransactionStackParamList>();
+
+const AddTransactionStack = () => {
   return (
-    <AppContainer>
-      <ScreenHeader title="Tambah Transaksi" />
-      <View style={styles.content}>
-        <Text>Form tambah transaksi akan ditampilkan di sini</Text>
-      </View>
-    </AppContainer>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="AddTransaction" component={AddTransactionScreen} />
+    </Stack.Navigator>
   );
 };
 
-const styles = StyleSheet.create({
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-});
-
-export default AddTransactionScreen; 
+export default AddTransactionStack;

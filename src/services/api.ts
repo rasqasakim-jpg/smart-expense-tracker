@@ -22,7 +22,7 @@ const getDevApiBase = (): string => {
   }
 
   // Fallback to device ipv4 (works with adb reverse on physical devices)
-  return 'http://172.10.2.34:5000/api';
+  return 'http://192.168.1.94:5000/api';
 };
 
 // We'll resolve a reachable dev host at request time for physical devices/emulators
@@ -131,6 +131,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 15000, // 15s default timeout to surface slow requests
 });
 
 // Attach token from AsyncStorage for every request
@@ -204,6 +205,16 @@ export const authAPI = {
   
   register: (data: { fullName: string; email: string; password: string }) =>
     api.post('/auth/register', data),
+};
+
+export const walletAPI = {
+  ping: () => api.get('/wallets/ping'),
+  getAll: () => api.get('/wallets'),
+  create: (data: { name: string; type: string; initialBalance?: number }) =>
+    api.post('/wallets', data),
+  update: (id: string, data: { name?: string; type?: string; balance?: number }) =>
+    api.put(`/wallets/${id}`, data),
+  remove: (id: string) => api.delete(`/wallets/${id}`),
 };
 
 export default api;

@@ -6,6 +6,8 @@ const router = Router();
 const walletController = new WalletController();
 const authMiddleware = new AuthMiddleware();
 
+// Lightweight ping endpoint to validate connectivity (no auth required)
+router.get('/ping', (_req, res) => res.status(200).json({ success: true, message: 'wallets ping OK' }));
 
 router.use(authMiddleware.handle); 
 
