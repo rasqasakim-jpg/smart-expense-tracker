@@ -2,12 +2,26 @@ import { Router } from 'express';
 import { AuthController } from '../controllers/auth.controller';
 import prisma from '../database';
 import { comparePassword } from '../utils/hash';
+import { AuthMiddleware } from '../middlewares/auth.middleware';
 
 const router = Router();
-const authController = new AuthController(); // Inisialisasi class
 
+// 1. Instansiasi Class
+const authController = new AuthController();
+const authMiddleware = new AuthMiddleware();
+
+// 2. Route Definitions
+
+// --- Public Routes ---
 router.post('/register', authController.register);
-router.post('/login', authController.login); // Tambahkan ini
+router.post('/login', authController.login);
+
+// --- Private Routes (Butuh Token) ---
+router.get(
+  '/me', 
+  authMiddleware.handle, 
+  authController.me
+);
 
 // Development-only helper: verify stored hash for an email (DO NOT ENABLE IN PRODUCTION)
 if (process.env.NODE_ENV === 'development') {

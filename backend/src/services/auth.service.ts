@@ -4,14 +4,24 @@ import { comparePassword, hashPassword } from '../utils/hash';
 
 export class AuthService {
     async registerUser(data: any) {
-        const { fullName, email, password } = data; // Sesuai API Contract
+        const { fullName, email, password } = data;
+
+        // Validasi manual jika data kosong (safety net)
+        if (!fullName || !email || !password) {
+            throw new Error("Full name, email, and password are required");
+        }
 
         const existingUser = await prisma.user.findUnique({ where: { email } });
         if (existingUser) {
-            const error: any = new Error("Email sudah terdaftar");
-            error.status = 400;
-            throw error;
+            throw new Error("Email sudah terdaftar");
         }
+
+        // --- PERBAIKAN DI SINI ---
+        // Ganti .replece menjadi .replace
+        const cleanName = fullName.replace(/\s+/g, ' ').toLowerCase();
+
+        const randomSuffix = Math.floor(100 + Math.random() * 900);
+        const defaultUsername = `${cleanName}${randomSuffix}`;
 
         const hashedPassword = await hashPassword(password);
 
@@ -27,12 +37,20 @@ export class AuthService {
                 full_name: fullName,
                 email,
                 password: hashedPassword,
-                role: 'USER'
+                role: 'USER',
+                profile: {
+                    create: {
+                        username: defaultUsername
+                    }
+                }
             },
             select: {
                 id: true,
                 email: true,
-                full_name: true
+                full_name: true,
+                profile: {
+                    select: { username: true }
+                }
             }
         });
 
@@ -44,16 +62,14 @@ export class AuthService {
 
         return created;
     }
-
     async loginUser(data: any) {
         const { email, password } = data;
 
+        // 1. Cek User
         const user = await prisma.user.findUnique({ where: { email } });
         if (!user) {
-            const error: any = new Error("Email atau password salah");
-            error.status = 401
-            throw error
-        };
+            throw new Error("Email atau password salah");
+        }
 
         // Debug logs in development to help track down mismatches
         if (process.env.NODE_ENV === 'development') {
@@ -67,6 +83,7 @@ export class AuthService {
             }
         }
 
+        // 2. Cek Password
         const isPasswordValid = await comparePassword(password, user.password);
 
         if (process.env.NODE_ENV === 'development') {
@@ -74,28 +91,29 @@ export class AuthService {
         }
 
         if (!isPasswordValid) {
-            const error: any = new Error("Email atau password salah");
-            error.status = 401;
-            throw error;
-        };
+            throw new Error("Email atau password salah");
+        }
 
-
-        const secret = process.env.JWT_SECRET || 'super_secret_key'
         const token = jwt.sign(
-            { id: user.id, email: user.email },
-            secret,
+            {
+                id: user.id,
+                email: user.email,
+                role: user.role
+            },
+            process.env.JWT_SECRET || 'super_secret_key',
             { expiresIn: '1d' }
-        );
-
+        )
 
         return {
             accessToken: token,
             user: {
                 id: user.id,
                 email: user.email,
-                fullName: user.full_name
+                fullName: user.full_name,
+                role: user.role
             }
         };
     }
 
 }
+
