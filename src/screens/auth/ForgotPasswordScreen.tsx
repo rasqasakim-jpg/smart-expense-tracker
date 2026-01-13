@@ -8,9 +8,9 @@ import {
   ActivityIndicator,
   Alert,
   ScrollView,
-  SafeAreaView,
   StatusBar,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { StackNavigationProp } from '@react-navigation/stack';

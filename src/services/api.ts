@@ -31,7 +31,7 @@ const DEFAULT_DEV_BASE = getDevApiBase();
 // Cache the resolved base (e.g., 'http://192.168.1.10:5000/api')
 let resolvedDevBase: string | null = null;
 
-const candidateHosts = (): string[] => {
+const candidateHosts = async (): Promise<string[]> => {
   const hosts = new Set<string>();
   // host from metro script if available
   try {
@@ -46,6 +46,22 @@ const candidateHosts = (): string[] => {
   hosts.add('10.0.3.2'); // Genymotion
   hosts.add('localhost'); // iOS simulator / desktop
   hosts.add('127.0.0.1'); // localhost IP
+
+  // Optionally try to get device network IP using a lightweight RN lib if installed.
+  // We import dynamically so the app won't crash if the package isn't present.
+  try {
+    // react-native-network-info exports NetworkInfo.getIPV4Address()
+    // and is useful on devices to discover the device IP address.
+    // If it's not installed, this block simply no-ops.
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const NetworkInfo = await import('react-native-network-info').then(m => m.NetworkInfo || m);
+    if (NetworkInfo && typeof NetworkInfo.getIPV4Address === 'function') {
+      const ip = await NetworkInfo.getIPV4Address();
+      if (ip) hosts.add(ip);
+    }
+  } catch (_) {
+    // ignore if the optional package is not installed
+  }
 
   return Array.from(hosts);
 };
@@ -76,7 +92,7 @@ const resolveDevBase = async () => {
     // ignore
   }
 
-  const hosts = candidateHosts();
+  const hosts = await candidateHosts();
   // try each host quickly to find a reachable backend
   for (const h of hosts) {
     // eslint-disable-next-line no-console

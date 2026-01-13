@@ -1,11 +1,12 @@
 import React from 'react';
 import {
-  SafeAreaView,
   View,
   StyleSheet,
   StatusBar,
   Platform,
 } from 'react-native';
+
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface AppContainerProps {
   children: React.ReactNode;
