@@ -14,7 +14,11 @@ interface MainTabNavigatorProps {
   onLogout?: () => void;
 }
 
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 const MainTabNavigator: React.FC<MainTabNavigatorProps> = ({ onLogout }) => {
+  const insets = useSafeAreaInsets();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -32,8 +36,8 @@ const MainTabNavigator: React.FC<MainTabNavigatorProps> = ({ onLogout }) => {
         tabBarActiveTintColor: '#007bff',
         tabBarInactiveTintColor: '#6c757d',
         tabBarStyle: {
-          height: 60,
-          paddingBottom: 8,
+          height: 60 + (insets.bottom ?? 0),
+          paddingBottom: insets.bottom ? insets.bottom : 8,
           paddingTop: 8,
         },
         headerShown: false,

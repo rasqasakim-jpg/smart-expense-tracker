@@ -4,6 +4,7 @@ import AuthNavigator from './src/navigation/AuthNavigation';
 import MainTabNavigator from './src/navigation/MainTabNavigator';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { View, ActivityIndicator } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 const Root = () => {
   const { userToken, loading, signOut } = useAuth();
@@ -22,11 +23,13 @@ const Root = () => {
 
 const App = () => {
   return (
-    <AuthProvider>
-      <NavigationContainer>
-        <Root />
-      </NavigationContainer>
-    </AuthProvider>
+    <SafeAreaProvider>
+      <AuthProvider>
+        <NavigationContainer>
+          <Root />
+        </NavigationContainer>
+      </AuthProvider>
+    </SafeAreaProvider>
   );
 };
 
