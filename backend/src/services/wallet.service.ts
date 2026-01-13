@@ -1,10 +1,10 @@
 import { WalletRepository } from '../repositories/wallet.repository';
-
+import prisma from '../database'; // <--- Import singleton prisma di sini
 export class WalletService { 
     private walletRepo: WalletRepository;
 
     constructor() {
-        this.walletRepo = new WalletRepository();
+        this.walletRepo = new WalletRepository(prisma);
     }
 
     async getWallets(userId: string) {
@@ -18,18 +18,15 @@ export class WalletService {
        });
     }
 
-  // Kita pakai 'any' di sini supaya tidak ribet, tapi tetap validasi logic kepemilikan
   async updateWallet(userId: string, walletId: string, data: any) {
     const wallet = await this.walletRepo.findById(walletId);
     
-    // Validasi: Kalau wallet gak ada ATAU bukan punya user yang login -> Error
     if (!wallet || wallet.user_id !== userId) {
       const error: any = new Error("Wallet tidak ditemukan atau akses dilarang");
       error.status = 404; // Set 404 Not Found
       throw error;
     }
 
-    // Kita filter sedikit agar user tidak sembarang update ID
     return await this.walletRepo.update(walletId, {
         name: data.name,
         type: data.type,

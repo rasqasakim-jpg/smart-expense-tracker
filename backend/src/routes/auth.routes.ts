@@ -8,16 +8,96 @@ const router = Router();
 const authController = new AuthController();
 const authMiddleware = new AuthMiddleware();
 
-// 2. Route Definitions
+/**
+ * @swagger
+ * tags:
+ *   - name: Auth
+ *     description: Autentikasi dan otorisasi user
+ */
 
-// --- Public Routes ---
+/**
+ * @swagger
+ * /auth/register:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Register user baru
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - fullName
+ *               - email
+ *               - password
+ *             properties:
+ *               fullName:
+ *                 type: string
+ *                 example: Fairuuz
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: fairuuz@mail.com
+ *               password:
+ *                 type: string
+ *                 example: password123
+ *     responses:
+ *       201:
+ *         description: Register berhasil
+ *       400:
+ *         description: Validasi gagal
+ */
 router.post('/register', authController.register);
+
+/**
+ * @swagger
+ * /auth/login:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Login user
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: fairuuz@mail.com
+ *               password:
+ *                 type: string
+ *                 example: password123
+ *     responses:
+ *       200:
+ *         description: Login berhasil
+ *       401:
+ *         description: Email atau password salah
+ */
 router.post('/login', authController.login);
 
-// --- Private Routes (Butuh Token) ---
+/**
+ * @swagger
+ * /auth/me:
+ *   get:
+ *     tags: [Auth]
+ *     summary: Ambil data user yang sedang login
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Data user berhasil diambil
+ *       401:
+ *         description: Unauthorized
+ */
 router.get(
-  '/me', 
-  authMiddleware.handle, 
+  '/me',
+  authMiddleware.handle,
   authController.me
 );
 

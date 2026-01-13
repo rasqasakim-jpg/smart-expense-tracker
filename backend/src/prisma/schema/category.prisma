@@ -1,7 +1,16 @@
 model Category {
-  id           Int             @id @default(autoincrement())
-  name         String          @db.VarChar
-  icon         String?         @db.VarChar
-  type         TransactionType 
+  id         Int      @id @default(autoincrement())
+  name       String   @db.VarChar
+  icon       String?  @db.VarChar
+  type       TransactionType
+  created_at DateTime @default(now()) @db.Timestamp
+  
+  // Soft Delete
+  deleted_at DateTime? @db.Timestamp
+
+  // HYBRID STRATEGY:
+  user_id    String?  
+  user       User?    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  // Relasi ke trancsavtion
   transactions Transaction[]
 }

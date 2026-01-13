@@ -1,18 +1,19 @@
-// 1. Import prisma instance dari database.ts kamu
 import prisma from "../database.js";
-// 2. Import Enum & Tipe dari Prisma Client untuk validasi data
 import { TransactionType, UserRole, OtpType } from "@prisma/client";
 import { faker } from "@faker-js/faker";
 import * as bcrypt from "bcrypt";
 class DatabaseSeeder {
+    // Helper untuk hash password
     async hashPassword(password) {
         return await bcrypt.hash(password, 10);
     }
     async run() {
-        console.log("\uD83D\uDE80 Memulai proses seeding (via src/database.ts)...");
+        console.log("\uD83D\uDE80 Memulai proses seeding...");
+        // ==========================================
         // 1. CLEANUP (Hapus data lama)
+        // ==========================================
         try {
-            // Hapus tabel child dulu baru parent (Reverse Order)
+            // Urutan delete: Child -> Parent (untuk menghindari foreign key constraint error)
             await prisma.attachment.deleteMany();
             await prisma.transaction.deleteMany();
             await prisma.budget.deleteMany();
@@ -22,31 +23,54 @@ class DatabaseSeeder {
             await prisma.refreshToken.deleteMany();
             await prisma.passwordReset.deleteMany();
             await prisma.wallet.deleteMany();
+            // Hapus Profile dulu sebelum User
+            await prisma.profile.deleteMany();
             await prisma.user.deleteMany();
             await prisma.category.deleteMany();
             console.log("\uD83E\uDDF9 Database berhasil dibersihkan.");
         }
         catch (error) {
-            console.log("\u26A0\uFE0F  Gagal membersihkan database, lanjut seeding...");
+            console.log("\u26A0\uFE0F  Pemberitahuan: Database mungkin sudah bersih atau tabel belum ada.");
         }
         const password = await this.hashPassword("password123");
-        // 2. SEED CATEGORIES (Pakai Enum TransactionType)
+        // ==========================================
+        // 2. SEED GLOBAL CATEGORIES
+        // ==========================================
+        // Note: Pastikan di schema.prisma 'user_id' pada model Category bersifat optional (Int?)
         console.log("\uD83C\uDF31 Seeding Categories...");
         const catGaji = await prisma.category.create({ data: { name: "Gaji", type: TransactionType.INCOME } });
         const catBonus = await prisma.category.create({ data: { name: "Bonus", type: TransactionType.INCOME } });
         const catMakan = await prisma.category.create({ data: { name: "Makanan", type: TransactionType.EXPENSE } });
         const catTransport = await prisma.category.create({ data: { name: "Transportasi", type: TransactionType.EXPENSE } });
         const catBelanja = await prisma.category.create({ data: { name: "Belanja", type: TransactionType.EXPENSE } });
-        // 3. SEED USERS & RELATIONS
-        console.log("\uD83C\uDF31 Seeding Users, Wallets, & Data Lainnya...");
+        // ==========================================
+        // 3. SEED USERS, PROFILES & DATA RELASI
+        // ==========================================
+        console.log("\uD83C\uDF31 Seeding Users, Profiles & Transactions...");
+        // Loop membuat 5 User Dummy
         for (let i = 0; i < 5; i++) {
-            // --- A. Create USER ---
+            const firstName = faker.person.firstName();
+            const lastName = faker.person.lastName();
+            const username = `${firstName.toLowerCase()}${faker.string.numeric(3)}`;
+            // --- A. Create USER + PROFILE ---
             const user = await prisma.user.create({
                 data: {
-                    full_name: faker.person.fullName(),
-                    email: faker.internet.email(),
+                    full_name: `${firstName} ${lastName}`,
+                    email: faker.internet.email({ firstName, lastName }).toLowerCase(),
                     password: password,
-                    role: i === 0 ? UserRole.ADMIN : UserRole.USER,
+                    role: i === 0 ? UserRole.ADMIN : UserRole.USER, // User pertama jadi Admin
+                    // Nested Write untuk Profile
+                    profile: {
+                        create: {
+                            username: username,
+                            address: faker.location.streetAddress(),
+                            occupation: faker.person.jobTitle(),
+                            date_of_birth: faker.date.birthdate({ min: 18, max: 60, mode: "age" })
+                        }
+                    }
+                },
+                include: {
+                    profile: true
                 }
             });
             // --- B. Create WALLETS ---
@@ -72,12 +96,12 @@ class DatabaseSeeder {
                     user_id: user.id
                 }
             });
-            // --- E. Create OTP (Pakai OtpType.REGISTRATION) ---
+            // --- E. Create OTP ---
             await prisma.otp.create({
                 data: {
                     code: faker.string.numeric(6),
                     type: OtpType.REGISTRATION,
-                    expired_at: faker.date.recent(),
+                    expired_at: new Date(Date.now() + 15 * 60 * 1000), // Expired 15 menit lagi
                     user_id: user.id
                 }
             });
@@ -87,23 +111,23 @@ class DatabaseSeeder {
                     {
                         user_id: user.id,
                         title: "Selamat Datang!",
-                        content: "Akun Smart Expense Tracker Anda aktif.",
+                        content: `Halo ${username}, selamat bergabung di Smart Expense Tracker!`,
                         is_read: true
                     },
                     {
                         user_id: user.id,
-                        title: "Info",
-                        content: "Cek laporan keuangan bulanan Anda.",
+                        title: "Lengkapi Profil",
+                        content: "Lengkapi data profil Anda untuk pengalaman lebih baik.",
                         is_read: false
                     }
                 ]
             });
-            // --- G. Create PASSWORD RESET (Hanya user ke-2) ---
+            // --- G. Create PASSWORD RESET (Hanya user ke-2 untuk simulasi) ---
             if (i === 1) {
                 await prisma.passwordReset.create({
                     data: {
                         email: user.email,
-                        token: faker.string.alphanumeric(20)
+                        token: faker.string.alphanumeric(20),
                     }
                 });
             }
@@ -111,57 +135,58 @@ class DatabaseSeeder {
             await prisma.activityLog.create({
                 data: {
                     user_id: user.id,
-                    action: "LOGIN",
-                    description: "Login berhasil via Web"
+                    action: "REGISTER",
+                    description: "User berhasil mendaftar ke dalam sistem"
                 }
             });
-            // --- I. Create TRANSACTIONS & ATTACHMENT ---
+            // --- I. Create TRANSACTIONS ---
+            // PERBAIKAN: Menambahkan field 'name' yang wajib ada
             await prisma.transaction.createMany({
                 data: [
-                    // Transaksi 1: Makan (Expense)
                     {
+                        name: "Makan Siang", // <--- Field ini sebelumnya kurang
                         amount: 25000,
-                        note: "Makan Siang Warteg",
+                        note: "Warteg Bahari, menu paket ayam",
                         type: TransactionType.EXPENSE,
                         transaction_date: faker.date.recent(),
                         user_id: user.id,
                         wallet_id: walletCash.id,
                         category_id: catMakan.id
                     },
-                    // Transaksi 2: Transportasi (PAKAI catTransport DISINI) ✅
                     {
+                        name: "Transportasi Kantor", // <--- Ditambahkan
                         amount: 15000,
-                        note: "Ojek Online ke Kantor",
+                        note: "Ojek Online (Gojek/Grab)",
                         type: TransactionType.EXPENSE,
-                        transaction_date: faker.date.recent(), // Transaksi baru-baru ini
+                        transaction_date: faker.date.recent(),
                         user_id: user.id,
-                        wallet_id: walletCash.id, // Bayar pakai tunai
-                        category_id: catTransport.id // <-- Variabel catTransport terpakai!
+                        wallet_id: walletCash.id,
+                        category_id: catTransport.id
                     },
-                    // Transaksi 3: Belanja (PAKAI catBelanja DISINI) ✅
                     {
+                        name: "Belanja Bulanan", // <--- Ditambahkan
                         amount: 750000,
-                        note: "Belanja Bulanan Superindo",
+                        note: "Superindo - Beras, Minyak, dll",
                         type: TransactionType.EXPENSE,
-                        transaction_date: faker.date.past(), // Transaksi bulan lalu
+                        transaction_date: faker.date.past(),
                         user_id: user.id,
-                        wallet_id: walletBank.id, // Bayar transfer bank
-                        category_id: catBelanja.id // <-- Variabel catBelanja terpakai!
+                        wallet_id: walletBank.id,
+                        category_id: catBelanja.id
                     },
-                    // Transaksi 4: Gaji (Income)
                     {
+                        name: "Gaji Bulanan", // <--- Ditambahkan
                         amount: 8000000,
-                        note: "Gaji Pokok",
+                        note: "Gaji Pokok Bulan Ini",
                         type: TransactionType.INCOME,
                         transaction_date: faker.date.past(),
                         user_id: user.id,
                         wallet_id: walletBank.id,
                         category_id: catGaji.id
                     },
-                    // Transaksi 5: Bonus (Income)
                     {
+                        name: "Bonus Project", // <--- Ditambahkan
                         amount: 1500000,
-                        note: "Bonus Lembur",
+                        note: "Bonus Lembur Project A",
                         type: TransactionType.INCOME,
                         transaction_date: faker.date.recent(),
                         user_id: user.id,
@@ -170,9 +195,8 @@ class DatabaseSeeder {
                     }
                 ]
             });
-            // --- J. Attachment (Opsional untuk salah satu transaksi saja) ---
-            // Karena createMany tidak mengembalikan ID satu per satu, 
-            // kita query satu transaksi terakhir buat ditempel struk
+            // --- J. Attachment (Struk untuk transaksi terakhir) ---
+            // Ambil transaksi terakhir yang baru saja dibuat user ini
             const lastTrx = await prisma.transaction.findFirst({
                 where: { user_id: user.id },
                 orderBy: { transaction_date: "desc" }
@@ -181,24 +205,22 @@ class DatabaseSeeder {
                 await prisma.attachment.create({
                     data: {
                         transaction_id: lastTrx.id,
-                        file_path: "uploads/struk-belanja.jpg",
+                        file_path: "uploads/dummy-receipt.jpg",
                         file_type: "image/jpeg"
                     }
                 });
             }
         }
-        console.log("\uD83C\uDF33 SEEDING SELESAI! Data dummy siap digunakan.");
+        console.log("\uD83C\uDF33 SEEDING SELESAI! Data dummy (termasuk Profile & Transaksi) siap digunakan.");
     }
 }
-// Jalankan Seeder
+// Menjalankan Seeder
 new DatabaseSeeder().run()
     .catch(e => {
     console.error("\u274C Error Seed:", e);
     process.exit(1);
 })
     .finally(async () => {
-    // Tidak perlu prisma.$disconnect() manual karena import dari singleton database.ts
-    // Tapi jika ingin force close:
     await prisma.$disconnect();
 });
 //# sourceMappingURL=seeder.js.map

@@ -1,4 +1,7 @@
+import { PrismaClient } from '../generated';
 export declare class WalletRepository {
+    private prisma;
+    constructor(prisma: PrismaClient);
     findAll(userId: string): Promise<{
         name: string;
         id: string;

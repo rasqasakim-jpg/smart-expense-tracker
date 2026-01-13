@@ -1,12 +1,15 @@
 import type { Request, Response, NextFunction } from "express";
-import { ZodObject, ZodError, } from 'zod'
+// Hapus kata 'type' di sini agar ZodError dianggap sebagai Class (Value), bukan cuma Tipe
+import { ZodError, type AnyZodObject } from 'zod'; 
 
-export const valided  = (schema: ZodObject) =>
+export const validate = (schema: AnyZodObject) => 
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            await schema.parseAsync(req.body);
+            // Validasi dan assign balik ke req.body
+            req.body = await schema.parseAsync(req.body);
             next();
         } catch (error) {
+            // Sekarang ini akan berhasil karena ZodError ada di runtime
             if (error instanceof ZodError) {
                 return res.status(422).json({
                     success: false,

@@ -1,16 +1,24 @@
-import prisma from "../database.js";
+// 1. Ubah import dari 'database' ke 'generated'
+import { PrismaClient } from '../generated';
 export class WalletRepository {
+    prisma;
+    // 2. Gunakan Constructor Injection
+    // (PrismaClient dikirim dari luar, bukan import langsung di sini)
+    constructor(prisma) {
+        this.prisma = prisma;
+    }
     async findAll(userId) {
-        return await prisma.wallet.findMany({
+        // 3. Pakai 'this.prisma' bukan 'prisma' global
+        return await this.prisma.wallet.findMany({
             where: {
                 user_id: userId,
-                deleted_at: null // Ambil yang belum dihapus saja
+                deleted_at: null
             },
-            orderBy: { created_at: "desc" }
+            orderBy: { created_at: 'desc' }
         });
     }
     async findById(id) {
-        return await prisma.wallet.findFirst({
+        return await this.prisma.wallet.findFirst({
             where: {
                 id,
                 deleted_at: null
@@ -18,19 +26,18 @@ export class WalletRepository {
         });
     }
     async create(data) {
-        return await prisma.wallet.create({
+        return await this.prisma.wallet.create({
             data
         });
     }
     async update(id, data) {
-        return await prisma.wallet.update({
+        return await this.prisma.wallet.update({
             where: { id },
             data
         });
     }
     async delete(id) {
-        // Soft Delete: Isi tanggal hari ini ke deleted_at
-        return await prisma.wallet.update({
+        return await this.prisma.wallet.update({
             where: { id },
             data: {
                 deleted_at: new Date()
