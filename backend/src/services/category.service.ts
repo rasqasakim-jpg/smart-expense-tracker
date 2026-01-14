@@ -11,12 +11,12 @@ export class CategoryService {
     }
 
 
-    async getCatagories(userId: string, type?: string) {
+    async getCategories(userId: string, type?: string) {
         let typeEnum: TransactionType | undefined;
 
         if (type === 'INCOME') {
             typeEnum = TransactionType.INCOME;
-        } else if (type === 'EXPANSE') {
+        } else if (type === 'EXPENSE') {
             typeEnum = TransactionType.EXPENSE
         }
 
@@ -33,7 +33,7 @@ export class CategoryService {
 
         if (data.type === 'INCOME') {
             transactionType = TransactionType.INCOME;
-        } else if (data.type === "EXPANSE") {
+        } else if (data.type === "EXPENSE") {
             transactionType = TransactionType.EXPENSE;
         } else {
             throw new Error("Type harus INCOME atau EXPENSE");

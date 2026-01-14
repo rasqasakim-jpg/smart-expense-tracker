@@ -10,7 +10,7 @@ import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './utils/swagger.config';
 
 const app: Application = express();
-const errorHandler = new ErrorHandler();
+// const errorHandler = new ();
 
 app.use(express.json());
 // CORS mengizinkan semua origin (untuk development aman)
@@ -32,5 +32,5 @@ app.get('/', (_req: Request, res: Response) => {
     });
 });
 
-app.use(errorHandler.handle);
+app.use(ErrorHandler.handle);
 export default app;

@@ -3,14 +3,14 @@ import { PrismaClient, TransactionType } from '../generated';
 export class CategoryRepository { 
     constructor(private prisma: PrismaClient) {}
 
-    async findAll(useId: string, type?: TransactionType) {
+    async findAll(userId: string, type?: TransactionType) {
         return await this.prisma.category.findMany({
 
             where: { 
 
                 OR: [
                     { user_id: null },
-                    { user_id: useId }
+                    { user_id: userId }
                 ],
 
                 ...(type && { type :type }),

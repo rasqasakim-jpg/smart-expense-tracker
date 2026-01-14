@@ -1,5 +1,18 @@
 import { PrismaClient, Prisma, TransactionType } from "../generated";
 
+
+export interface TransactionFindAllOptions {
+  startDate: Date;
+  endDate: Date;
+  type?: TransactionType | undefined;
+  search?: string | undefined;
+  page: number;  
+  limit: number; 
+}
+
+
+
+
 export class TransactionRepository {
   constructor(private prisma: PrismaClient) {}
 
@@ -9,13 +22,11 @@ export class TransactionRepository {
     return await client.transaction.create({ data });
   }
 
-  // Find All dengan Filter Tanggal & Search
-  async findAll(userId: string, filters: { 
-    startDate: Date; 
-    endDate: Date; 
-    type?: TransactionType;
-    search?: string;
-  }) {
+  // Find All 
+
+  async findAll(userId: string, filters: TransactionFindAllOptions) {
+    const skip = (filters.page - 1) * filters.limit;
+
     const whereCondition: Prisma.TransactionWhereInput = {
       user_id: userId,
       deleted_at: null,
@@ -26,7 +37,6 @@ export class TransactionRepository {
       ...(filters.type && { type: filters.type }),
     };
 
-    // Logic Search (Name OR Note)
     if (filters.search) {
       whereCondition.OR = [
         { name: { contains: filters.search, mode: 'insensitive' } },
@@ -34,15 +44,33 @@ export class TransactionRepository {
       ];
     }
 
-    return await this.prisma.transaction.findMany({
-      where: whereCondition,
-      include: {
-        category: true,
-        wallet: true
-      },
-      orderBy: { transaction_date: "desc" },
-    });
+    // --- PERUBAHAN DI SINI ---
+    // GANTI: this.prisma.$transaction([...])
+    // JADI: Promise.all([...])
+    
+    const [transactions, total] = await Promise.all([
+      this.prisma.transaction.findMany({
+        where: whereCondition,
+        include: {
+          category: {
+            select: { id: true, name: true, icon: true, type: true }
+          },
+          wallet: {
+            select: { id: true, name: true }
+          },
+          attachments: true
+        },
+        orderBy: { transaction_date: "desc" },
+        skip: skip,
+        take: filters.limit,
+      }),
+      this.prisma.transaction.count({ where: whereCondition })
+    ]);
+    // -------------------------
+
+    return { data: transactions, total };
   }
+
 
   // Find One by ID
   async findById(id: string) {

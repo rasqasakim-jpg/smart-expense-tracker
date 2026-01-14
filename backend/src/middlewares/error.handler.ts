@@ -1,14 +1,25 @@
-import type {  Response } from 'express';
+// src/middlewares/error.middleware.ts (atau utils/ErrorHandler.ts)
+import type { Request, Response, NextFunction } from 'express';
 
 export class ErrorHandler {
-  // WAJIB 4 parameter: err, req, res, next
-  public handle = (err: any,  res: Response, ) => {
+  // Ubah jadi STATIC biar gampang dipanggil tanpa 'new ErrorHandler()'
+  public static handle(
+    err: any, 
+    _req: Request, 
+    res: Response, 
+    _next: NextFunction // <--- INI WAJIB ADA!
+  ) {
     const status = err.status || 500;
+    const message = err.message || "Internal Server Error";
     
-    // Format response sesuai API Contract
+    // Opsional: Log error di console server biar developer tau (jangan dimakan sendiri)
+    if (status === 500) {
+        console.error("🔥 SERVER ERROR:", err);
+    }
+
     res.status(status).json({
       success: false,
-      message: err.message || "Internal Server Error"
+      message: message
     });
-  };
+  }
 }

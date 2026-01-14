@@ -4,10 +4,10 @@ import { asyncHandler } from "../utils/asyncHandler";
 
 
 export class CategoryController {
-    private categotyService: CategoryService;
+    private categoryService: CategoryService;
 
     constructor() {
-        this.categotyService = new CategoryService();
+        this.categoryService = new CategoryService();
     }
 
     public getAll = asyncHandler(async (req: Request, res: Response) =>{
@@ -17,7 +17,7 @@ export class CategoryController {
 
         const { type } = req.query;
 
-        const categories = await this.categotyService.getCatagories(
+        const categories = await this.categoryService.getCategories(
             userId,
             type as string | undefined
         );
@@ -33,7 +33,7 @@ export class CategoryController {
         const userId = req.user?.id;
         if (!userId) throw new Error("Unauthorized");
 
-        const newCategory = await this.categotyService.createCategory(userId, req.body);
+        const newCategory = await this.categoryService.createCategory(userId, req.body);
 
         res.status(201).json({
             success: true,

@@ -52,8 +52,16 @@ export class TransactionService {
     }
 
 
-    async getTransactions(userId: string, month?: number, year?: number, type?: string, search?: string) {
-        const now = new Date()
+    async getTransactions(
+        userId: string,
+        month?: number,
+        year?: number,
+        type?: string,
+        search?: string,
+        page: number = 1,
+        limit: number = 10
+    ) {
+        const now = new Date();
         const targetMonth = month ? month - 1 : now.getMonth();
         const targetYear = year || now.getFullYear();
 
@@ -64,12 +72,24 @@ export class TransactionService {
         if (type === 'INCOME') typeEnum = TransactionType.INCOME;
         else if (type === 'EXPENSE') typeEnum = TransactionType.EXPENSE;
 
-        return await this.transactionRepo.findAll(userId, {
+        const { data, total } = await this.transactionRepo.findAll(userId, {
             startDate,
             endDate,
-            ...(search && { search }),
-            ...(typeEnum && { type: typeEnum })
+            search,
+            type: typeEnum,
+            page,
+            limit
         });
+
+        return {
+            data: data,
+            meta: {
+                page: page,
+                limit: limit,
+                total_items: total,
+                total_pages: Math.ceil(total / limit)
+            }
+        };
     }
 
 
@@ -96,12 +116,10 @@ export class TransactionService {
             const wallet = await this.walletRepo.findById(oldTransaction.wallet_id)
             if (!wallet) throw new Error("Wallet tidak dimukan");
 
-            // A. REVERT (Kembalikan saldo lama)
             let currentBalance = Number(wallet.balance);
             if (oldTransaction.type === 'INCOME') currentBalance -= Number(oldTransaction.amount);
             else currentBalance += Number(oldTransaction.amount)
 
-            // B. APPLY (Terapkan data baru)
             const newAmount = data.amount !== undefined ? data.amount : Number(oldTransaction.amount);
             const newType = data.type !== undefined ? data.type : oldTransaction.type;
             if (newType === 'INCOME') currentBalance += newAmount;
@@ -154,7 +172,7 @@ export class TransactionService {
                 where: { id: wallet.id },
                 data: { balance: reverseBalance }
             });
-            return { message: "Transaksi berasil di hapus dan saldo dikembalikan"}
-        }); 
-      }
+            return { message: "Transaksi berasil di hapus dan saldo dikembalikan" }
+        });
+    }
 }
