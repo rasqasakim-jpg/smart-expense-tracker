@@ -6,15 +6,15 @@ export interface TransactionFindAllOptions {
   endDate: Date;
   type?: TransactionType | undefined;
   search?: string | undefined;
-  page: number;  
-  limit: number; 
+  page: number;
+  limit: number;
 }
 
 
 
 
 export class TransactionRepository {
-  constructor(private prisma: PrismaClient) {}
+  constructor(private prisma: PrismaClient) { }
 
   // Create dengan support transaction client (tx)
   async create(data: Prisma.TransactionCreateInput, tx?: Prisma.TransactionClient) {
@@ -47,7 +47,7 @@ export class TransactionRepository {
     // --- PERUBAHAN DI SINI ---
     // GANTI: this.prisma.$transaction([...])
     // JADI: Promise.all([...])
-    
+
     const [transactions, total] = await Promise.all([
       this.prisma.transaction.findMany({
         where: whereCondition,
@@ -97,4 +97,50 @@ export class TransactionRepository {
       data: { deleted_at: new Date() }
     });
   }
+
+
+
+
+  // Untuk mengambil total Income dan Expense dashboard
+
+  async getSummaryStats(userId: string, startDate: Date, endDate: Date) {
+    return await this.prisma.transaction.groupBy({
+      by: ['type'],
+      where: {
+        user_id: userId,
+        deleted_at: null,
+        transaction_date: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+      _sum: {
+        amount: true,
+      },
+    });
+  }
+
+
+  // [BARU] Untuk mengambil data mentah buat Grafik
+  async getDailyTransactions(useId: string, startDate: Date, endDate: Date) {
+    return await this.prisma.transaction.findMany({
+      where: {
+        user_id: useId,
+        deleted_at: null,
+        transaction_date: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+      select: {
+        transaction_date: true,
+        amount: true,
+        type: true,
+      },
+      orderBy: {
+        transaction_date: 'asc'
+      },
+    });
+  }
+
 }

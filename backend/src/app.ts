@@ -5,6 +5,7 @@ import userRoutes from './routes/user.routes';
 import walletRoutes from './routes/wallet.routes';
 import categoryRoutes from './routes/category.routes';
 import transactionRoutes from "./routes/transaction.routes";
+import dashboardRoutes from "./routes/dashboard.routes";
 import { ErrorHandler } from './middlewares/error.handler';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './utils/swagger.config';
@@ -24,6 +25,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/wallets', walletRoutes); 
 app.use('/api/categories', categoryRoutes); 
 app.use('/api/transactions', transactionRoutes); 
+app.use("/api/dashboard", dashboardRoutes);
 
 app.get('/', (_req: Request, res: Response) => {
     res.status(200).json({
