@@ -1,22 +1,62 @@
 import * as Yup from 'yup';
 
+// Reusable validation rules
+export const emailRule = Yup.string()
+  .email('Email tidak valid')
+  .required('Email harus diisi');
+
+export const passwordRule = Yup.string()
+  .min(6, 'Password minimal 6 karakter')
+  .required('Password harus diisi');
+
+export const nameRule = Yup.string()
+  .min(3, 'Minimal 3 karakter')
+  .required('Wajib diisi');
+
+export const amountRule = Yup.number()
+  .min(1, 'Jumlah harus lebih dari 0')
+  .required('Jumlah harus diisi')
+  .typeError('Jumlah harus berupa angka');
+
+// Schemas
 export const loginSchema = Yup.object().shape({
-    email: Yup.string()
-      .email('email tidak valid')
-      .required('Email harus diisi'),
-    password: Yup.string()
-      .min(6, 'Password harus lebih dari 6 karakter')
-      .required('Password harus diisi'),
-})
+  email: emailRule,
+  password: passwordRule,
+});
 
 export const registerSchema = Yup.object().shape({
-    fullName: Yup.string()
-      .min(3, 'Nama minimal 3 karakter')
-      .required('Nama harus diisi'),
-    email: Yup.string()
-      .email('email tidak valid')
-      .required('Email harus diisi'),
-    password: Yup.string()
-      .min(6, 'password minimal 6 karakter')
-      .required('Password harus diisi')
-})
+  fullName: nameRule,
+  email: emailRule,
+  password: passwordRule,
+});
+
+export const walletSchema = Yup.object().shape({
+  name: Yup.string()
+    .min(2, 'Nama wallet minimal 2 karakter')
+    .required('Nama wallet harus diisi'),
+  type: Yup.string()
+    .required('Tipe wallet harus dipilih'),
+});
+
+export const transactionSchema = Yup.object().shape({
+  amount: amountRule,
+  description: Yup.string()
+    .min(3, 'Deskripsi minimal 3 karakter')
+    .required('Deskripsi harus diisi'),
+  categoryId: Yup.number()
+    .min(1, 'Pilih kategori')
+    .required('Kategori harus dipilih'),
+  walletId: Yup.number()
+    .min(1, 'Pilih wallet')
+    .required('Wallet harus dipilih'),
+  transactionDate: Yup.string()
+    .required('Tanggal harus dipilih'),
+});
+
+export const categorySchema = Yup.object().shape({
+  name: Yup.string()
+    .min(2, 'Nama kategori minimal 2 karakter')
+    .required('Nama kategori harus diisi'),
+  type: Yup.string()
+    .required('Tipe kategori harus dipilih'),
+});

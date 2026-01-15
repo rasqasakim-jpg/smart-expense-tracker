@@ -9,13 +9,17 @@ import {
   Alert,
   ActivityIndicator,
   Modal,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import Ionicons from '@react-native-vector-icons/ionicons';
+import { transactionSchema } from '../../utils/validation';
 import { TransactionStackParamList, TransactionFormData } from '../../types/transaction';
 import { transactionAPI } from '../../services/transactionApi';
 import ScreenHeader from '../../components/layout/ScreenHeader';
+import ValidatedInput from '../../components/common/ValidatedInput';
 
 // Mock data untuk categories dan wallets
 const mockCategories = [
@@ -59,13 +63,15 @@ const TransactionFormScreen: React.FC<Props> = ({ navigation, route }) => {
     description: '',
     categoryId: 0,
     walletId: 0,
-    transactionDate: new Date().toISOString().split('T')[0], // YYYY-MM-DD
+    transactionDate: new Date().toISOString().split('T')[0],
     notes: '',
   });
 
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [showDateModal, setShowDateModal] = useState(false);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (isEdit) {
@@ -96,29 +102,25 @@ const TransactionFormScreen: React.FC<Props> = ({ navigation, route }) => {
   };
 
   const handleSubmit = async () => {
-    // Validation
-    if (!formData.description.trim()) {
-      Alert.alert('Error', 'Deskripsi harus diisi');
-      return;
-    }
-
-    if (formData.amount <= 0) {
-      Alert.alert('Error', 'Jumlah harus lebih dari 0');
-      return;
-    }
-
-    if (!formData.categoryId) {
-      Alert.alert('Error', 'Pilih kategori');
-      return;
-    }
-
-    if (!formData.walletId) {
-      Alert.alert('Error', 'Pilih wallet');
-      return;
-    }
-
     try {
       setLoading(true);
+      setFormErrors({});
+      
+      // Validate with Yup
+      await transactionSchema.validate(formData, { abortEarly: false });
+      
+      // Demo: Simulate API validation error
+      if (formData.description.toLowerCase().includes('error')) {
+        throw {
+          success: false,
+          message: 'Validation failed',
+          errors: {
+            amount: ['Jumlah tidak valid'],
+            description: ['Deskripsi mengandung kata terlarang'],
+            categoryId: ['Kategori tidak valid'],
+          },
+        };
+      }
       
       if (isEdit) {
         await transactionAPI.update(transactionId!, formData);
@@ -129,8 +131,42 @@ const TransactionFormScreen: React.FC<Props> = ({ navigation, route }) => {
       }
       
       navigation.goBack();
-    } catch (error) {
+      
+    } catch (error: any) {
+      console.log('Submit error:', error);
+      
+      // Handle Yup validation errors
+      if (error.name === 'ValidationError') {
+        const errors: Record<string, string> = {};
+        error.inner.forEach((err: any) => {
+          errors[err.path] = err.message;
+        });
+        setFormErrors(errors);
+        
+        // Show first error in alert
+        const firstError = Object.values(errors)[0];
+        if (firstError) {
+          Alert.alert('Validasi Gagal', firstError);
+        }
+        return;
+      }
+      
+      // Handle API validation errors (422)
+      if (error?.errors) {
+        const errors: Record<string, string> = {};
+        Object.keys(error.errors).forEach(key => {
+          errors[key] = error.errors[key][0];
+        });
+        setFormErrors(errors);
+        
+        const firstError = Object.values(errors)[0];
+        Alert.alert('Validasi Gagal', firstError);
+        return;
+      }
+      
+      // Handle other errors
       Alert.alert('Error', 'Gagal menyimpan transaksi');
+      
     } finally {
       setLoading(false);
     }
@@ -163,6 +199,45 @@ const TransactionFormScreen: React.FC<Props> = ({ navigation, route }) => {
     return wallet ? wallet.name : 'Pilih Wallet';
   };
 
+  const clearError = (field: string) => {
+    if (formErrors[field]) {
+      setFormErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
+  };
+
+  const handleFieldTouch = (field: string) => {
+    setTouchedFields(prev => ({ ...prev, [field]: true }));
+  };
+
+  const handleAmountChange = (text: string) => {
+    const num = parseInt(text.replace(/[^0-9]/g, '') || '0');
+    setFormData({ ...formData, amount: num });
+    clearError('amount');
+  };
+
+  const handleDescriptionChange = (text: string) => {
+    setFormData({ ...formData, description: text });
+    clearError('description');
+  };
+
+  const handleCategorySelect = (id: number) => {
+    setFormData({ ...formData, categoryId: id });
+    clearError('categoryId');
+    setShowCategoryModal(false);
+    handleFieldTouch('categoryId');
+  };
+
+  const handleWalletSelect = (id: number) => {
+    setFormData({ ...formData, walletId: id });
+    clearError('walletId');
+    setShowWalletModal(false);
+    handleFieldTouch('walletId');
+  };
+
   if (loading && isEdit) {
     return (
       <View style={styles.centered}>
@@ -172,14 +247,21 @@ const TransactionFormScreen: React.FC<Props> = ({ navigation, route }) => {
   }
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
       <ScreenHeader
         title={isEdit ? 'Edit Transaksi' : 'Tambah Transaksi'}
         showBackButton
         onBackPress={() => navigation.goBack()}
       />
 
-      <ScrollView contentContainerStyle={styles.formContainer}>
+      <ScrollView 
+        contentContainerStyle={styles.formContainer}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         {/* Type Selection */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Tipe Transaksi</Text>
@@ -190,6 +272,7 @@ const TransactionFormScreen: React.FC<Props> = ({ navigation, route }) => {
                 formData.type === 'EXPENSE' && styles.typeButtonActive,
               ]}
               onPress={() => setFormData({ ...formData, type: 'EXPENSE' })}
+              disabled={loading}
             >
               <Text
                 style={[
@@ -206,6 +289,7 @@ const TransactionFormScreen: React.FC<Props> = ({ navigation, route }) => {
                 formData.type === 'INCOME' && styles.typeButtonActive,
               ]}
               onPress={() => setFormData({ ...formData, type: 'INCOME' })}
+              disabled={loading}
             >
               <Text
                 style={[
@@ -222,20 +306,34 @@ const TransactionFormScreen: React.FC<Props> = ({ navigation, route }) => {
         {/* Amount */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Jumlah</Text>
-          <View style={styles.amountContainer}>
-            <Text style={styles.currencySymbol}>Rp</Text>
+          <View style={[
+            styles.amountContainer,
+            formErrors.amount && styles.inputError
+          ]}>
+            <Ionicons 
+              name="cash-outline" 
+              size={20} 
+              color={formErrors.amount ? "#FF3B30" : "#666"} 
+              style={styles.currencyIcon}
+            />
             <TextInput
               style={styles.amountInput}
               placeholder="0"
+              placeholderTextColor="#999"
               value={formData.amount === 0 ? '' : formData.amount.toString()}
-              onChangeText={(text) => {
-                const num = parseInt(text.replace(/[^0-9]/g, '') || '0');
-                setFormData({ ...formData, amount: num });
-              }}
+              onChangeText={handleAmountChange}
+              onBlur={() => handleFieldTouch('amount')}
               keyboardType="numeric"
+              editable={!loading}
             />
           </View>
-          {formData.amount > 0 && (
+          {formErrors.amount && (
+            <View style={styles.errorContainer}>
+              <Ionicons name="alert-circle" size={14} color="#FF3B30" />
+              <Text style={styles.errorText}>{formErrors.amount}</Text>
+            </View>
+          )}
+          {formData.amount > 0 && !formErrors.amount && (
             <Text style={styles.amountPreview}>
               {formatCurrency(formData.amount)}
             </Text>
@@ -245,46 +343,108 @@ const TransactionFormScreen: React.FC<Props> = ({ navigation, route }) => {
         {/* Description */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Deskripsi</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Contoh: Gaji Bulanan, Belanja Mingguan"
-            value={formData.description}
-            onChangeText={(text) => setFormData({ ...formData, description: text })}
-          />
+          <View style={[
+            styles.inputWithIcon,
+            formErrors.description && styles.inputError
+          ]}>
+            <Ionicons 
+              name="document-text-outline" 
+              size={20} 
+              color={formErrors.description ? "#FF3B30" : "#666"} 
+              style={styles.inputIcon}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Contoh: Gaji Bulanan, Belanja Mingguan"
+              placeholderTextColor="#999"
+              value={formData.description}
+              onChangeText={handleDescriptionChange}
+              onBlur={() => handleFieldTouch('description')}
+              editable={!loading}
+            />
+          </View>
+          {formErrors.description && (
+            <View style={styles.errorContainer}>
+              <Ionicons name="alert-circle" size={14} color="#FF3B30" />
+              <Text style={styles.errorText}>{formErrors.description}</Text>
+            </View>
+          )}
         </View>
 
         {/* Category Picker */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Kategori</Text>
           <TouchableOpacity
-            style={styles.pickerButton}
+            style={[
+              styles.pickerButton,
+              formErrors.categoryId && styles.inputError
+            ]}
             onPress={() => setShowCategoryModal(true)}
+            disabled={loading}
           >
+            <Ionicons
+              name="pricetags-outline"
+              size={20}
+              color={formErrors.categoryId ? "#FF3B30" : "#666"}
+              style={styles.pickerIcon}
+            />
             <Text style={[
               styles.pickerButtonText,
-              !formData.categoryId && styles.pickerButtonPlaceholder
+              !formData.categoryId && styles.pickerButtonPlaceholder,
+              formErrors.categoryId && styles.pickerButtonError
             ]}>
               {getCategoryName(formData.categoryId)}
             </Text>
-            <Ionicons name="chevron-down" size={24} color="#666" />
+            <Ionicons 
+              name="chevron-down" 
+              size={24} 
+              color={formErrors.categoryId ? "#FF3B30" : "#666"} 
+            />
           </TouchableOpacity>
+          {formErrors.categoryId && (
+            <View style={styles.errorContainer}>
+              <Ionicons name="alert-circle" size={14} color="#FF3B30" />
+              <Text style={styles.errorText}>{formErrors.categoryId}</Text>
+            </View>
+          )}
         </View>
 
         {/* Wallet Picker */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Wallet</Text>
           <TouchableOpacity
-            style={styles.pickerButton}
+            style={[
+              styles.pickerButton,
+              formErrors.walletId && styles.inputError
+            ]}
             onPress={() => setShowWalletModal(true)}
+            disabled={loading}
           >
+            <Ionicons
+              name="wallet-outline"
+              size={20}
+              color={formErrors.walletId ? "#FF3B30" : "#666"}
+              style={styles.pickerIcon}
+            />
             <Text style={[
               styles.pickerButtonText,
-              !formData.walletId && styles.pickerButtonPlaceholder
+              !formData.walletId && styles.pickerButtonPlaceholder,
+              formErrors.walletId && styles.pickerButtonError
             ]}>
               {getWalletName(formData.walletId)}
             </Text>
-            <Ionicons name="chevron-down" size={24} color="#666" />
+            <Ionicons 
+              name="chevron-down" 
+              size={24} 
+              color={formErrors.walletId ? "#FF3B30" : "#666"} 
+            />
           </TouchableOpacity>
+          {formErrors.walletId && (
+            <View style={styles.errorContainer}>
+              <Ionicons name="alert-circle" size={14} color="#FF3B30" />
+              <Text style={styles.errorText}>{formErrors.walletId}</Text>
+            </View>
+          )}
         </View>
 
         {/* Date Picker */}
@@ -293,25 +453,41 @@ const TransactionFormScreen: React.FC<Props> = ({ navigation, route }) => {
           <TouchableOpacity
             style={styles.pickerButton}
             onPress={() => setShowDateModal(true)}
+            disabled={loading}
           >
+            <Ionicons
+              name="calendar-outline"
+              size={20}
+              color="#666"
+              style={styles.pickerIcon}
+            />
             <Text style={styles.pickerButtonText}>
               {formatDate(formData.transactionDate)}
             </Text>
-            <Ionicons name="calendar-outline" size={20} color="#666" />
           </TouchableOpacity>
         </View>
 
         {/* Notes */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Catatan (Opsional)</Text>
-          <TextInput
-            style={[styles.input, styles.textArea]}
-            placeholder="Tambahkan catatan jika perlu"
-            value={formData.notes}
-            onChangeText={(text) => setFormData({ ...formData, notes: text })}
-            multiline
-            numberOfLines={3}
-          />
+          <View style={styles.inputWithIcon}>
+            <Ionicons 
+              name="create-outline" 
+              size={20} 
+              color="#666" 
+              style={[styles.inputIcon, styles.textAreaIcon]}
+            />
+            <TextInput
+              style={[styles.input, styles.textArea]}
+              placeholder="Tambahkan catatan jika perlu"
+              placeholderTextColor="#999"
+              value={formData.notes}
+              onChangeText={(text) => setFormData({ ...formData, notes: text })}
+              multiline
+              numberOfLines={3}
+              editable={!loading}
+            />
+          </View>
         </View>
 
         {/* Submit Button */}
@@ -323,11 +499,27 @@ const TransactionFormScreen: React.FC<Props> = ({ navigation, route }) => {
           {loading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.submitButtonText}>
-              {isEdit ? 'Simpan Perubahan' : 'Simpan Transaksi'}
-            </Text>
+            <>
+              <Ionicons 
+                name={isEdit ? "checkmark-circle" : "add-circle"} 
+                size={20} 
+                color="#fff" 
+              />
+              <Text style={styles.submitButtonText}>
+                {isEdit ? 'Simpan Perubahan' : 'Simpan Transaksi'}
+              </Text>
+            </>
           )}
         </TouchableOpacity>
+
+        {/* Demo Hint */}
+        {!isEdit && (
+          <View style={styles.demoHint}>
+            <Text style={styles.demoHintText}>
+              Demo: Ketik "error" di deskripsi untuk simulasi validation error
+            </Text>
+          </View>
+        )}
       </ScrollView>
 
       {/* Category Modal */}
@@ -335,6 +527,7 @@ const TransactionFormScreen: React.FC<Props> = ({ navigation, route }) => {
         visible={showCategoryModal}
         animationType="slide"
         transparent={true}
+        onRequestClose={() => setShowCategoryModal(false)}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -351,10 +544,7 @@ const TransactionFormScreen: React.FC<Props> = ({ navigation, route }) => {
                   <TouchableOpacity
                     key={category.id}
                     style={styles.modalItem}
-                    onPress={() => {
-                      setFormData({ ...formData, categoryId: category.id });
-                      setShowCategoryModal(false);
-                    }}
+                    onPress={() => handleCategorySelect(category.id)}
                   >
                     <Text style={styles.modalItemText}>{category.name}</Text>
                     {formData.categoryId === category.id && (
@@ -372,6 +562,7 @@ const TransactionFormScreen: React.FC<Props> = ({ navigation, route }) => {
         visible={showWalletModal}
         animationType="slide"
         transparent={true}
+        onRequestClose={() => setShowWalletModal(false)}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -386,10 +577,7 @@ const TransactionFormScreen: React.FC<Props> = ({ navigation, route }) => {
                 <TouchableOpacity
                   key={wallet.id}
                   style={styles.modalItem}
-                  onPress={() => {
-                    setFormData({ ...formData, walletId: wallet.id });
-                    setShowWalletModal(false);
-                  }}
+                  onPress={() => handleWalletSelect(wallet.id)}
                 >
                   <Text style={styles.modalItemText}>{wallet.name}</Text>
                   {formData.walletId === wallet.id && (
@@ -407,6 +595,7 @@ const TransactionFormScreen: React.FC<Props> = ({ navigation, route }) => {
         visible={showDateModal}
         animationType="slide"
         transparent={true}
+        onRequestClose={() => setShowDateModal(false)}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -445,7 +634,7 @@ const TransactionFormScreen: React.FC<Props> = ({ navigation, route }) => {
           </View>
         </View>
       </Modal>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -453,7 +642,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8f9fa',
-    paddingTop: 50
   },
   centered: {
     flex: 1,
@@ -462,9 +650,10 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     padding: 16,
+    paddingBottom: 32,
   },
   inputGroup: {
-    marginBottom: 24,
+    marginBottom: 20,
   },
   label: {
     fontSize: 14,
@@ -482,7 +671,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
-    padding: 16,
+    padding: 14,
     alignItems: 'center',
   },
   typeButtonActive: {
@@ -506,9 +695,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 12,
   },
-  currencySymbol: {
-    fontSize: 16,
-    color: '#666',
+  currencyIcon: {
     marginRight: 8,
   },
   amountInput: {
@@ -519,45 +706,84 @@ const styles = StyleSheet.create({
   },
   amountPreview: {
     fontSize: 14,
-    color: '#666',
-    marginTop: 8,
+    color: '#28a745',
+    fontWeight: '500',
+    marginTop: 6,
   },
-  input: {
+  inputWithIcon: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
-    padding: 12,
+    paddingHorizontal: 12,
+  },
+  inputIcon: {
+    marginRight: 8,
+  },
+  textAreaIcon: {
+    alignSelf: 'flex-start',
+    marginTop: 12,
+  },
+  input: {
+    flex: 1,
+    paddingVertical: 12,
     fontSize: 16,
+    color: '#1a1a1a',
   },
   textArea: {
     minHeight: 80,
     textAlignVertical: 'top',
+    paddingTop: 12,
+    paddingBottom: 12,
   },
   pickerButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
     padding: 12,
   },
+  pickerIcon: {
+    marginRight: 8,
+  },
   pickerButtonText: {
+    flex: 1,
     fontSize: 16,
     color: '#1a1a1a',
   },
   pickerButtonPlaceholder: {
     color: '#999',
   },
+  pickerButtonError: {
+    color: '#FF3B30',
+  },
+  inputError: {
+    borderColor: '#FF3B30',
+  },
+  errorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  errorText: {
+    color: '#FF3B30',
+    fontSize: 12,
+    marginLeft: 4,
+  },
   submitButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: '#007bff',
     borderRadius: 8,
     padding: 16,
-    alignItems: 'center',
     marginTop: 16,
-    marginBottom: 32,
+    marginBottom: 16,
+    gap: 8,
   },
   submitButtonDisabled: {
     backgroundColor: '#6c757d',
@@ -566,6 +792,19 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  demoHint: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: 8,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+    marginTop: 8,
+  },
+  demoHintText: {
+    fontSize: 12,
+    color: '#6c757d',
+    textAlign: 'center',
   },
   modalOverlay: {
     flex: 1,

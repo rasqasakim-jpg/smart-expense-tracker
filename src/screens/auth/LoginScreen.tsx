@@ -10,6 +10,8 @@ import {
   ScrollView,
   StatusBar,
   SafeAreaView,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { Formik } from 'formik';
 import { loginSchema } from '../../utils/validation';
@@ -22,167 +24,236 @@ import { useNavigation } from '@react-navigation/native';
 type LoginScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Login'>;
 
 interface Props {
-  navigation: LoginScreenNavigationProp;
   onLoginSuccess?: () => void;
 }
 
 const LoginScreen: React.FC<Props> = ({ onLoginSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const navigation = useNavigation<any>();
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const navigation = useNavigation<LoginScreenNavigationProp>();
 
- // Di handleLogin function:
-const handleLogin = async (values: LoginRequest) => {
-  try {
-    setLoading(true);
-    
-    console.log('Login attempt:', values);
-    
-    // Simulasi API call
-    await new Promise<void>(resolve => setTimeout(resolve, 1000));
-    
-    console.log('Login success! Calling onLoginSuccess callback...');
-    
-    // HANYA panggil callback, JANGAN navigation.reset
-    if (onLoginSuccess) {
-      onLoginSuccess(); // Ini akan trigger AppNavigator untuk render MainTabNavigator
+  const handleLogin = async (values: LoginRequest) => {
+    try {
+      setLoading(true);
+      setFormErrors({});
+      
+      console.log('Login attempt:', values);
+      console.log('onLoginSuccess prop exists?', ! !onLoginSuccess);
+      
+      
+      // Validate with Yup
+      await loginSchema.validate(values, { abortEarly: false });
+      
+      // Simulasi API call
+      await new Promise<void>(resolve => setTimeout(resolve, 1000));
+      
+      console.log('Login success! Calling onLoginSuccess callback...');
+      
+      if (onLoginSuccess) {
+        console.log('calling onLoginSuccess');
+        onLoginSuccess();
+      } 
+      
+    } catch (error: any) {
+      console.log('Login error:', error);
+      
+      // Handle Yup validation errors
+      if (error.name === 'ValidationError') {
+        const errors: Record<string, string> = {};
+        error.inner.forEach((err: any) => {
+          errors[err.path] = err.message;
+        });
+        setFormErrors(errors);
+        return;
+      }
+      
+      // Handle API validation errors (422)
+      if (error?.errors) {
+        const errors: Record<string, string> = {};
+        Object.keys(error.errors).forEach(key => {
+          errors[key] = error.errors[key][0];
+        });
+        setFormErrors(errors);
+        return;
+      }
+      
+      // Handle network/server errors
+      Alert.alert(
+        'Login Gagal',
+        error?.message || 'Terjadi kesalahan. Coba lagi.',
+        [{ text: 'OK' }]
+      );
+      
+    } finally {
+      setLoading(false);
     }
-    
-    // JANGAN lakukan ini:
-    // navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
-    
-  } catch (error: any) {
-    console.log('Login error:', error);
-    Alert.alert('Error', 'Login gagal');
-  } finally {
-    setLoading(false);
-  }
-};
+  };
+
+  // Clear error when user starts typing
+  const clearError = (field: string) => {
+    if (formErrors[field]) {
+      setFormErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar backgroundColor="#007AFF" barStyle="light-content" />
       
-      {/* HEADER */}
-      <View style={styles.header}>
-        <Ionicons name="wallet" size={50} color="#fff" />
-        <Text style={styles.headerTitle}>Smart Expense Tracker</Text>
-        <Text style={styles.subtitle}>Kelola keuangan dengan mudah</Text>
-      </View>
-
-      <ScrollView 
-        contentContainerStyle={styles.container}
-        keyboardShouldPersistTaps="handled"
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardAvoid}
       >
-        <Formik
-          initialValues={{ email: '', password: '' }}
-          validationSchema={loginSchema}
-          onSubmit={handleLogin}
+        <ScrollView 
+          contentContainerStyle={styles.container}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
-            <View style={styles.form}>
-              {/* EMAIL */}
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Email</Text>
-                <View style={styles.inputContainer}>
-                  <Ionicons
-                    name="mail-outline" 
-                    size={20} 
-                    color="#999" 
-                    style={styles.inputIcon}
-                  />
-                  <TextInput
-                    style={[
-                      styles.input, 
-                      errors.email && touched.email && styles.inputError
-                    ]}
-                    placeholder="email@example.com"
-                    placeholderTextColor="#999"
-                    value={values.email}
-                    onChangeText={handleChange('email')}
-                    onBlur={handleBlur('email')}
-                    autoCapitalize="none"
-                    keyboardType="email-address"
-                  />
-                </View>
-                {errors.email && touched.email && (
-                  <Text style={styles.errorText}>{errors.email}</Text>
-                )}
-              </View>
+          {/* HEADER */}
+          <View style={styles.header}>
+            <Ionicons name="wallet" size={50} color="#fff" />
+            <Text style={styles.headerTitle}>Smart Expense Tracker</Text>
+            <Text style={styles.subtitle}>Kelola keuangan dengan mudah</Text>
+          </View>
 
-              {/* PASSWORD */}
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Password</Text>
-                <View style={styles.inputContainer}>
-                  <Ionicons
-                    name="lock-closed-outline" 
-                    size={20} 
-                    color="#999" 
-                    style={styles.inputIcon}
-                  />
-                  <TextInput
-                    style={[
-                      styles.input, 
-                      errors.password && touched.password && styles.inputError
-                    ]}
-                    placeholder="Masukkan password"
-                    placeholderTextColor="#999"
-                    value={values.password}
-                    onChangeText={handleChange('password')}
-                    onBlur={handleBlur('password')}
-                    secureTextEntry={!showPassword}
-                  />
-                  <TouchableOpacity
-                    style={styles.eyeIcon}
-                    onPress={() => setShowPassword(!showPassword)}
+          {/* FORM */}
+          <View style={styles.formContainer}>
+            <Text style={styles.formTitle}>Masuk ke Akun Anda</Text>
+            
+            <Formik
+              initialValues={{ email: '', password: '' }}
+              onSubmit={handleLogin}
+            >
+              {({ handleChange, handleBlur, handleSubmit, values }) => (
+                <>
+                  {/* EMAIL */}
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.label}>Email</Text>
+                    <View style={[
+                      styles.inputContainer,
+                      formErrors.email && styles.inputContainerError
+                    ]}>
+                      <Ionicons
+                        name="mail-outline" 
+                        size={20} 
+                        color={formErrors.email ? "#FF3B30" : "#999"} 
+                        style={styles.inputIcon}
+                      />
+                      <TextInput
+                        style={styles.input}
+                        placeholder="email@example.com"
+                        placeholderTextColor="#999"
+                        value={values.email}
+                        onChangeText={(text) => {
+                          handleChange('email')(text);
+                          clearError('email');
+                        }}
+                        onBlur={handleBlur('email')}
+                        autoCapitalize="none"
+                        keyboardType="email-address"
+                        editable={!loading}
+                      />
+                    </View>
+                    {formErrors.email && (
+                      <View style={styles.errorContainer}>
+                        <Ionicons name="alert-circle" size={14} color="#FF3B30" />
+                        <Text style={styles.errorText}>{formErrors.email}</Text>
+                      </View>
+                    )}
+                  </View>
+
+                  {/* PASSWORD */}
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.label}>Password</Text>
+                    <View style={[
+                      styles.inputContainer,
+                      formErrors.password && styles.inputContainerError
+                    ]}>
+                      <Ionicons
+                        name="lock-closed-outline" 
+                        size={20} 
+                        color={formErrors.password ? "#FF3B30" : "#999"} 
+                        style={styles.inputIcon}
+                      />
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Masukkan password"
+                        placeholderTextColor="#999"
+                        value={values.password}
+                        onChangeText={(text) => {
+                          handleChange('password')(text);
+                          clearError('password');
+                        }}
+                        onBlur={handleBlur('password')}
+                        secureTextEntry={!showPassword}
+                        editable={!loading}
+                      />
+                      <TouchableOpacity
+                        style={styles.eyeIcon}
+                        onPress={() => setShowPassword(!showPassword)}
+                        disabled={loading}
+                      >
+                        <Ionicons
+                          name={showPassword ? "eye-outline" : "eye-off-outline"}
+                          size={20}
+                          color="#999"
+                        />
+                      </TouchableOpacity>
+                    </View>
+                    {formErrors.password && (
+                      <View style={styles.errorContainer}>
+                        <Ionicons name="alert-circle" size={14} color="#FF3B30" />
+                        <Text style={styles.errorText}>{formErrors.password}</Text>
+                      </View>
+                    )}
+                  </View>
+
+                  {/* FORGOT PASSWORD */}
+                  <TouchableOpacity 
+                    style={styles.forgotPassword}
+                    onPress={() => navigation.navigate('ForgotPassword')}
+                    disabled={loading}
                   >
-                    <Ionicons
-                      name={showPassword ? "eye-outline" : "eye-off-outline"}
-                      size={20}
-                      color="#999"
-                    />
+                    <Text style={styles.forgotPasswordText}>Lupa password?</Text>
                   </TouchableOpacity>
-                </View>
-                {errors.password && touched.password && (
-                  <Text style={styles.errorText}>{errors.password}</Text>
-                )}
-              </View>
 
-              {/* FORGOT PASSWORD */}
+                  {/* LOGIN BUTTON */}
+                  <TouchableOpacity
+                    style={[styles.button, loading && styles.buttonDisabled]}
+                    onPress={() => handleSubmit()}
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <ActivityIndicator color="#fff" />
+                    ) : (
+                      <>
+                        <Ionicons name="log-in-outline" size={20} color="#fff" />
+                        <Text style={styles.buttonText}>  Masuk ke Aplikasi</Text>
+                      </>
+                    )}
+                  </TouchableOpacity>
+                </>
+              )}
+            </Formik>
+
+            {/* SIGN UP LINK */}
+            <View style={styles.signupContainer}>
+              <Text style={styles.signupText}>Belum punya akun? </Text>
               <TouchableOpacity 
-                style={styles.forgotPassword}
-                onPress={() => navigation.navigate('ForgotPassword')}
-              >
-                <Text style={styles.forgotPasswordText}>Lupa password?</Text>
-              </TouchableOpacity>
-
-              {/* LOGIN BUTTON */}
-              <TouchableOpacity
-                style={[styles.button, loading && styles.buttonDisabled]}
-                onPress={() => navigation.navigate("MainTabs")}
+                onPress={() => navigation.navigate('Register')}
                 disabled={loading}
               >
-                {loading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <>
-                    <Ionicons name="log-in-outline" size={20} color="#fff" />
-                    <Text style={styles.buttonText}>  Masuk ke Aplikasi</Text>
-                  </>
-                )}
+                <Text style={styles.signupLink}>Daftar sekarang</Text>
               </TouchableOpacity>
             </View>
-          )}
-        </Formik>
-
-        {/* SIGN UP LINK */}
-        <View style={styles.signupContainer}>
-          <Text style={styles.signupText}>Belum punya akun? </Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-            <Text style={styles.signupLink}>Daftar sekarang</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
@@ -191,6 +262,12 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  keyboardAvoid: {
+    flex: 1,
+  },
+  container: {
+    flexGrow: 1,
   },
   header: {
     backgroundColor: '#007AFF',
@@ -211,57 +288,60 @@ const styles = StyleSheet.create({
     fontSize: 14,
     opacity: 0.9,
   },
-  container: {
-    flexGrow: 1,
+  formContainer: {
     paddingHorizontal: 20,
     paddingTop: 40,
     paddingBottom: 30,
   },
-  form: {
-    width: '100%',
+  formTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 25,
+    textAlign: 'center',
   },
   inputGroup: {
     marginBottom: 20,
   },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    position: 'relative',
-  },
-  inputIcon: {
-    position: 'absolute',
-    left: 12,
-    zIndex: 1,
-  },
-  eyeIcon: {
-    position: 'absolute',
-    right: 12,
-    zIndex: 1,
-  },
   label: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '500',
     color: '#333',
     marginBottom: 8,
   },
-  input: {
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderWidth: 1,
     borderColor: '#E0E0E0',
     borderRadius: 8,
-    paddingHorizontal: 40,
+    backgroundColor: '#fff',
+  },
+  inputContainerError: {
+    borderColor: '#FF3B30',
+  },
+  inputIcon: {
+    marginLeft: 12,
+  },
+  input: {
+    flex: 1,
+    paddingHorizontal: 12,
     paddingVertical: 14,
     fontSize: 16,
-    backgroundColor: '#fff',
     color: '#333',
-    flex: 1,
   },
-  inputError: {
-    borderColor: '#FF3B30',
+  eyeIcon: {
+    paddingHorizontal: 12,
+  },
+  errorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
   },
   errorText: {
     color: '#FF3B30',
     fontSize: 12,
-    marginTop: 4,
+    marginLeft: 4,
   },
   forgotPassword: {
     alignSelf: 'flex-start',
