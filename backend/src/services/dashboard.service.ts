@@ -78,7 +78,7 @@ export class DashboardService {
                 expense: totalExpense
             },
             chart: chartData,
-            recent_transactionas: recentTransactions.data
+            recent_transactions: recentTransactions.data
         }
     }
 }

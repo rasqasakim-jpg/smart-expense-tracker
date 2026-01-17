@@ -1,12 +1,20 @@
 import prisma from '../database';
 import jwt from 'jsonwebtoken';
 import { comparePassword, hashPassword } from '../utils/hash';
+import { ActivityLogService } from './activity-log.service';
+import { ActivityAction } from '../types/activity.types';
 
 export class AuthService {
+
+    private activityLogService: ActivityLogService;
+
+    constructor() {
+        this.activityLogService = new ActivityLogService();
+    }
     async registerUser(data: any) {
         const { fullName, email, password } = data;
 
-        // Validasi manual jika data kosong (safety net)
+
         if (!fullName || !email || !password) {
             throw new Error("Full name, email, and password are required");
         }
@@ -25,7 +33,7 @@ export class AuthService {
 
         const hashedPassword = await hashPassword(password);
 
-        return await prisma.user.create({
+        const newUser = await prisma.user.create({
             data: {
                 full_name: fullName,
                 email,
@@ -37,16 +45,28 @@ export class AuthService {
                     }
                 }
             },
+
             select: {
                 id: true,
                 email: true,
                 full_name: true,
-                profile: {
-                    select: { username: true }
+                profile: { 
+                    select : { username: true }
                 }
             }
         });
+
+        await this.activityLogService.log(
+            newUser.id,
+            ActivityAction.REGISTER,
+            `User registered with email: ${email}`
+        );
+
+        return newUser
     }
+    
+    
+    
     async loginUser(data: any) {
         const { email, password } = data;
 
@@ -71,6 +91,12 @@ export class AuthService {
             process.env.JWT_SECRET || 'super_secret_key',
             { expiresIn: '1d' }
         )
+
+        await this.activityLogService.log(
+            user.id,
+            ActivityAction.LOGIN,
+            "User logged in successfully"
+        );
 
         return {
             accessToken: token,
