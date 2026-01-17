@@ -17,39 +17,46 @@ export declare class TransactionService {
         transaction_date: Date;
         updated_at: Date;
     }>;
-    getTransactions(userId: string, month?: number, year?: number, type?: string, search?: string): Promise<({
-        wallet: {
+    getTransactions(userId: string, month?: number, year?: number, type?: string, search?: string, page?: number, limit?: number): Promise<{
+        data: ({
+            wallet: {
+                name: string;
+                id: string;
+            };
+            category: {
+                name: string;
+                id: number;
+                type: import("../generated").$Enums.TransactionType;
+                icon: string | null;
+            };
+            attachments: {
+                id: string;
+                created_at: Date;
+                transaction_id: string;
+                file_path: string;
+                file_type: string;
+            }[];
+        } & {
             name: string;
             id: string;
             user_id: string;
             created_at: Date;
-            balance: import("@prisma/client-runtime-utils").Decimal;
-            type: string;
-            deleted_at: Date | null;
-        };
-        category: {
-            name: string;
-            id: number;
-            user_id: string | null;
-            created_at: Date;
             type: import("../generated").$Enums.TransactionType;
             deleted_at: Date | null;
-            icon: string | null;
+            category_id: number;
+            wallet_id: string;
+            amount: import("@prisma/client-runtime-utils").Decimal;
+            note: string | null;
+            transaction_date: Date;
+            updated_at: Date;
+        })[];
+        meta: {
+            page: number;
+            limit: number;
+            total_items: number;
+            total_pages: number;
         };
-    } & {
-        name: string;
-        id: string;
-        user_id: string;
-        created_at: Date;
-        type: import("../generated").$Enums.TransactionType;
-        deleted_at: Date | null;
-        category_id: number;
-        wallet_id: string;
-        amount: import("@prisma/client-runtime-utils").Decimal;
-        note: string | null;
-        transaction_date: Date;
-        updated_at: Date;
-    })[]>;
+    }>;
     getTransactionDetail(userId: string, transactionId: string): Promise<{
         wallet: {
             name: string;

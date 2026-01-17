@@ -22,7 +22,7 @@ const getDevApiBase = (): string => {
   }
 
   // Fallback to device ipv4 (works with adb reverse on physical devices)
-  return 'http://192.168.1.94:5000/api';
+  return 'http://172.10.2.241:5000/api';
 };
 
 // We'll resolve a reachable dev host at request time for physical devices/emulators

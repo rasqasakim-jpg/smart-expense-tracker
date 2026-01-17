@@ -1,243 +1,98 @@
 import api from './api';
-import { Transaction, TransactionFormData } from '../types/transaction';
+import {TransactionFormData } from '../types/transaction';
 
-// Mock data sesuai wireframe
-let mockTransactions: Transaction[] = [
-  // Hari Ini
-  {
-    id: 1,
-    amount: 8000000,
-    type: 'INCOME',
-    description: 'Gaji Bulanan',
-    category: 'Pendapatan',
-    categoryId: 1,
-    walletId: 2,
-    walletName: 'Bank BCA',
-    transactionDate: '2026-01-05',
-    createdAt: '2026-01-05T08:00:00',
-  },
-  {
-    id: 2,
-    amount: 1200000,
-    type: 'EXPENSE',
-    description: 'Belanja Bulanan',
-    category: 'Belanja',
-    categoryId: 2,
-    walletId: 1,
-    walletName: 'Kas',
-    transactionDate: '2026-01-04',
-    createdAt: '2026-01-04T14:30:00',
-  },
-  // Minggu Ini
-  {
-    id: 3,
-    amount: 450000,
-    type: 'EXPENSE',
-    description: 'Tagihan Listrik',
-    category: 'Tagihan',
-    categoryId: 3,
-    walletId: 2,
-    walletName: 'Bank BCA',
-    transactionDate: '2026-01-03',
-    createdAt: '2026-01-03T10:15:00',
-  },
-  {
-    id: 4,
-    amount: 250000,
-    type: 'EXPENSE',
-    description: 'Transportasi',
-    category: 'Transport',
-    categoryId: 4,
-    walletId: 1,
-    walletName: 'Kas',
-    transactionDate: '2026-01-02',
-    createdAt: '2026-01-02T18:45:00',
-  },
-  {
-    id: 5,
-    amount: 2500000,
-    type: 'INCOME',
-    description: 'Freelance Project',
-    category: 'Pendapatan',
-    categoryId: 1,
-    walletId: 3,
-    walletName: 'OVO',
-    transactionDate: '2026-01-01',
-    createdAt: '2026-01-01T12:00:00',
-  },
-  {
-    id: 6,
-    amount: 350000,
-    type: 'EXPENSE',
-    description: 'Makan & Minum',
-    category: 'Makanan',
-    categoryId: 5,
-    walletId: 1,
-    walletName: 'Kas',
-    transactionDate: '2026-01-01',
-    createdAt: '2026-01-01T19:30:00',
-  },
-  // Bulan Lalu
-  {
-    id: 7,
-    amount: 350000,
-    type: 'EXPENSE',
-    description: 'Tagihan Internet',
-    category: 'Tagihan',
-    categoryId: 3,
-    walletId: 2,
-    walletName: 'Bank BCA',
-    transactionDate: '2025-12-28',
-    createdAt: '2025-12-28T09:20:00',
-  },
-];
-
+// Real API implementation
 export const transactionAPI = {
-  // Get semua transactions dengan filter
-  // Di getAll function, tambahkan filter by type:
-getAll: async (filters?: {
-  search?: string;
-  categoryId?: number;
-  walletId?: number;
-  startDate?: string;
-  type?: 'INCOME' | 'EXPENSE' | 'ALL';
-}) => {
-   await new Promise(resolve => setTimeout(() => resolve(true), 500));
-  
-  let filtered = [...mockTransactions];
-  
-  // Filter by search
-  if (filters?.search) {
-    const searchLower = filters.search.toLowerCase();
-    filtered = filtered.filter(t => 
-      t.description.toLowerCase().includes(searchLower) ||
-      t.category.toLowerCase().includes(searchLower)
-    );
-  }
-  
-  // ✅ FIX: Filter by category
-  if (filters?.categoryId) {
-    filtered = filtered.filter(t => t.categoryId === filters.categoryId);
-  }
-  
-  // ✅ FIX: Filter by wallet
-  if (filters?.walletId) {
-    filtered = filtered.filter(t => t.walletId === filters.walletId);
-  }
-  
-  // ✅ FIX: Filter by type
-  if (filters?.type && filters.type !== 'ALL') {
-    filtered = filtered.filter(t => t.type === filters.type);
-  }
-  
-  // ✅ FIX: Filter by date range
-  if (filters?.startDate) {
-    const today = new Date();
-    let startDate = new Date();
-    
-    switch (filters.startDate) {
-      case 'today':
-        startDate.setHours(0, 0, 0, 0);
-        break;
-      case 'week':
-        startDate.setDate(today.getDate() - 7);
-        break;
-      case 'month':
-        startDate.setMonth(today.getMonth() - 1);
-        break;
-      default:
-        // 'all' - no date filter
-        break;
+  // Get all transactions with filters
+  getAll: async (filters?: {
+    search?: string;
+    categoryId?: number;
+    walletId?: number;
+    startDate?: string;
+    type?: 'INCOME' | 'EXPENSE' | 'ALL';
+    page?: number;
+    limit?: number;
+  }) => {
+    try {
+      const params: any = {};
+
+      if (filters?.search) params.search = filters.search;
+      if (filters?.type && filters.type !== 'ALL') params.type = filters.type;
+      if (filters?.page) params.page = filters.page;
+      if (filters?.limit) params.limit = filters.limit;
+
+      // Note: Backend uses different field names, but we'll adapt in the service layer
+      const response = await api.get('/transactions', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+      throw error;
     }
-    
-    if (filters.startDate !== 'all') {
-      filtered = filtered.filter(t => {
-        const transDate = new Date(t.transactionDate);
-        return transDate >= startDate;
-      });
-    }
-  }
-  
-  return {
-    success: true,
-    message: 'Transactions retrieved successfully',
-    data: filtered,
-  };
-},
-  
-  // Get by ID
-  getById: async (id: number) => {
-    await new Promise(resolve => setTimeout(() => resolve(true), 300));
-    
-    const transaction = mockTransactions.find(t => t.id === id);
-    if (!transaction) {
-      throw new Error('Transaction not found');
-    }
-    
-    return {
-      success: true,
-      message: 'Transaction retrieved successfully',
-      data: transaction,
-    };
   },
-  
-  // Create transaction baru
+
+  // Get transaction by ID
+  getById: async (id: string) => {
+    try {
+      const response = await api.get(`/transactions/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching transaction:', error);
+      throw error;
+    }
+  },
+
+  // Create new transaction
   create: async (data: TransactionFormData) => {
-    await new Promise(resolve => setTimeout(() => resolve(true), 500));
-    
-    const newTransaction: Transaction = {
-      id: mockTransactions.length + 1,
-      ...data,
-      category: 'Unknown', // Nanti diisi dari categoryId
-      walletName: 'Unknown', // Nanti diisi dari walletId
-      createdAt: new Date().toISOString(),
-    };
-    
-    mockTransactions.unshift(newTransaction);
-    
-    return {
-      success: true,
-      message: 'Transaction created successfully',
-      data: newTransaction,
-    };
+    try {
+      // Transform frontend data to match backend expectations
+      const payload = {
+        wallet_id: data.walletId.toString(), // Backend expects string UUID, but we're using numbers for now
+        category_id: data.categoryId,
+        name: data.name,
+        amount: data.amount,
+        type: data.type,
+        transaction_date: new Date(data.transactionDate).toISOString(),
+        note: data.note || undefined,
+      };
+
+      const response = await api.post('/transactions', payload);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating transaction:', error);
+      throw error;
+    }
   },
-  
+
   // Update transaction
-  update: async (id: number, data: Partial<TransactionFormData>) => {
-    await new Promise(resolve => setTimeout(() => resolve(true), 500));
-    
-    const index = mockTransactions.findIndex(t => t.id === id);
-    if (index === -1) {
-      throw new Error('Transaction not found');
+  update: async (id: string, data: Partial<TransactionFormData>) => {
+    try {
+      // Transform frontend data to match backend expectations
+      const payload: any = {};
+
+      if (data.name) payload.name = data.name;
+      if (data.amount !== undefined) payload.amount = data.amount;
+      if (data.type) payload.type = data.type;
+      if (data.transactionDate) payload.transaction_date = new Date(data.transactionDate).toISOString();
+      if (data.note !== undefined) payload.note = data.note;
+      if (data.categoryId) payload.category_id = data.categoryId;
+      if (data.walletId) payload.wallet_id = data.walletId.toString();
+
+      const response = await api.put(`/transactions/${id}`, payload);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating transaction:', error);
+      throw error;
     }
-    
-    mockTransactions[index] = {
-      ...mockTransactions[index],
-      ...data,
-    };
-    
-    return {
-      success: true,
-      message: 'Transaction updated successfully',
-      data: mockTransactions[index],
-    };
   },
-  
+
   // Delete transaction
-  delete: async (id: number) => {
-    await new Promise(resolve => setTimeout(() => resolve(true), 500));
-    
-    const initialLength = mockTransactions.length;
-    mockTransactions = mockTransactions.filter(t => t.id !== id);
-    
-    if (mockTransactions.length === initialLength) {
-      throw new Error('Transaction not found');
+  delete: async (id: string) => {
+    try {
+      const response = await api.delete(`/transactions/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting transaction:', error);
+      throw error;
     }
-    
-    return {
-      success: true,
-      message: 'Transaction deleted successfully',
-      data: null,
-    };
   },
 };

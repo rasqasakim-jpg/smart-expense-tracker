@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 export declare class CategoryController {
-    private categotyService;
+    private categoryService;
     constructor();
     getAll: (req: Request, res: Response, next: import("express").NextFunction) => void;
     create: (req: Request, res: Response, next: import("express").NextFunction) => void;

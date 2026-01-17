@@ -57,20 +57,36 @@ const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
   const loadTransactions = async (filters: any = {}) => {
     try {
       setLoading(true);
-      
+
       // Gabungkan search dengan filter lainnya
       const allFilters = {
         ...filters,
         search: searchQuery || undefined,
       };
-      
+
       const response = await transactionAPI.getAll(allFilters);
-      const transactions = response.data;
-      
-      const grouped = groupTransactionsByDate(transactions);
+      const transactions = response.data || [];
+
+      // Transform backend data to frontend format
+      const transformedTransactions = transactions.map((t: any) => ({
+        id: t.id,
+        amount: Number(t.amount),
+        type: t.type,
+        name: t.name, // Backend uses 'name'
+        category: t.category?.name || 'Unknown',
+        categoryId: t.category_id,
+        walletId: t.wallet_id,
+        walletName: t.wallet?.name || 'Unknown',
+        transactionDate: t.transaction_date.split('T')[0],
+        createdAt: t.created_at,
+        note: t.note,
+      }));
+
+      const grouped = groupTransactionsByDate(transformedTransactions);
       setSections(grouped);
     } catch (error) {
       console.error('Error loading transactions:', error);
+      Alert.alert('Error', 'Gagal memuat transaksi');
     } finally {
       setLoading(false);
       setRefreshing(false);

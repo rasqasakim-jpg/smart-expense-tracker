@@ -1,8 +1,8 @@
 import type { Request, Response, NextFunction } from "express";
 // Hapus kata 'type' di sini agar ZodError dianggap sebagai Class (Value), bukan cuma Tipe
-import { ZodError, type AnyZodObject } from 'zod'; 
+import { ZodError, ZodObject } from 'zod'; 
 
-export const validate = (schema: AnyZodObject) => 
+export const validate = (schema: ZodObject<any>) => 
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             // Validasi dan assign balik ke req.body

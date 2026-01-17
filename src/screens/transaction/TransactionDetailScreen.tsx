@@ -43,9 +43,27 @@ const TransactionDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   const loadTransaction = async () => {
     try {
       const response = await transactionAPI.getById(transactionId);
-      setTransaction(response.data);
+      const backendTransaction = response.data;
+
+      // Transform backend data to frontend format
+      const transformedTransaction: Transaction = {
+        id: backendTransaction.id,
+        amount: Number(backendTransaction.amount),
+        type: backendTransaction.type,
+        name: backendTransaction.name,
+        category: backendTransaction.category?.name || 'Unknown',
+        categoryId: backendTransaction.category_id,
+        walletId: backendTransaction.wallet_id,
+        walletName: backendTransaction.wallet?.name || 'Unknown',
+        transactionDate: backendTransaction.transaction_date.split('T')[0],
+        createdAt: backendTransaction.created_at,
+        note: backendTransaction.note,
+      };
+
+      setTransaction(transformedTransaction);
     } catch (error) {
       Alert.alert('Error', 'Gagal memuat detail transaksi');
+      console.error('Error loading transaction detail:', error);
     } finally {
       setLoading(false);
     }
@@ -151,7 +169,7 @@ const TransactionDetailScreen: React.FC<Props> = ({ navigation, route }) => {
           
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Deskripsi</Text>
-            <Text style={styles.detailValue}>{transaction.description}</Text>
+            <Text style={styles.detailValue}>{transaction.name}</Text>
           </View>
           
           <View style={styles.separator} />
@@ -177,12 +195,12 @@ const TransactionDetailScreen: React.FC<Props> = ({ navigation, route }) => {
             </Text>
           </View>
           
-          {transaction.notes && (
+          {transaction.note && (
             <>
               <View style={styles.separator} />
               <View style={styles.detailRow}>
                 <Text style={styles.detailLabel}>Catatan</Text>
-                <Text style={styles.detailValue}>{transaction.notes}</Text>
+                <Text style={styles.detailValue}>{transaction.note}</Text>
               </View>
             </>
           )}

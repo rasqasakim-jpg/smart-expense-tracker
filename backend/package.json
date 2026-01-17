@@ -10,7 +10,7 @@
     "seed": "tsx src/prisma/seeder.ts",
     "dev": "tsx watch src/index.ts",
     "start": "node dist/index.js",
-    "build": "tsc && ts-add-js-extension --dir=dist",
+    "build": "tsc && ts-add-js-extension --dir=dist && cp -r src/generated dist/",
     "test": "jest"
   },
   "keywords": [],

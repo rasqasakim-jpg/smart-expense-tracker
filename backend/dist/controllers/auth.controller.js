@@ -6,7 +6,11 @@ export class AuthController {
         this.authService = new AuthService();
     }
     register = asyncHandler(async (req, res) => {
-        // Controller cuma melempar body ke service
+        if (process.env.NODE_ENV === "development") {
+            const { email } = req.body || {};
+            // Never log plaintext passwords — show email and redact password here
+            console.log("[auth] register called from", req.ip || req.hostname, "email:", email, "password: [REDACTED]");
+        }
         const newUser = await this.authService.registerUser(req.body);
         res.status(201).json({
             success: true,
@@ -15,6 +19,11 @@ export class AuthController {
         });
     });
     login = asyncHandler(async (req, res) => {
+        if (process.env.NODE_ENV === "development") {
+            const { email } = req.body || {};
+            // Never log plaintext passwords — show email and redact password here
+            console.log("[auth] login called from", req.ip || req.hostname, "email:", email, "password: [REDACTED]");
+        }
         // Kita pakai versi HEAD (loginResult & Operation success)
         const loginResult = await this.authService.loginUser(req.body);
         res.status(200).json({

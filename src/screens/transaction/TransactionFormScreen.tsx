@@ -15,27 +15,12 @@ import {
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import Ionicons from '@react-native-vector-icons/ionicons';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { transactionSchema } from '../../utils/validation';
 import { TransactionStackParamList, TransactionFormData } from '../../types/transaction';
 import { transactionAPI } from '../../services/transactionApi';
+import { categoryAPI, walletAPI, Category, Wallet } from '../../services/categoryWalletApi';
 import ScreenHeader from '../../components/layout/ScreenHeader';
-import ValidatedInput from '../../components/common/ValidatedInput';
-
-// Mock data untuk categories dan wallets
-const mockCategories = [
-  { id: 1, name: 'Pendapatan', type: 'INCOME' },
-  { id: 2, name: 'Belanja', type: 'EXPENSE' },
-  { id: 3, name: 'Tagihan', type: 'EXPENSE' },
-  { id: 4, name: 'Transport', type: 'EXPENSE' },
-  { id: 5, name: 'Makanan', type: 'EXPENSE' },
-];
-
-const mockWallets = [
-  { id: 1, name: 'Kas' },
-  { id: 2, name: 'Bank BCA' },
-  { id: 3, name: 'OVO' },
-  { id: 4, name: 'Tabungan' },
-];
 
 type TransactionFormScreenNavigationProp = StackNavigationProp<
   TransactionStackParamList,
@@ -57,44 +42,70 @@ const TransactionFormScreen: React.FC<Props> = ({ navigation, route }) => {
   const isEdit = !!transactionId;
 
   const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [wallets, setWallets] = useState<Wallet[]>([]);
+  const [dataLoading, setDataLoading] = useState(true);
   const [formData, setFormData] = useState<TransactionFormData>({
     amount: 0,
     type: 'EXPENSE',
-    description: '',
+    name: '', // Changed from description to name
     categoryId: 0,
-    walletId: 0,
+    walletId: '', // Changed to string UUID
     transactionDate: new Date().toISOString().split('T')[0],
-    notes: '',
+    note: '', // Changed from notes to note
   });
 
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);
-  const [showDateModal, setShowDateModal] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
+  const [_touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    if (isEdit) {
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    if (isEdit && transactionId) {
       loadTransaction();
     }
-  }, []);
+  }, [isEdit, transactionId]);
+
+  const loadData = async () => {
+    try {
+      setDataLoading(true);
+      const [categoriesResponse, walletsResponse] = await Promise.all([
+        categoryAPI.getAll(),
+        walletAPI.getAll(),
+      ]);
+
+      setCategories(categoriesResponse.data || []);
+      setWallets(walletsResponse.data || []);
+    } catch (error) {
+      console.error('Error loading data:', error);
+      Alert.alert('Error', 'Gagal memuat data kategori dan wallet');
+    } finally {
+      setDataLoading(false);
+    }
+  };
 
   const loadTransaction = async () => {
     try {
       setLoading(true);
       const response = await transactionAPI.getById(transactionId!);
       const transaction = response.data;
-      
+
       setFormData({
-        amount: transaction.amount,
+        amount: Number(transaction.amount),
         type: transaction.type,
-        description: transaction.description,
+        name: transaction.name, // Changed from description to name
         categoryId: transaction.categoryId,
-        walletId: transaction.walletId,
-        transactionDate: transaction.transactionDate,
-        notes: transaction.notes || '',
+        walletId: transaction.walletId, // Already a string UUID
+        transactionDate: transaction.transactionDate.split('T')[0],
+        note: transaction.note || '', // Changed from notes to note
       });
     } catch (error) {
+      console.error('Error loading transaction:', error);
       Alert.alert('Error', 'Gagal memuat data transaksi');
     } finally {
       setLoading(false);
@@ -105,23 +116,23 @@ const TransactionFormScreen: React.FC<Props> = ({ navigation, route }) => {
     try {
       setLoading(true);
       setFormErrors({});
-      
+
       // Validate with Yup
       await transactionSchema.validate(formData, { abortEarly: false });
-      
+
       // Demo: Simulate API validation error
-      if (formData.description.toLowerCase().includes('error')) {
+      if (formData.name.toLowerCase().includes('error')) {
         throw {
           success: false,
           message: 'Validation failed',
           errors: {
             amount: ['Jumlah tidak valid'],
-            description: ['Deskripsi mengandung kata terlarang'],
+            name: ['Nama mengandung kata terlarang'], // Changed from description to name
             categoryId: ['Kategori tidak valid'],
           },
         };
       }
-      
+
       if (isEdit) {
         await transactionAPI.update(transactionId!, formData);
         Alert.alert('Success', 'Transaksi berhasil diperbarui');
@@ -129,12 +140,12 @@ const TransactionFormScreen: React.FC<Props> = ({ navigation, route }) => {
         await transactionAPI.create(formData);
         Alert.alert('Success', 'Transaksi berhasil dibuat');
       }
-      
+
       navigation.goBack();
-      
+
     } catch (error: any) {
       console.log('Submit error:', error);
-      
+
       // Handle Yup validation errors
       if (error.name === 'ValidationError') {
         const errors: Record<string, string> = {};
@@ -142,7 +153,7 @@ const TransactionFormScreen: React.FC<Props> = ({ navigation, route }) => {
           errors[err.path] = err.message;
         });
         setFormErrors(errors);
-        
+
         // Show first error in alert
         const firstError = Object.values(errors)[0];
         if (firstError) {
@@ -150,7 +161,7 @@ const TransactionFormScreen: React.FC<Props> = ({ navigation, route }) => {
         }
         return;
       }
-      
+
       // Handle API validation errors (422)
       if (error?.errors) {
         const errors: Record<string, string> = {};
@@ -158,15 +169,15 @@ const TransactionFormScreen: React.FC<Props> = ({ navigation, route }) => {
           errors[key] = error.errors[key][0];
         });
         setFormErrors(errors);
-        
+
         const firstError = Object.values(errors)[0];
         Alert.alert('Validasi Gagal', firstError);
         return;
       }
-      
+
       // Handle other errors
       Alert.alert('Error', 'Gagal menyimpan transaksi');
-      
+
     } finally {
       setLoading(false);
     }
@@ -190,12 +201,12 @@ const TransactionFormScreen: React.FC<Props> = ({ navigation, route }) => {
   };
 
   const getCategoryName = (id: number) => {
-    const category = mockCategories.find(c => c.id === id);
+    const category = categories.find(c => c.id === id);
     return category ? category.name : 'Pilih Kategori';
   };
 
-  const getWalletName = (id: number) => {
-    const wallet = mockWallets.find(w => w.id === id);
+  const getWalletName = (id: string) => {
+    const wallet = wallets.find(w => w.id === id);
     return wallet ? wallet.name : 'Pilih Wallet';
   };
 
@@ -219,9 +230,9 @@ const TransactionFormScreen: React.FC<Props> = ({ navigation, route }) => {
     clearError('amount');
   };
 
-  const handleDescriptionChange = (text: string) => {
-    setFormData({ ...formData, description: text });
-    clearError('description');
+  const handleNameChange = (text: string) => {
+    setFormData({ ...formData, name: text });
+    clearError('name');
   };
 
   const handleCategorySelect = (id: number) => {
@@ -231,7 +242,7 @@ const TransactionFormScreen: React.FC<Props> = ({ navigation, route }) => {
     handleFieldTouch('categoryId');
   };
 
-  const handleWalletSelect = (id: number) => {
+  const handleWalletSelect = (id: string) => {
     setFormData({ ...formData, walletId: id });
     clearError('walletId');
     setShowWalletModal(false);
@@ -342,31 +353,31 @@ const TransactionFormScreen: React.FC<Props> = ({ navigation, route }) => {
 
         {/* Description */}
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Deskripsi</Text>
+          <Text style={styles.label}>Nama Transaksi</Text>
           <View style={[
             styles.inputWithIcon,
-            formErrors.description && styles.inputError
+            formErrors.name && styles.inputError
           ]}>
             <Ionicons 
               name="document-text-outline" 
               size={20} 
-              color={formErrors.description ? "#FF3B30" : "#666"} 
+              color={formErrors.name ? "#FF3B30" : "#666"} 
               style={styles.inputIcon}
             />
             <TextInput
               style={styles.input}
               placeholder="Contoh: Gaji Bulanan, Belanja Mingguan"
               placeholderTextColor="#999"
-              value={formData.description}
-              onChangeText={handleDescriptionChange}
-              onBlur={() => handleFieldTouch('description')}
+              value={formData.name}
+              onChangeText={handleNameChange}
+              onBlur={() => handleFieldTouch('name')}
               editable={!loading}
             />
           </View>
-          {formErrors.description && (
+          {formErrors.name && (
             <View style={styles.errorContainer}>
               <Ionicons name="alert-circle" size={14} color="#FF3B30" />
-              <Text style={styles.errorText}>{formErrors.description}</Text>
+              <Text style={styles.errorText}>{formErrors.name}</Text>
             </View>
           )}
         </View>
@@ -452,7 +463,7 @@ const TransactionFormScreen: React.FC<Props> = ({ navigation, route }) => {
           <Text style={styles.label}>Tanggal</Text>
           <TouchableOpacity
             style={styles.pickerButton}
-            onPress={() => setShowDateModal(true)}
+            onPress={() => setShowDatePicker(true)}
             disabled={loading}
           >
             <Ionicons
@@ -465,6 +476,23 @@ const TransactionFormScreen: React.FC<Props> = ({ navigation, route }) => {
               {formatDate(formData.transactionDate)}
             </Text>
           </TouchableOpacity>
+          {showDatePicker && (
+            <DateTimePicker
+              value={new Date(formData.transactionDate)}
+              mode="date"
+              display="default"
+              onChange={(event, selectedDate) => {
+                setShowDatePicker(false);
+                if (selectedDate) {
+                  setFormData({ 
+                    ...formData, 
+                    transactionDate: selectedDate.toISOString().split('T')[0] 
+                  });
+                }
+              }}
+              maximumDate={new Date()}
+            />
+          )}
         </View>
 
         {/* Notes */}
@@ -481,8 +509,8 @@ const TransactionFormScreen: React.FC<Props> = ({ navigation, route }) => {
               style={[styles.input, styles.textArea]}
               placeholder="Tambahkan catatan jika perlu"
               placeholderTextColor="#999"
-              value={formData.notes}
-              onChangeText={(text) => setFormData({ ...formData, notes: text })}
+              value={formData.note}
+              onChangeText={(text) => setFormData({ ...formData, note: text })}
               multiline
               numberOfLines={3}
               editable={!loading}
@@ -538,7 +566,7 @@ const TransactionFormScreen: React.FC<Props> = ({ navigation, route }) => {
               </TouchableOpacity>
             </View>
             <ScrollView>
-              {mockCategories
+              {categories
                 .filter(cat => cat.type === formData.type)
                 .map(category => (
                   <TouchableOpacity
@@ -573,7 +601,7 @@ const TransactionFormScreen: React.FC<Props> = ({ navigation, route }) => {
               </TouchableOpacity>
             </View>
             <ScrollView>
-              {mockWallets.map(wallet => (
+              {wallets.map(wallet => (
                 <TouchableOpacity
                   key={wallet.id}
                   style={styles.modalItem}
@@ -590,50 +618,7 @@ const TransactionFormScreen: React.FC<Props> = ({ navigation, route }) => {
         </View>
       </Modal>
 
-      {/* Simple Date Modal */}
-      <Modal
-        visible={showDateModal}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setShowDateModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Pilih Tanggal</Text>
-              <TouchableOpacity onPress={() => setShowDateModal(false)}>
-                <Ionicons name="close" size={24} color="#666" />
-              </TouchableOpacity>
-            </View>
-            <View style={styles.dateOptions}>
-              {['Hari Ini', 'Kemarin', '3 Hari Lalu', 'Minggu Lalu'].map((option, index) => {
-                const date = new Date();
-                if (option === 'Kemarin') date.setDate(date.getDate() - 1);
-                if (option === '3 Hari Lalu') date.setDate(date.getDate() - 3);
-                if (option === 'Minggu Lalu') date.setDate(date.getDate() - 7);
-                
-                const dateString = date.toISOString().split('T')[0];
-                
-                return (
-                  <TouchableOpacity
-                    key={option}
-                    style={styles.modalItem}
-                    onPress={() => {
-                      setFormData({ ...formData, transactionDate: dateString });
-                      setShowDateModal(false);
-                    }}
-                  >
-                    <Text style={styles.modalItemText}>{option}</Text>
-                    <Text style={styles.datePreview}>
-                      {formatDate(dateString)}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          </View>
-        </View>
-      </Modal>
+      {/* Date Modal - REMOVED: Replaced with DateTimePicker */}
     </KeyboardAvoidingView>
   );
 };

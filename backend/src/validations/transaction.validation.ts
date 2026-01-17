@@ -3,14 +3,12 @@ import { TransactionType } from "../generated"; // Sesuaikan path
 
 // Schema untuk CREATE (TIDAK BERUBAH)
 export const createTransactionSchema = z.object({
-  wallet_id: z.string().uuid({ message: "Format Wallet ID tidak valid" }),
-  category_id: z.number({ invalid_type_error: "Category ID harus angka" }).int(),
+  wallet_id: z.string().uuid("Format Wallet ID tidak valid"),
+  category_id: z.number().int("Category ID harus angka"),
   name: z.string().min(1, "Nama transaksi wajib diisi").max(100),
-  amount: z.number({ invalid_type_error: "Amount harus angka" }).min(1, "Jumlah harus > 0"),
-  type: z.nativeEnum(TransactionType, {
-    errorMap: () => ({ message: "Tipe harus INCOME atau EXPENSE" })
-  }),
-  transaction_date: z.string().datetime({ message: "Format tanggal ISO 8601 tidak valid" }),
+  amount: z.number().min(1, "Jumlah harus > 0"),
+  type: z.enum(["INCOME", "EXPENSE"]),
+  transaction_date: z.string().datetime("Format tanggal ISO 8601 tidak valid"),
   note: z.string().optional(),
 });
 

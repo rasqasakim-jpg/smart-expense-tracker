@@ -40,17 +40,17 @@ export const walletSchema = Yup.object().shape({
 
 export const transactionSchema = Yup.object().shape({
   amount: amountRule,
-  description: Yup.string()
-    .min(3, 'Deskripsi minimal 3 karakter')
-    .required('Deskripsi harus diisi'),
+  name: Yup.string()
+    .min(3, 'Nama transaksi minimal 3 karakter')
+    .required('Nama transaksi harus diisi'),
   categoryId: Yup.number()
     .min(1, 'Pilih kategori')
     .required('Kategori harus dipilih'),
-  walletId: Yup.number()
-    .min(1, 'Pilih wallet')
+  walletId: Yup.string()
     .required('Wallet harus dipilih'),
   transactionDate: Yup.string()
     .required('Tanggal harus dipilih'),
+  note: Yup.string(),
 });
 
 export const categorySchema = Yup.object().shape({

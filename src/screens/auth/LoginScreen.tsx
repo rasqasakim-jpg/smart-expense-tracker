@@ -12,16 +12,16 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Formik } from 'formik';
 import { loginSchema } from '../../utils/validation';
-import { LoginRequest } from '../../types/auth';
+import { authAPI } from '../../services/api';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParamList } from '../../navigation/AuthNavigation';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import { useNavigation } from '@react-navigation/native';
-import { useEffect, useState } from 'react';
 import AppContainer from '../../components/layout/AppContainer';
+import { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
 
 type LoginScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Login'>;
 
@@ -34,6 +34,7 @@ export default function LoginScreen({ onLoginSuccess }: Props) {
   const [showPassword, setShowPassword] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const navigation = useNavigation<LoginScreenNavigationProp>();
+  const auth = useAuth();
 
   const handleLogin = async (values: LoginRequest) => {
     try {
@@ -41,18 +42,19 @@ export default function LoginScreen({ onLoginSuccess }: Props) {
       setFormErrors({});
 
       console.log('Login attempt:', values);
-      console.log('onLoginSuccess prop exists?', !!onLoginSuccess);
 
       // Validate with Yup
       await loginSchema.validate(values, { abortEarly: false });
 
-      // Simulasi API call
-      await new Promise<void>(resolve => setTimeout(resolve, 1000));
+      // Call API
+      const data = await authAPI.login(values);
 
-      console.log('Login success! Calling onLoginSuccess callback...');
+      // Save token
+      await auth.signIn(data.data.accessToken);
+
+      console.log('Login success!');
 
       if (onLoginSuccess) {
-        console.log('calling onLoginSuccess');
         onLoginSuccess();
       }
 
@@ -69,17 +71,7 @@ export default function LoginScreen({ onLoginSuccess }: Props) {
         return;
       }
 
-      // Handle API validation errors (422)
-      if (error?.errors) {
-        const errors: Record<string, string> = {};
-        Object.keys(error.errors).forEach(key => {
-          errors[key] = error.errors[key][0];
-        });
-        setFormErrors(errors);
-        return;
-      }
-
-      // Handle network/server errors
+      // Handle API errors
       Alert.alert(
         'Login Gagal',
         error?.message || 'Terjadi kesalahan. Coba lagi.',
@@ -119,8 +111,7 @@ export default function LoginScreen({ onLoginSuccess }: Props) {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <AppContainer backgroundColor="#fff">
+      <AppContainer backgroundColor="#ffffff">
         {/* Keep status bar consistent */}
         <StatusBar backgroundColor="#007AFF" barStyle="light-content" />
 
@@ -271,7 +262,6 @@ export default function LoginScreen({ onLoginSuccess }: Props) {
           </ScrollView>
         </KeyboardAvoidingView>
       </AppContainer>
-    </SafeAreaView>
   );
 }
 

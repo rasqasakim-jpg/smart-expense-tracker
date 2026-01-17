@@ -1,7 +1,7 @@
 export declare class CategoryService {
     private categoryRepo;
     constructor();
-    getCatagories(userId: string, type?: string): Promise<{
+    getCategories(userId: string, type?: string): Promise<{
         name: string;
         id: number;
         user_id: string | null;

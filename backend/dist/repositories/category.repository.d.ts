@@ -2,7 +2,7 @@ import { PrismaClient, TransactionType } from '../generated';
 export declare class CategoryRepository {
     private prisma;
     constructor(prisma: PrismaClient);
-    findAll(useId: string, type?: TransactionType): Promise<{
+    findAll(userId: string, type?: TransactionType): Promise<{
         name: string;
         id: number;
         user_id: string | null;

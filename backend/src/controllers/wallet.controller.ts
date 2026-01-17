@@ -24,7 +24,6 @@ export class WalletController {
   });
 
   public create = asyncHandler(async (req: Request, res: Response) => {
-<<<<<<< HEAD
     const userId = req.user?.id;
 
     if (process.env.NODE_ENV === 'development') {
@@ -43,18 +42,6 @@ export class WalletController {
       success: true, 
       message: "Operation success", 
       data: wallet 
-=======
-    const userId = req.user?.id
-    if (!userId) throw new Error("Unauthorized");
-
-    const wallet = await this.walletService.createWallet(userId, req.body)
-
-
-    res.status(201).json({
-      success: true,
-      message: "Operation success",
-      data: wallet
->>>>>>> backend
     });
   });
 
@@ -64,7 +51,6 @@ export class WalletController {
 
     const { id } = req.params;
 
-<<<<<<< HEAD
     if (process.env.NODE_ENV === 'development') {
       console.log('[wallet] update called from', req.ip || req.hostname, 'userId:', userId, 'walletId:', id, 'body:', req.body);
     }
@@ -78,10 +64,6 @@ export class WalletController {
     }
 
     res.status(200).json({ 
-=======
-    const wallet = await this.walletService.updateWallet(userId!, id!, req.body)
-  res.status(200).json({ 
->>>>>>> backend
       success: true, 
       message: "Operation success", 
       data: wallet 
@@ -93,7 +75,6 @@ public delete = asyncHandler(async (req: Request, res: Response) => {
     if (!userId) throw new Error("Unauthorized"); // Validasi
 
     const { id } = req.params;
-<<<<<<< HEAD
 
     if (process.env.NODE_ENV === 'development') {
       console.log('[wallet] delete called from', req.ip || req.hostname, 'userId:', userId, 'walletId:', id);
@@ -105,10 +86,6 @@ public delete = asyncHandler(async (req: Request, res: Response) => {
       console.log(`[wallet] deleted id=${id} by userId=${userId}`);
     }
 
-=======
-    await this.walletService.deleteWallet(userId, id!);
-    
->>>>>>> backend
     res.status(200).json({ 
       success: true, 
       message: "Operation success", 

@@ -6,12 +6,12 @@ export class CategoryService {
     constructor() {
         this.categoryRepo = new CategoryRepository(prisma);
     }
-    async getCatagories(userId, type) {
+    async getCategories(userId, type) {
         let typeEnum;
         if (type === "INCOME") {
             typeEnum = TransactionType.INCOME;
         }
-        else if (type === "EXPANSE") {
+        else if (type === "EXPENSE") {
             typeEnum = TransactionType.EXPENSE;
         }
         return await this.categoryRepo.findAll(userId, typeEnum);
@@ -24,7 +24,7 @@ export class CategoryService {
         if (data.type === "INCOME") {
             transactionType = TransactionType.INCOME;
         }
-        else if (data.type === "EXPANSE") {
+        else if (data.type === "EXPENSE") {
             transactionType = TransactionType.EXPENSE;
         }
         else {
