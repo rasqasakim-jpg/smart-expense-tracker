@@ -17,30 +17,25 @@ import { Formik } from 'formik';
 import { loginSchema } from '../../utils/validation';
 import { LoginRequest } from '../../types/auth';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { AuthStackParamList } from '../../navigation/AuthNavigation';
+import { AuthStackParamList } from '../../navigation/AuthNavigator';
 import Ionicons from '@react-native-vector-icons/ionicons';
-import { useNavigation } from '@react-navigation/native';
 
 type LoginScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Login'>;
 
 interface Props {
+  navigation: LoginScreenNavigationProp;
   onLoginSuccess?: () => void;
 }
 
-const LoginScreen: React.FC<Props> = ({ onLoginSuccess }) => {
+const LoginScreen: React.FC<Props> = ({ navigation, onLoginSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const navigation = useNavigation<LoginScreenNavigationProp>();
 
   const handleLogin = async (values: LoginRequest) => {
     try {
       setLoading(true);
       setFormErrors({});
-      
-      console.log('Login attempt:', values);
-      console.log('onLoginSuccess prop exists?', ! !onLoginSuccess);
-      
       
       // Validate with Yup
       await loginSchema.validate(values, { abortEarly: false });
@@ -48,10 +43,7 @@ const LoginScreen: React.FC<Props> = ({ onLoginSuccess }) => {
       // Simulasi API call
       await new Promise<void>(resolve => setTimeout(resolve, 1000));
       
-      console.log('Login success! Calling onLoginSuccess callback...');
-      
       if (onLoginSuccess) {
-        console.log('calling onLoginSuccess');
         onLoginSuccess();
       } 
       

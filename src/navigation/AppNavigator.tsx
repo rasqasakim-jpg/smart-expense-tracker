@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import AuthNavigator from './AuthNavigation';
+import AuthNavigator from './AuthNavigator';
 import MainTabNavigator from './MainTabNavigator';
 import LoadingSpinner from '../components/common/LoadingScreen';
 

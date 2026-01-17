@@ -15,6 +15,7 @@ import Ionicons from '@react-native-vector-icons/ionicons';
 import { Category } from '../../types/category';
 import CategoryPicker from '../../components/transaction/CategoryPicker';
 import ScreenHeader from '../../components/layout/ScreenHeader';
+import ValidatedInput from '../../components/common/ValidatedInput';
 
 type TransactionStackParamList = {
   AddTransaction: undefined;
@@ -29,6 +30,12 @@ interface Props {
   navigation: AddTransactionScreenNavigationProp;
 }
 
+interface FormErrors {
+  amount?: string;
+  title?: string;
+  category?: string;
+}
+
 const AddTransactionScreen: React.FC<Props> = ({ navigation }) => {
   const [transactionType, setTransactionType] = useState<'EXPENSE' | 'INCOME'>('EXPENSE');
   const [amount, setAmount] = useState('');
@@ -38,18 +45,23 @@ const AddTransactionScreen: React.FC<Props> = ({ navigation }) => {
   const [note, setNote] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [touched, setTouched] = useState({
+    amount: false,
+    title: false,
+    category: false,
+  });
 
   // Data mock kategori (nanti ambil dari API/context)
-  const [categories, setCategories] = useState<Category[]>([
-    { id: 1, name: 'Makanan & Minuman', type: 'EXPENSE', icon: 'restaurant', color: '#dc3545', createdAt: '2024-01-13' },
-    { id: 2, name: 'Transportasi', type: 'EXPENSE', icon: 'directions-car', color: '#fd7e14', createdAt: '2024-01-13' },
-    { id: 3, name: 'Belanja', type: 'EXPENSE', icon: 'shopping-cart', color: '#6f42c1', createdAt: '2024-01-13' },
-    { id: 4, name: 'Hiburan', type: 'EXPENSE', icon: 'movie', color: '#20c997', createdAt: '2024-01-13' },
-    { id: 5, name: 'Gaji', type: 'INCOME', icon: 'work', color: '#007bff', createdAt: '2024-01-13' },
-    { id: 6, name: 'Bonus', type: 'INCOME', icon: 'card-giftcard', color: '#6f42c1', createdAt: '2024-01-13' },
-    { id: 7, name: 'Investasi', type: 'INCOME', icon: 'trending-up', color: '#28a745', createdAt: '2024-01-13' },
-  ]);
-
+ const [categories, setCategories] = useState<Category[]>([
+  { id: 1, name: 'Makanan & Minuman', type: 'EXPENSE', icon: 'restaurant-outline', color: '#dc3545', createdAt: '2024-01-13' },
+  { id: 2, name: 'Transportasi', type: 'EXPENSE', icon: 'car-outline', color: '#fd7e14', createdAt: '2024-01-13' },
+  { id: 3, name: 'Belanja', type: 'EXPENSE', icon: 'cart-outline', color: '#6f42c1', createdAt: '2024-01-13' },
+  { id: 4, name: 'Hiburan', type: 'EXPENSE', icon: 'film-outline', color: '#20c997', createdAt: '2024-01-13' },
+  { id: 5, name: 'Gaji', type: 'INCOME', icon: 'briefcase-outline', color: '#007bff', createdAt: '2024-01-13' },
+  { id: 6, name: 'Bonus', type: 'INCOME', icon: 'gift-outline', color: '#6f42c1', createdAt: '2024-01-13' },
+  { id: 7, name: 'Investasi', type: 'INCOME', icon: 'trending-up-outline', color: '#28a745', createdAt: '2024-01-13' },
+]);
   const formatCurrency = (value: string) => {
     if (!value) return 'Rp 0';
     const num = parseInt(value.replace(/\D/g, '') || '0');
@@ -67,10 +79,77 @@ const AddTransactionScreen: React.FC<Props> = ({ navigation }) => {
     return `${day}/${month}/${year}`;
   };
 
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+    
+    // Validate amount
+    if (!amount.trim()) {
+      newErrors.amount = 'Jumlah harus diisi';
+    } else if (parseInt(amount) <= 0) {
+      newErrors.amount = 'Jumlah harus lebih dari 0';
+    }
+    
+    // Validate title
+    if (!title.trim()) {
+      newErrors.title = 'Judul harus diisi';
+    } else if (title.trim().length < 3) {
+      newErrors.title = 'Judul minimal 3 karakter';
+    }
+    
+    // Validate category
+    if (!selectedCategory) {
+      newErrors.category = 'Kategori harus dipilih';
+    }
+    
+    setErrors(newErrors);
+    
+    // Mark all fields as touched
+    setTouched({
+      amount: true,
+      title: true,
+      category: true,
+    });
+    
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleAmountChange = (text: string) => {
     // Hanya angka
     const cleaned = text.replace(/\D/g, '');
     setAmount(cleaned);
+    
+    // Clear error when user starts typing
+    if (errors.amount) {
+      setErrors(prev => ({ ...prev, amount: undefined }));
+    }
+  };
+
+  const handleTitleChange = (text: string) => {
+    setTitle(text);
+    
+    // Clear error when user starts typing
+    if (errors.title) {
+      setErrors(prev => ({ ...prev, title: undefined }));
+    }
+  };
+
+  const handleCategorySelect = (category: Category) => {
+    setSelectedCategory(category);
+    
+    // Clear error when category is selected
+    if (errors.category) {
+      setErrors(prev => ({ ...prev, category: undefined }));
+    }
+  };
+
+  const handleTypeChange = (type: 'EXPENSE' | 'INCOME') => {
+    setTransactionType(type);
+    setSelectedCategory(undefined); // Reset category when type changes
+    
+    // Clear category error if exists
+    if (errors.category) {
+      setErrors(prev => ({ ...prev, category: undefined }));
+    }
   };
 
   const handleDateChange = (event: any, selectedDate?: Date) => {
@@ -80,19 +159,31 @@ const AddTransactionScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
+  const handleBlur = (field: keyof typeof touched) => {
+    setTouched(prev => ({ ...prev, [field]: true }));
+    
+    // Validate field on blur
+    switch (field) {
+      case 'amount':
+        if (!amount.trim()) {
+          setErrors(prev => ({ ...prev, amount: 'Jumlah harus diisi' }));
+        } else if (parseInt(amount) <= 0) {
+          setErrors(prev => ({ ...prev, amount: 'Jumlah harus lebih dari 0' }));
+        }
+        break;
+      case 'title':
+        if (!title.trim()) {
+          setErrors(prev => ({ ...prev, title: 'Judul harus diisi' }));
+        } else if (title.trim().length < 3) {
+          setErrors(prev => ({ ...prev, title: 'Judul minimal 3 karakter' }));
+        }
+        break;
+    }
+  };
+
   const handleSubmit = async () => {
-    if (!amount || parseInt(amount) === 0) {
-      Alert.alert('Error', 'Jumlah transaksi harus diisi');
-      return;
-    }
-
-    if (!title.trim()) {
-      Alert.alert('Error', 'Judul transaksi harus diisi');
-      return;
-    }
-
-    if (!selectedCategory) {
-      Alert.alert('Error', 'Kategori harus dipilih');
+    // Validate form
+    if (!validateForm()) {
       return;
     }
 
@@ -104,7 +195,7 @@ const AddTransactionScreen: React.FC<Props> = ({ navigation }) => {
         type: transactionType,
         amount: parseInt(amount),
         title,
-        categoryId: selectedCategory.id,
+        categoryId: selectedCategory!.id,
         date: date.toISOString().split('T')[0],
         note: note.trim() || undefined,
       };
@@ -123,13 +214,30 @@ const AddTransactionScreen: React.FC<Props> = ({ navigation }) => {
             setTitle('');
             setSelectedCategory(undefined);
             setNote('');
-            // Navigate back or stay based on requirement
+            setErrors({});
+            setTouched({
+              amount: false,
+              title: false,
+              category: false,
+            });
+            // Navigate back
             navigation.goBack();
           },
         },
       ]);
-    } catch (error) {
-      Alert.alert('Error', 'Gagal menambahkan transaksi');
+    } catch (error: any) {
+      // Handle API errors (422 validation errors)
+      if (error?.errors) {
+        const apiErrors: FormErrors = {};
+        Object.keys(error.errors).forEach(key => {
+          if (key === 'amount') apiErrors.amount = error.errors[key][0];
+          if (key === 'description' || key === 'title') apiErrors.title = error.errors[key][0];
+          if (key === 'categoryId') apiErrors.category = error.errors[key][0];
+        });
+        setErrors(apiErrors);
+      } else {
+        Alert.alert('Error', error?.message || 'Gagal menambahkan transaksi');
+      }
     } finally {
       setLoading(false);
     }
@@ -154,10 +262,7 @@ const AddTransactionScreen: React.FC<Props> = ({ navigation }) => {
               styles.typeButton,
               transactionType === 'EXPENSE' && styles.typeButtonActiveExpense,
             ]}
-            onPress={() => {
-              setTransactionType('EXPENSE');
-              setSelectedCategory(undefined); // Reset category when type changes
-            }}
+            onPress={() => handleTypeChange('EXPENSE')}
           >
             <Text
               style={[
@@ -174,10 +279,7 @@ const AddTransactionScreen: React.FC<Props> = ({ navigation }) => {
               styles.typeButton,
               transactionType === 'INCOME' && styles.typeButtonActiveIncome,
             ]}
-            onPress={() => {
-              setTransactionType('INCOME');
-              setSelectedCategory(undefined); // Reset category when type changes
-            }}
+            onPress={() => handleTypeChange('INCOME')}
           >
             <Text
               style={[
@@ -193,7 +295,10 @@ const AddTransactionScreen: React.FC<Props> = ({ navigation }) => {
         {/* Amount Input */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Jumlah</Text>
-          <View style={styles.amountContainer}>
+          <View style={[
+            styles.amountContainer,
+            errors.amount && touched.amount && styles.inputError
+          ]}>
             <Text style={styles.amountPreview}>
               {formatCurrency(amount)}
             </Text>
@@ -202,33 +307,50 @@ const AddTransactionScreen: React.FC<Props> = ({ navigation }) => {
               placeholder="0"
               value={amount}
               onChangeText={handleAmountChange}
+              onBlur={() => handleBlur('amount')}
               keyboardType="numeric"
               autoFocus={true}
+              editable={!loading}
             />
           </View>
+          {errors.amount && touched.amount && (
+            <Text style={styles.errorText}>{errors.amount}</Text>
+          )}
         </View>
 
         {/* Title Input */}
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Judul</Text>
-          <TextInput
-            style={styles.input}
+          <ValidatedInput
+            label="Judul"
             placeholder="Masukkan judul transaksi"
             value={title}
-            onChangeText={setTitle}
+            onChangeText={handleTitleChange}
+            onBlur={() => handleBlur('title')}
+            error={errors.title}
+            touched={touched.title}
+            editable={!loading}
           />
         </View>
 
         {/* Category Picker */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Kategori</Text>
-          <CategoryPicker
-            categories={filteredCategories}
-            selectedCategory={selectedCategory}
-            onSelectCategory={setSelectedCategory}
-            type={transactionType}
-            placeholder="Pilih kategori"
-          />
+          <View style={[
+            styles.categoryContainer,
+            errors.category && touched.category && styles.inputError
+          ]}>
+            <CategoryPicker
+              categories={filteredCategories}
+              selectedCategory={selectedCategory}
+              onSelectCategory={handleCategorySelect}
+              type={transactionType}
+              placeholder="Pilih kategori"
+              disabled={loading}
+            />
+          </View>
+          {errors.category && touched.category && (
+            <Text style={styles.errorText}>{errors.category}</Text>
+          )}
         </View>
 
         {/* Date Picker */}
@@ -237,6 +359,7 @@ const AddTransactionScreen: React.FC<Props> = ({ navigation }) => {
           <TouchableOpacity
             style={styles.dateButton}
             onPress={() => setShowDatePicker(true)}
+            disabled={loading}
           >
             <Text style={styles.dateText}>{formatDate(date)}</Text>
             <Ionicons name="calendar-outline" size={20} color="#666" />
@@ -254,6 +377,7 @@ const AddTransactionScreen: React.FC<Props> = ({ navigation }) => {
             multiline
             numberOfLines={3}
             textAlignVertical="top"
+            editable={!loading}
           />
         </View>
 
@@ -336,6 +460,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 16,
   },
+  inputError: {
+    borderColor: '#dc3545',
+  },
   amountPreview: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -388,6 +515,16 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  errorText: {
+    fontSize: 12,
+    color: '#dc3545',
+    marginTop: 4,
+    marginLeft: 4,
+  },
+  categoryContainer: {
+    borderRadius: 8,
+    overflow: 'hidden',
   },
 });
 

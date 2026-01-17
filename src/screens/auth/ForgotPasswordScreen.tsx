@@ -14,7 +14,7 @@ import {
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { AuthStackParamList } from '../../navigation/AuthNavigation';
+import { AuthStackParamList } from '../../navigation/AuthNavigator';
 import Ionicons from '@react-native-vector-icons/ionicons';
 
 type ForgotPasswordScreenNavigationProp = StackNavigationProp<
