@@ -4,13 +4,11 @@ import SplashScreen from '../screens/splash/SplashScreen';
 import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
 import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen';
-import MainTabNavigator from './MainTabNavigator';
 
 export type AuthStackParamList = {
   Splash: undefined;
   Login: { onLoginSuccess?: () => void };
   Register: undefined;
-  MainTabs:undefined;
   ForgotPassword: undefined;
 };
 
@@ -23,7 +21,7 @@ interface AuthNavigatorProps {
 const AuthNavigator: React.FC<AuthNavigatorProps> = ({ onLoginSuccess }) => {
   return (
     <Stack.Navigator
-      initialRouteName="Login"
+      initialRouteName="Splash"
       screenOptions={{
         headerShown: false,
         cardStyle: { backgroundColor: '#f8f9fa' },
@@ -35,8 +33,7 @@ const AuthNavigator: React.FC<AuthNavigatorProps> = ({ onLoginSuccess }) => {
       </Stack.Screen>
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-      <Stack.Screen name="MainTabs" component={MainTabNavigator} />    
-      </Stack.Navigator>
+    </Stack.Navigator>
   );
 };
 

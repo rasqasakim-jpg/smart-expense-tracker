@@ -1,26 +1,25 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import AppContainer from '../../components/layout/AppContainer';
-import ScreenHeader from '../../components/layout/ScreenHeader';
+import { createStackNavigator } from '@react-navigation/stack';
+import TransactionListScreen from '../transaction/TransactionListScreen';
+import TransactionDetailScreen from '../transaction/TransactionDetailScreen';
+import TransactionFormScreen from '../transaction/TransactionFormScreen';
+import { TransactionStackParamList } from '../../types/transaction';
+
+const Stack = createStackNavigator<TransactionStackParamList>();
 
 const TransactionsScreen = () => {
   return (
-    <AppContainer>
-      <ScreenHeader title="Transaksi" />
-      <View style={styles.content}>
-        <Text>Daftar transaksi akan ditampilkan di sini</Text>
-      </View>
-    </AppContainer>
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        cardStyle: { backgroundColor: '#f8f9fa' },
+      }}
+    >
+      <Stack.Screen name="TransactionList" component={TransactionListScreen} />
+      <Stack.Screen name="TransactionDetail" component={TransactionDetailScreen} />
+      <Stack.Screen name="TransactionForm" component={TransactionFormScreen} />
+    </Stack.Navigator>
   );
 };
-
-const styles = StyleSheet.create({
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-});
 
 export default TransactionsScreen;
