@@ -1,0 +1,140 @@
+import { TransactionRepository } from "../repositories/transaction.repository.js";
+import { WalletRepository } from "../repositories/wallet.repository.js";
+import prisma from "../database.js";
+import { TransactionType } from "../generated";
+export class TransactionService {
+    transactionRepo;
+    walletRepo;
+    constructor() {
+        this.transactionRepo = new TransactionRepository(prisma);
+        this.walletRepo = new WalletRepository(prisma);
+    }
+    async createTransaction(userId, data) {
+        const wallet = await this.walletRepo.findById(data.wallet_id);
+        if (!wallet || wallet.user_id !== userId) {
+            throw new Error("Wallet tidak dimukan atau bukan milik anda");
+        }
+        return await prisma.$transaction(async (tx) => {
+            const newTransaction = await this.transactionRepo.create({
+                name: data.name,
+                amount: data.amount,
+                type: data.type,
+                note: data.note ?? null,
+                transaction_date: new Date(data.transaction_date),
+                user_id: userId,
+                wallet: {
+                    connect: { id: data.wallet_id }
+                },
+                category: {
+                    connect: { id: data.category_id }
+                }
+            }, tx);
+            let newBalace = Number(wallet.balance);
+            if (data.type === "INCOME") {
+                newBalace += data.amount;
+            }
+            else {
+                newBalace -= data.amount;
+            }
+            await tx.wallet.update({
+                where: { id: data.wallet_id },
+                data: { balance: newBalace }
+            });
+            return newTransaction;
+        });
+    }
+    async getTransactions(userId, month, year, type, search) {
+        const now = new Date();
+        const targetMonth = month ? month - 1 : now.getMonth();
+        const targetYear = year || now.getFullYear();
+        const startDate = new Date(targetYear, targetMonth, 1);
+        const endDate = new Date(targetYear, targetMonth + 1, 0, 23, 59, 59);
+        let typeEnum;
+        if (type === "INCOME")
+            typeEnum = TransactionType.INCOME;
+        else if (type === "EXPENSE")
+            typeEnum = TransactionType.EXPENSE;
+        return await this.transactionRepo.findAll(userId, {
+            startDate,
+            endDate,
+            ...(search && { search }),
+            ...(typeEnum && { type: typeEnum })
+        });
+    }
+    async getTransactionDetail(userId, transactionId) {
+        const transaction = await this.transactionRepo.findById(transactionId);
+        if (!transaction)
+            throw new Error("Transaksi tidak dimuka");
+        if (transaction.user_id !== userId)
+            throw new Error("Akses ditolak");
+        return transaction;
+    }
+    async updateTransaction(userId, transactionId, data) {
+        const oldTransaction = await this.transactionRepo.findById(transactionId);
+        if (!oldTransaction || oldTransaction.user_id !== userId) {
+            throw new Error("Transaksi tidak ditemukan");
+        }
+        if (data.wallet_id && data.wallet_id !== oldTransaction.wallet_id) {
+            throw new Error("Tidak dapat memindakan wallet saat update. silakan hapus dan buat baru.");
+        }
+        return await prisma.$transaction(async (tx) => {
+            const wallet = await this.walletRepo.findById(oldTransaction.wallet_id);
+            if (!wallet)
+                throw new Error("Wallet tidak dimukan");
+            // A. REVERT (Kembalikan saldo lama)
+            let currentBalance = Number(wallet.balance);
+            if (oldTransaction.type === "INCOME")
+                currentBalance -= Number(oldTransaction.amount);
+            else
+                currentBalance += Number(oldTransaction.amount);
+            // B. APPLY (Terapkan data baru)
+            const newAmount = data.amount !== undefined ? data.amount : Number(oldTransaction.amount);
+            const newType = data.type !== undefined ? data.type : oldTransaction.type;
+            if (newType === "INCOME")
+                currentBalance += newAmount;
+            else
+                currentBalance -= newAmount;
+            // UPDATE WALLET
+            await tx.wallet.update({
+                where: { id: wallet.id },
+                data: { balance: currentBalance }
+            });
+            // UPDATE TRANSAKSI
+            const updateData = {
+                name: data.name,
+                amount: data.amount,
+                type: data.type,
+                note: data.note ?? null,
+                transaction_date: data.transaction_date ? new Date(data.transaction_date) : undefined,
+            };
+            if (data.category_id) {
+                updateData.category = { connect: { id: data.category_id } };
+            }
+            return await this.transactionRepo.update(transactionId, updateData, tx);
+        });
+    }
+    async deleteTransaction(userId, transactionId) {
+        const transaction = await this.transactionRepo.findById(transactionId);
+        if (!transaction || transaction.user_id !== userId)
+            throw new Error("Transaksi tidak dimukan");
+        const wallet = await this.walletRepo.findById(transaction.wallet_id);
+        if (!wallet)
+            throw new Error("Wallet terkait tidak ditemukan");
+        return await prisma.$transaction(async (tx) => {
+            await this.transactionRepo.delete(transactionId, tx);
+            //Kembalikan Saldo (Reverse Logic)
+            let reverseBalance = Number(wallet.balance);
+            const amount = Number(transaction.amount);
+            if (transaction.type === "INCOME")
+                reverseBalance -= amount;
+            else
+                reverseBalance += amount;
+            await tx.wallet.update({
+                where: { id: wallet.id },
+                data: { balance: reverseBalance }
+            });
+            return { message: "Transaksi berasil di hapus dan saldo dikembalikan" };
+        });
+    }
+}
+//# sourceMappingURL=transaction.service.js.map

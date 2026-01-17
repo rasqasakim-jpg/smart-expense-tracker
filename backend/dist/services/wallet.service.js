@@ -1,8 +1,9 @@
 import { WalletRepository } from "../repositories/wallet.repository.js";
+import prisma from "../database.js"; // <--- Import singleton prisma di sini
 export class WalletService {
     walletRepo;
     constructor() {
-        this.walletRepo = new WalletRepository();
+        this.walletRepo = new WalletRepository(prisma);
     }
     async getWallets(userId) {
         return await this.walletRepo.findAll(userId);

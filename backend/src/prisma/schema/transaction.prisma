@@ -3,10 +3,19 @@ model Transaction {
   user_id          String
   category_id      Int
   wallet_id        String
-  amount           Decimal         @db.Decimal 
-  type             TransactionType // Menggunakan Enum
-  note             String?         @db.Text
+  
+
+  name             String          @db.VarChar(255) 
+  
+  amount           Decimal         @db.Decimal(19, 2)
+  type             TransactionType 
+  note             String?         @db.Text // Untuk "Catatan Opsional"
   transaction_date DateTime        @db.Timestamp
+  
+  // Audit Trail
+  created_at       DateTime        @default(now())
+  updated_at       DateTime        @updatedAt
+  deleted_at       DateTime?       @db.Timestamp
   
   wallet           Wallet       @relation(fields: [wallet_id], references: [id])
   category         Category     @relation(fields: [category_id], references: [id])

@@ -24,13 +24,17 @@ export class AuthController {
         });
     });
     // --- AMBIL INI DARI BRANCH fitur-wallet ---
+    // ... import dan constructor sama ...
+    // register & login TETAP SAMA (karena pakai req.body)
     me = asyncHandler(async (req, res) => {
-        // req.user otomatis terisi dari AuthMiddleware
-        // Karena pakai asyncHandler, tidak perlu try-catch
+        // Meskipun AuthMiddleware menjamin, Syntax A tetap good practice
+        const user = req.user;
+        if (!user)
+            throw new Error("Unauthorized");
         res.status(200).json({
             success: true,
             message: "Operation success",
-            data: req.user
+            data: user
         });
     });
 }
