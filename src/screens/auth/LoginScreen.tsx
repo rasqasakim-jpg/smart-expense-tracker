@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // ← TAMBAH useEffect
 import {
   View,
   Text,
@@ -17,20 +17,41 @@ import { Formik } from 'formik';
 import { loginSchema } from '../../utils/validation';
 import { LoginRequest } from '../../types/auth';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { RouteProp } from '@react-navigation/native'; // ← IMPORT INI
 import { AuthStackParamList } from '../../navigation/AuthNavigator';
 import Ionicons from '@react-native-vector-icons/ionicons';
 
 type LoginScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Login'>;
+type LoginScreenRouteProp = RouteProp<AuthStackParamList, 'Login'>; // ← TAMBAH INI
 
 interface Props {
   navigation: LoginScreenNavigationProp;
+  route: LoginScreenRouteProp; // ← TAMBAH INI
   onLoginSuccess?: () => void;
 }
 
-const LoginScreen: React.FC<Props> = ({ navigation, onLoginSuccess }) => {
+const LoginScreen: React.FC<Props> = ({ navigation, route, onLoginSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Handle success message dari OTP verification atau route params
+  useEffect(() => {
+    if (route.params?.message) {
+      setSuccessMessage(route.params.message);
+      // Clear params setelah ditampilkan
+      navigation.setParams({ message: undefined });
+    }
+  }, [route.params?.message, navigation]);
+
+  // Tampilkan success message jika ada
+  useEffect(() => {
+    if (successMessage) {
+      Alert.alert('Success', successMessage);
+      setSuccessMessage(null);
+    }
+  }, [successMessage]);
 
   const handleLogin = async (values: LoginRequest) => {
     try {
@@ -43,9 +64,38 @@ const LoginScreen: React.FC<Props> = ({ navigation, onLoginSuccess }) => {
       // Simulasi API call
       await new Promise<void>(resolve => setTimeout(resolve, 1000));
       
-      if (onLoginSuccess) {
-        onLoginSuccess();
-      } 
+      // Demo credentials untuk testing
+      if (values.email === 'demo@test.com' && values.password === 'demo123') {
+        Alert.alert(
+          'Login Berhasil',
+          'Selamat datang di Smart Expense Tracker!',
+          [
+            {
+              text: 'Lanjutkan',
+              onPress: () => {
+                if (onLoginSuccess) {
+                  onLoginSuccess();
+                }
+              },
+            },
+          ]
+        );
+      } else if (values.email === 'error@test.com') {
+        // Simulate API validation error
+        throw {
+          success: false,
+          message: 'Validation failed',
+          errors: {
+            email: ['Email tidak terdaftar'],
+            password: ['Password salah'],
+          },
+        };
+      } else {
+        // Default success
+        if (onLoginSuccess) {
+          onLoginSuccess();
+        }
+      }
       
     } catch (error: any) {
       console.log('Login error:', error);
@@ -73,7 +123,7 @@ const LoginScreen: React.FC<Props> = ({ navigation, onLoginSuccess }) => {
       // Handle network/server errors
       Alert.alert(
         'Login Gagal',
-        error?.message || 'Terjadi kesalahan. Coba lagi.',
+        error?.message || 'Email atau password salah. Coba lagi.',
         [{ text: 'OK' }]
       );
       
@@ -250,6 +300,7 @@ const LoginScreen: React.FC<Props> = ({ navigation, onLoginSuccess }) => {
   );
 };
 
+// Styles tetap sama seperti sebelumnya
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -376,6 +427,26 @@ const styles = StyleSheet.create({
     color: '#007AFF',
     fontSize: 14,
     fontWeight: '600',
+  },
+  demoContainer: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: 8,
+    padding: 16,
+    marginTop: 30,
+    borderWidth: 1,
+    borderColor: '#eaeaea',
+  },
+  demoTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#495057',
+    marginBottom: 8,
+  },
+  demoText: {
+    fontSize: 12,
+    color: '#6c757d',
+    marginBottom: 4,
+    lineHeight: 16,
   },
 });
 

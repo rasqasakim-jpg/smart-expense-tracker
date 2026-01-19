@@ -4,11 +4,15 @@ import SplashScreen from '../screens/splash/SplashScreen';
 import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
 import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen';
+import OtpScreen from '../screens/auth/OtpScreen';
 
 export type AuthStackParamList = {
   Splash: undefined;
-  Login: { onLoginSuccess?: () => void };
+  Login: { onLoginSuccess?: () => void 
+    message?: string;
+  };
   Register: undefined;
+  Otp: { email: string; userId?: number}
   ForgotPassword: undefined;
 };
 
@@ -32,6 +36,7 @@ const AuthNavigator: React.FC<AuthNavigatorProps> = ({ onLoginSuccess }) => {
         {(props) => <LoginScreen {...props} onLoginSuccess={onLoginSuccess} />}
       </Stack.Screen>
       <Stack.Screen name="Register" component={RegisterScreen} />
+      <Stack.Screen name="Otp" component={OtpScreen} />
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
     </Stack.Navigator>
   );
