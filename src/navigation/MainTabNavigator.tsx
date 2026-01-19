@@ -1,7 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from '@react-native-vector-icons/ionicons';
-import HomeScreen from '../screens/main/HomeScreen';
+import DashboardScreenWrapper from '../screens/main/DashboardScreenWrapper';
 import TransactionsScreen from '../screens/main/TransactionsScreen';
 import AddTransactionScreen from '../screens/main/AddTransactionScreen';
 import WalletsScreen from '../screens/main/WalletsScreen';
@@ -39,7 +39,7 @@ const MainTabNavigator: React.FC<MainTabNavigatorProps> = ({ onLogout }) => {
         headerShown: false,
       })}
     >
-      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Home" component={DashboardScreenWrapper} />
       <Tab.Screen name="Transactions" component={TransactionsScreen} />
       <Tab.Screen 
         name="Add" 
