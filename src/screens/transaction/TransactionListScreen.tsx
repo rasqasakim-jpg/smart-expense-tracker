@@ -199,11 +199,6 @@ const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
     <View style={styles.container}>
       <ScreenHeader
         title="Semua Transaksi"
-        rightComponent={
-          <TouchableOpacity onPress={handleAddTransaction}>
-            <Ionicons name="add" size={24} color="#007bff" />
-          </TouchableOpacity>
-        }
       />
 
       <View style={styles.searchContainer}>
