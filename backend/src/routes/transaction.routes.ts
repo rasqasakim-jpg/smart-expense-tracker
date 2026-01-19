@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { TransactionController } from "../controllers/transaction.controller";
 import { AuthMiddleware } from "../middlewares/auth.middleware";
+import { RateLimitMiddleware } from "../middlewares/rateLimiter.middlerware";
 
 const router = Router();
 const controller = new TransactionController();
@@ -108,7 +109,7 @@ router.get("/:id", auth.handle, controller.getDetail);
  *       400:
  *         description: Validasi gagal
  */
-router.post("/", auth.handle, controller.create);
+router.post("/", auth.handle, RateLimitMiddleware.transactionLimiter, controller.create);
 
 /**
  * @swagger
@@ -152,7 +153,7 @@ router.post("/", auth.handle, controller.create);
  *       404:
  *         description: Transaksi tidak ditemukan
  */
-router.put("/:id", auth.handle, controller.update);
+router.put("/:id", auth.handle, RateLimitMiddleware.transactionLimiter, controller.update);
 
 /**
  * @swagger
@@ -175,6 +176,6 @@ router.put("/:id", auth.handle, controller.update);
  *       404:
  *         description: Transaksi tidak ditemukan
  */
-router.delete("/:id", auth.handle, controller.delete);
+router.delete("/:id", auth.handle, RateLimitMiddleware.transactionLimiter, controller.delete);
 
 export default router;

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { AuthController } from '../controllers/auth.controller';
 import { AuthMiddleware } from '../middlewares/auth.middleware';
+import { RateLimitMiddleware } from '../middlewares/rateLimiter.middlerware';
 
 const router = Router();
 
@@ -48,7 +49,7 @@ const authMiddleware = new AuthMiddleware();
  *       400:
  *         description: Validasi gagal
  */
-router.post('/register', authController.register);
+router.post('/register', RateLimitMiddleware.authLimiter,authController.register);
 
 /**
  * @swagger
@@ -79,7 +80,7 @@ router.post('/register', authController.register);
  *       401:
  *         description: Email atau password salah
  */
-router.post('/login', authController.login);
+router.post('/login', RateLimitMiddleware.authLimiter, authController.login);
 
 /**
  * @swagger

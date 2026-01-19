@@ -87,7 +87,6 @@ export class TransactionController {
 
         // --- LOG START ---
         if (process.env.NODE_ENV === 'development') {
-            // Aman me-log body transaksi (biasanya tidak ada data sensitif spt password)
             console.log('[transaction] create called from', req.ip || req.hostname, 'userId:', userId, 'body:', req.body);
         }
 

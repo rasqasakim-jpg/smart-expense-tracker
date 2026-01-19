@@ -1,6 +1,6 @@
 model Attachment {
   id             String      @id @default(uuid()) // Diubah ke UUID
-  transaction_id String      // Foreign Key menjadi String (Transaction UUID)
+  transaction_id String      
   file_path      String      @db.VarChar
   file_type      String      @db.VarChar
   created_at     DateTime    @default(now()) @db.Timestamp

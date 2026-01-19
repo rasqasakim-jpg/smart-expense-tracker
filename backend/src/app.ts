@@ -10,16 +10,27 @@ import { ErrorHandler } from './middlewares/error.handler';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './utils/swagger.config';
 
+// 1. IMPORT RATE LIMITER
+// Pastikan path foldernya sesuai ('middleware' atau 'middlewares')
+import { RateLimitMiddleware } from './middlewares/rateLimiter.middlerware'; 
+
 const app: Application = express();
-// const errorHandler = new ();
+
+// 2. SET TRUST PROXY (WAJIB untuk Railway)
+// Taruh ini tepat setelah inisialisasi app
+app.set('trust proxy', 1);
 
 app.use(express.json());
-// CORS mengizinkan semua origin (untuk development aman)
 app.use(cors()); 
+
+// 3. PASANG GLOBAL LIMITER (Opsional tapi Recommended)
+// Ini akan melindungi SEMUA route di bawah ini dari spam ringan
+app.use(RateLimitMiddleware.globalLimiter);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // === ROUTES ===
+// Auth Route ini nanti akan punya 'authLimiter' sendiri di dalam file routes-nya (double protection)
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);    
 app.use('/api/wallets', walletRoutes); 
