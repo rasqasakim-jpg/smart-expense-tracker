@@ -9,8 +9,7 @@ export class CategoryService {
     constructor() {
         this.categoryRepo = new CategoryRepository(prisma)
     }
-
-
+ 
     async getCategories(userId: string, type?: string) {
         let typeEnum: TransactionType | undefined;
 

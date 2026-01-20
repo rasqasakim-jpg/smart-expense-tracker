@@ -6,6 +6,8 @@ import walletRoutes from './routes/wallet.routes';
 import categoryRoutes from './routes/category.routes';
 import transactionRoutes from "./routes/transaction.routes";
 import dashboardRoutes from "./routes/dashboard.routes";
+import budgetRoutes from './routes/budget.routes';         // Import file budget tadi
+import notificationRoutes from './routes/notification.routes';
 import { ErrorHandler } from './middlewares/error.handler';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './utils/swagger.config';
@@ -37,6 +39,8 @@ app.use('/api/wallets', walletRoutes);
 app.use('/api/categories', categoryRoutes); 
 app.use('/api/transactions', transactionRoutes); 
 app.use("/api/dashboard", dashboardRoutes);
+app.use('/api/budget', budgetRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 app.get('/', (_req: Request, res: Response) => {
     res.status(200).json({
