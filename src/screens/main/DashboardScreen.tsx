@@ -45,7 +45,7 @@ interface Props {
 
 const DashboardScreen: React.FC<Props> = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
-  const [userName, setUserName] = useState('Ucup');
+  const [userName, setUserName] = useState('User');
   const [totalBalance, setTotalBalance] = useState(18000000);
   const [totalIncome, setTotalIncome] = useState(3500000);
   const [totalExpense, setTotalExpense] = useState(2100000);
@@ -145,23 +145,6 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
      { label: 'Jun', value: 3900000, color: '#17a2b8' },
   ];
 
-  const chartConfig = {
-    backgroundColor: '#ffffff',
-    backgroundGradientFrom: '#ffffff',
-    backgroundGradientTo: '#ffffff',
-    decimalPlaces: 0,
-    color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`,
-    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-    style: {
-      borderRadius: 16,
-    },
-    propsForDots: {
-      r: '4',
-      strokeWidth: '2',
-      stroke: '#007bff',
-    },
-  };
-
   if (loading) {
     return (
       <View style={styles.centered}>
@@ -173,16 +156,21 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Header Greeting dengan warna biru dan border bawah besar */}
-      <View style={styles.greetingContainer}>
-        <Text style={styles.greeting}>
-          Halo {userName}, Selamat Datang!
-        </Text>
+      {/* PERBAIKAN: Header Greeting sesuai Figma */}
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.greeting}>Halo {userName},</Text>
+          <Text style={styles.welcome}>Selamat Datang!</Text>
+        </View>
       </View>
 
-      {/* Total Saldo Card */}
+      {/* PERBAIKAN: Total Saldo Card sesuai Figma */}
       <View style={styles.balanceCard}>
-        <Text style={styles.balanceTitle}>TOTAL SALDO</Text>
+        <View style={styles.balanceHeader}>
+          <Ionicons name="wallet-outline" size={20} color="#007bff" />
+          <Text style={styles.balanceTitle}>TOTAL SALDO</Text>
+        </View>
+        
         <Text style={styles.balanceAmount}>
           {formatCurrency(totalBalance)}
         </Text>
@@ -221,16 +209,16 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Statistik Bulanan</Text>
         <View style={styles.chartContainer}>
-         <SimpleBarChart
-      data={chartData}
-      height={180}
-      showValues={true}
-      title="Pengeluaran Per Bulan (Rp)"
-    />
+          <SimpleBarChart
+            data={chartData}
+            height={180}
+            showValues={true}
+            title="Pengeluaran Per Bulan (Rp)"
+          />
         </View>
       </View>
 
-      {/* Recent Transactions Header - POSISI DIBALIK */}
+      {/* Recent Transactions Header */}
       <View style={styles.transactionHeader}>
         <Text style={styles.sectionTitleLeft}>Transaksi Terakhir</Text>
         
@@ -257,6 +245,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8f9fa',
+    paddingTop: 50
   },
   centered: {
     flex: 1,
@@ -267,49 +256,59 @@ const styles = StyleSheet.create({
     marginTop: 12,
     color: '#666',
   },
-  // PERBAIKAN: Greeting dengan border bawah lebih besar dan warna biru
-  greetingContainer: {
+  // PERBAIKAN: Header sesuai Figma
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 24,
-    paddingBottom: 20,
+    paddingVertical: 16,
     backgroundColor: '#fff',
-    borderBottomWidth: 2,
-    borderBottomColor: '#eaeaea',
-    marginBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#000000',
   },
   greeting: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  welcome: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#007bff', // WARNA BIRU
-    textAlign: 'center',
+    color: '#333',
+    marginTop: 2,
   },
+  // PERBAIKAN: Balance Card sesuai Figma
   balanceCard: {
-    backgroundColor: '#fff',
-    marginHorizontal: 20,
-    marginBottom: 20,
-    borderRadius: 16,
-    padding: 24,
+    backgroundColor: '#ffffff',
+    margin: 20,
+    borderRadius: 20,
+    padding: 25,
+    elevation: 5,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.15,
     shadowRadius: 8,
-    elevation: 4,
+  },
+  balanceHeader: {
+    flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 8,
   },
   balanceTitle: {
     fontSize: 14,
-    color: '#666',
+    color: 'rgba(0, 0, 0, 0.9)',
     fontWeight: '600',
-    marginBottom: 8,
-    letterSpacing: 1,
+    marginLeft: 8,
+    letterSpacing: 0.5,
   },
   balanceAmount: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: '#1a1a1a',
-    marginBottom: 24,
+    color: '#000000',
+    marginBottom: 25,
   },
-  statsContainer: {
+   statsContainer: {
     flexDirection: 'row',
     width: '100%',
     justifyContent: 'space-between',
@@ -348,9 +347,11 @@ const styles = StyleSheet.create({
   },
   incomeText: {
     color: '#28a745',
+    fontSize: 12
   },
   expenseText: {
     color: '#dc3545',
+    fontSize: 12
   },
   divider: {
     width: 1,
@@ -376,7 +377,6 @@ const styles = StyleSheet.create({
     color: '#1a1a1a',
     marginBottom: 16,
   },
-  // PERBAIKAN: Title untuk posisi kiri
   sectionTitleLeft: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -385,11 +385,6 @@ const styles = StyleSheet.create({
   chartContainer: {
     alignItems: 'center',
   },
-  chart: {
-    borderRadius: 16,
-    marginLeft: -20,
-  },
-  // PERBAIKAN: Transaction header dengan posisi terbalik
   transactionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -397,7 +392,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 12,
   },
-  // PERBAIKAN: Link di kanan
   allTransactionsLink: {
     fontSize: 14,
     color: '#007bff',
