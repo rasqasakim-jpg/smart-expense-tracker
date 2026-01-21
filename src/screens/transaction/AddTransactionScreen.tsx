@@ -11,11 +11,13 @@ import {
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Ionicons from '@react-native-vector-icons/ionicons';
-// import DateTimePicker from '@react-native-community/datetimepicker';
 import { Category } from '../../types/category';
+import { Wallet } from '../../types/wallet';
 import CategoryPicker from '../../components/transaction/CategoryPicker';
 import ScreenHeader from '../../components/layout/ScreenHeader';
-import ValidatedInput from '../../components/common/ValidatedInput';
+import { useCategories } from '../../store/contexts/CategoryContext';
+import { useWallets } from '../../store/contexts/WalletProvider';
+import WalletPicker from '../../components/transaction/WalletPicker';
 
 type TransactionStackParamList = {
   AddTransaction: undefined;
@@ -34,6 +36,7 @@ interface FormErrors {
   amount?: string;
   title?: string;
   category?: string;
+  wallet?: string;
 }
 
 const AddTransactionScreen: React.FC<Props> = ({ navigation }) => {
@@ -41,27 +44,22 @@ const AddTransactionScreen: React.FC<Props> = ({ navigation }) => {
   const [amount, setAmount] = useState('');
   const [title, setTitle] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<Category>();
+  const [selectedWallet, setSelectedWallet] = useState<Wallet>();
   const [date, setDate] = useState(new Date());
   const [note, setNote] = useState('');
-  const [showDatePicker, setShowDatePicker] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState({
     amount: false,
     title: false,
     category: false,
+    wallet: false,
   });
 
-  // Data mock kategori (nanti ambil dari API/context)
- const [categories, setCategories] = useState<Category[]>([
-  { id: 1, name: 'Makanan & Minuman', type: 'EXPENSE', icon: 'restaurant-outline', color: '#dc3545', createdAt: '2024-01-13' },
-  { id: 2, name: 'Transportasi', type: 'EXPENSE', icon: 'car-outline', color: '#fd7e14', createdAt: '2024-01-13' },
-  { id: 3, name: 'Belanja', type: 'EXPENSE', icon: 'cart-outline', color: '#6f42c1', createdAt: '2024-01-13' },
-  { id: 4, name: 'Hiburan', type: 'EXPENSE', icon: 'film-outline', color: '#20c997', createdAt: '2024-01-13' },
-  { id: 5, name: 'Gaji', type: 'INCOME', icon: 'briefcase-outline', color: '#007bff', createdAt: '2024-01-13' },
-  { id: 6, name: 'Bonus', type: 'INCOME', icon: 'gift-outline', color: '#6f42c1', createdAt: '2024-01-13' },
-  { id: 7, name: 'Investasi', type: 'INCOME', icon: 'trending-up-outline', color: '#28a745', createdAt: '2024-01-13' },
-]);
+  // Gunakan context untuk categories dan wallets
+  const { categories, loading: categoriesLoading } = useCategories();
+  const { wallets, loading: walletsLoading } = useWallets();
+
   const formatCurrency = (value: string) => {
     if (!value) return 'Rp 0';
     const num = parseInt(value.replace(/\D/g, '') || '0');
@@ -101,6 +99,11 @@ const AddTransactionScreen: React.FC<Props> = ({ navigation }) => {
       newErrors.category = 'Kategori harus dipilih';
     }
     
+    // Validate wallet
+    if (!selectedWallet) {
+      newErrors.wallet = 'Wallet harus dipilih';
+    }
+    
     setErrors(newErrors);
     
     // Mark all fields as touched
@@ -108,6 +111,7 @@ const AddTransactionScreen: React.FC<Props> = ({ navigation }) => {
       amount: true,
       title: true,
       category: true,
+      wallet: true,
     });
     
     return Object.keys(newErrors).length === 0;
@@ -142,6 +146,15 @@ const AddTransactionScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
+  const handleWalletSelect = (wallet: Wallet) => {
+    setSelectedWallet(wallet);
+    
+    // Clear error when wallet is selected
+    if (errors.wallet) {
+      setErrors(prev => ({ ...prev, wallet: undefined }));
+    }
+  };
+
   const handleTypeChange = (type: 'EXPENSE' | 'INCOME') => {
     setTransactionType(type);
     setSelectedCategory(undefined); // Reset category when type changes
@@ -149,13 +162,6 @@ const AddTransactionScreen: React.FC<Props> = ({ navigation }) => {
     // Clear category error if exists
     if (errors.category) {
       setErrors(prev => ({ ...prev, category: undefined }));
-    }
-  };
-
-  const handleDateChange = (event: any, selectedDate?: Date) => {
-    setShowDatePicker(false);
-    if (selectedDate) {
-      setDate(selectedDate);
     }
   };
 
@@ -190,14 +196,15 @@ const AddTransactionScreen: React.FC<Props> = ({ navigation }) => {
     try {
       setLoading(true);
       
-      // TODO: Panggil API untuk simpan transaksi
+      // Prepare transaction data
       const transactionData = {
         type: transactionType,
         amount: parseInt(amount),
-        title,
+        description: title,
         categoryId: selectedCategory!.id,
-        date: date.toISOString().split('T')[0],
-        note: note.trim() || undefined,
+        walletId: selectedWallet!.id,
+        transactionDate: date.toISOString().split('T')[0],
+        notes: note.trim() || undefined,
       };
 
       console.log('Transaction data:', transactionData);
@@ -213,12 +220,14 @@ const AddTransactionScreen: React.FC<Props> = ({ navigation }) => {
             setAmount('');
             setTitle('');
             setSelectedCategory(undefined);
+            setSelectedWallet(undefined);
             setNote('');
             setErrors({});
             setTouched({
               amount: false,
               title: false,
               category: false,
+              wallet: false,
             });
             // Navigate back
             navigation.goBack();
@@ -233,6 +242,7 @@ const AddTransactionScreen: React.FC<Props> = ({ navigation }) => {
           if (key === 'amount') apiErrors.amount = error.errors[key][0];
           if (key === 'description' || key === 'title') apiErrors.title = error.errors[key][0];
           if (key === 'categoryId') apiErrors.category = error.errors[key][0];
+          if (key === 'walletId') apiErrors.wallet = error.errors[key][0];
         });
         setErrors(apiErrors);
       } else {
@@ -242,9 +252,6 @@ const AddTransactionScreen: React.FC<Props> = ({ navigation }) => {
       setLoading(false);
     }
   };
-
-  // Filter categories by transaction type
-  const filteredCategories = categories.filter(cat => cat.type === transactionType);
 
   return (
     <View style={styles.container}>
@@ -263,6 +270,7 @@ const AddTransactionScreen: React.FC<Props> = ({ navigation }) => {
               transactionType === 'EXPENSE' && styles.typeButtonActiveExpense,
             ]}
             onPress={() => handleTypeChange('EXPENSE')}
+            disabled={loading}
           >
             <Text
               style={[
@@ -280,6 +288,7 @@ const AddTransactionScreen: React.FC<Props> = ({ navigation }) => {
               transactionType === 'INCOME' && styles.typeButtonActiveIncome,
             ]}
             onPress={() => handleTypeChange('INCOME')}
+            disabled={loading}
           >
             <Text
               style={[
@@ -320,50 +329,54 @@ const AddTransactionScreen: React.FC<Props> = ({ navigation }) => {
 
         {/* Title Input */}
         <View style={styles.inputGroup}>
-          <ValidatedInput
-            label="Judul"
-            placeholder="Masukkan judul transaksi"
+          <Text style={styles.label}>Judul Transaksi</Text>
+          <TextInput
+            style={[
+              styles.input,
+              errors.title && touched.title && styles.inputError
+            ]}
+            placeholder="Contoh: Gaji Bulanan, Belanja Mingguan"
             value={title}
             onChangeText={handleTitleChange}
             onBlur={() => handleBlur('title')}
-            error={errors.title}
-            touched={touched.title}
             editable={!loading}
           />
+          {errors.title && touched.title && (
+            <Text style={styles.errorText}>{errors.title}</Text>
+          )}
         </View>
 
         {/* Category Picker */}
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Kategori</Text>
-          <View style={[
-            styles.categoryContainer,
-            errors.category && touched.category && styles.inputError
-          ]}>
-            <CategoryPicker
-              categories={filteredCategories}
-              selectedCategory={selectedCategory}
-              onSelectCategory={handleCategorySelect}
-              type={transactionType}
-              placeholder="Pilih kategori"
-              disabled={loading}
-            />
-          </View>
-          {errors.category && touched.category && (
-            <Text style={styles.errorText}>{errors.category}</Text>
-          )}
+          {/* <Text style={styles.label}>Kategori</Text> */}
+          <CategoryPicker
+            selectedCategoryId={selectedCategory?.id}
+            onSelectCategory={handleCategorySelect}
+            transactionType={transactionType}
+            error={errors.category && touched.category ? errors.category : undefined}
+          />
         </View>
 
-        {/* Date Picker */}
+        {/* Wallet Picker */}
+        <View style={styles.inputGroup}>
+          {/* <Text style={styles.label}>Wallet</Text> */}
+          <WalletPicker
+            selectedWalletId={selectedWallet?.id}
+            onSelectWallet={handleWalletSelect}
+            error={errors.wallet && touched.wallet ? errors.wallet : undefined}
+          />
+        </View>
+
+        {/* Date Display */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Tanggal</Text>
-          <TouchableOpacity
-            style={styles.dateButton}
-            onPress={() => setShowDatePicker(true)}
-            disabled={loading}
-          >
+          <View style={styles.dateContainer}>
             <Text style={styles.dateText}>{formatDate(date)}</Text>
             <Ionicons name="calendar-outline" size={20} color="#666" />
-          </TouchableOpacity>
+          </View>
+          <Text style={styles.dateHint}>
+            Transaksi akan dicatat dengan tanggal hari ini
+          </Text>
         </View>
 
         {/* Note Input */}
@@ -371,7 +384,7 @@ const AddTransactionScreen: React.FC<Props> = ({ navigation }) => {
           <Text style={styles.label}>Catatan (Opsional)</Text>
           <TextInput
             style={[styles.input, styles.noteInput]}
-            placeholder="Tambahkan catatan..."
+            placeholder="Tambahkan catatan jika perlu..."
             value={note}
             onChangeText={setNote}
             multiline
@@ -385,7 +398,7 @@ const AddTransactionScreen: React.FC<Props> = ({ navigation }) => {
         <TouchableOpacity
           style={[styles.submitButton, loading && styles.submitButtonDisabled]}
           onPress={handleSubmit}
-          disabled={loading}
+          disabled={loading || categoriesLoading || walletsLoading}
         >
           {loading ? (
             <ActivityIndicator color="#fff" />
@@ -394,16 +407,6 @@ const AddTransactionScreen: React.FC<Props> = ({ navigation }) => {
           )}
         </TouchableOpacity>
       </ScrollView>
-
-      {/* Date Picker Modal */}
-      {/* {showDatePicker && (
-        <DateTimePicker
-          value={date}
-          mode="date"
-          display="spinner"
-          onChange={handleDateChange}
-        />
-      )} */}
     </View>
   );
 };
@@ -412,7 +415,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8f9fa',
-    paddingTop: 50
   },
   content: {
     padding: 16,
@@ -423,6 +425,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 24,
     padding: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   typeButton: {
     flex: 1,
@@ -473,19 +480,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
     height: 40,
+    padding: 0,
   },
   input: {
     backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
-    padding: 16,
+    padding: 12,
     fontSize: 16,
+    color: '#1a1a1a',
   },
   noteInput: {
     minHeight: 100,
   },
-  dateButton: {
+  dateContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -493,38 +502,44 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
-    padding: 16,
-    height: 56,
+    padding: 12,
   },
   dateText: {
     fontSize: 16,
     color: '#1a1a1a',
   },
+  dateHint: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 4,
+    marginLeft: 4,
+  },
   submitButton: {
     backgroundColor: '#007bff',
     borderRadius: 8,
-    padding: 18,
+    padding: 16,
     alignItems: 'center',
     marginTop: 8,
     marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   submitButtonDisabled: {
     backgroundColor: '#6c757d',
   },
   submitButtonText: {
     color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 16,
+    fontWeight: '600',
   },
   errorText: {
     fontSize: 12,
     color: '#dc3545',
     marginTop: 4,
     marginLeft: 4,
-  },
-  categoryContainer: {
-    borderRadius: 8,
-    overflow: 'hidden',
   },
 });
 

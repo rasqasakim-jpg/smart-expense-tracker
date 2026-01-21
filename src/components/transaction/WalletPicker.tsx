@@ -5,59 +5,76 @@ import {
   StyleSheet,
   TouchableOpacity,
   Modal,
-  ScrollView,
   FlatList,
 } from 'react-native';
 import Ionicons from '@react-native-vector-icons/ionicons';
-import { useCategories } from '../../store/contexts/CategoryContext';
-import { Category } from '../../types/category';
+import { useWallets } from '../../store/contexts/WalletProvider';
+import { Wallet } from '../../types/wallet';
 
-interface CategoryPickerProps {
-  selectedCategoryId?: number;
-  onSelectCategory: (category: Category) => void;
-  transactionType: 'INCOME' | 'EXPENSE';
+interface WalletPickerProps {
+  selectedWalletId?: number;
+  onSelectWallet: (wallet: Wallet) => void;
   label?: string;
   error?: string;
 }
 
-const CategoryPicker: React.FC<CategoryPickerProps> = ({
-  selectedCategoryId,
-  onSelectCategory,
-  transactionType,
-  label = 'Kategori',
+const WalletPicker: React.FC<WalletPickerProps> = ({
+  selectedWalletId,
+  onSelectWallet,
+  label = 'Wallet',
   error,
 }) => {
-  const { incomeCategories, expenseCategories, loading } = useCategories();
+  const { wallets, loading } = useWallets();
   const [showModal, setShowModal] = useState(false);
 
-  const categories = transactionType === 'INCOME' ? incomeCategories : expenseCategories;
-  const selectedCategory = categories.find(cat => cat.id === selectedCategoryId);
+  const selectedWallet = wallets.find(wallet => wallet.id === selectedWalletId);
 
-  const handleSelect = (category: Category) => {
-    onSelectCategory(category);
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  const getWalletIcon = (type: string) => {
+    switch (type) {
+      case 'CASH': return 'money';
+      case 'BANK': return 'account-balance';
+      case 'E-WALLET': return 'smartphone';
+      case 'SAVINGS': return 'savings';
+      default: return 'account-balance-wallet';
+    }
+  };
+
+  const handleSelect = (wallet: Wallet) => {
+    onSelectWallet(wallet);
     setShowModal(false);
   };
 
-  const renderCategoryItem = ({ item }: { item: Category }) => (
+  const renderWalletItem = ({ item }: { item: Wallet }) => (
     <TouchableOpacity
       style={[
-        styles.categoryItem,
-        selectedCategoryId === item.id && styles.categoryItemSelected,
+        styles.walletItem,
+        selectedWalletId === item.id && styles.walletItemSelected,
       ]}
       onPress={() => handleSelect(item)}
     >
-      <View style={[styles.categoryIcon, { backgroundColor: item.color }]}>
+      <View style={[styles.walletIcon, { backgroundColor: item.color }]}>
         <Ionicons name={item.icon as any} size={20} color="#fff" />
       </View>
-      <Text
-        style={[
-          styles.categoryName,
-          selectedCategoryId === item.id && styles.categoryNameSelected,
-        ]}
-      >
-        {item.name}
-      </Text>
-      {selectedCategoryId === item.id && (
+      <View style={styles.walletInfo}>
+        <Text
+          style={[
+            styles.walletName,
+            selectedWalletId === item.id && styles.walletNameSelected,
+          ]}
+        >
+          {item.name}
+        </Text>
+        <Text style={styles.walletBalance}>{formatCurrency(item.balance)}</Text>
+      </View>
+      {selectedWalletId === item.id && (
         <Ionicons name="checkmark" size={20} color="#007bff" />
       )}
     </TouchableOpacity>
@@ -72,19 +89,22 @@ const CategoryPicker: React.FC<CategoryPickerProps> = ({
         onPress={() => setShowModal(true)}
         disabled={loading}
       >
-        {selectedCategory ? (
-          <View style={styles.selectedCategory}>
-            <View style={[styles.categoryIcon, { backgroundColor: selectedCategory.color }]}>
-              <Ionicons name={selectedCategory.icon as any} size={16} color="#fff" />
+        {selectedWallet ? (
+          <View style={styles.selectedWallet}>
+            <View style={[styles.walletIcon, { backgroundColor: selectedWallet.color }]}>
+              <Ionicons name={selectedWallet.icon as any} size={16} color="#fff" />
             </View>
-            <Text style={styles.selectedCategoryText}>{selectedCategory.name}</Text>
+            <View style={styles.selectedWalletInfo}>
+              <Text style={styles.selectedWalletName}>{selectedWallet.name}</Text>
+              <Text style={styles.selectedWalletBalance}>
+                {formatCurrency(selectedWallet.balance)}
+              </Text>
+            </View>
           </View>
         ) : (
-          <Text style={styles.placeholderText}>
-            Pilih Kategori {transactionType === 'INCOME' ? 'Pemasukan' : 'Pengeluaran'}
-          </Text>
+          <Text style={styles.placeholderText}>Pilih Wallet</Text>
         )}
-        <Ionicons name="pricetags-outline" size={24} color="#666" />
+        <Ionicons name="wallet-outline" size={24} color="#666" />
       </TouchableOpacity>
       
       {error && <Text style={styles.errorText}>{error}</Text>}
@@ -98,9 +118,7 @@ const CategoryPicker: React.FC<CategoryPickerProps> = ({
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>
-                Pilih Kategori {transactionType === 'INCOME' ? 'Pemasukan' : 'Pengeluaran'}
-              </Text>
+              <Text style={styles.modalTitle}>Pilih Wallet</Text>
               <TouchableOpacity onPress={() => setShowModal(false)}>
                 <Ionicons name="close" size={24} color="#666" />
               </TouchableOpacity>
@@ -108,14 +126,19 @@ const CategoryPicker: React.FC<CategoryPickerProps> = ({
             
             {loading ? (
               <View style={styles.loadingContainer}>
-                <Text>Memuat kategori...</Text>
+                <Text>Memuat wallet...</Text>
               </View>
             ) : (
               <FlatList
-                data={categories}
-                renderItem={renderCategoryItem}
+                data={wallets}
+                renderItem={renderWalletItem}
                 keyExtractor={(item) => item.id.toString()}
-                contentContainerStyle={styles.categoryList}
+                contentContainerStyle={styles.walletList}
+                ListEmptyComponent={
+                  <View style={styles.emptyContainer}>
+                    <Text>Belum ada wallet</Text>
+                  </View>
+                }
               />
             )}
           </View>
@@ -149,12 +172,12 @@ const styles = StyleSheet.create({
   pickerButtonError: {
     borderColor: '#dc3545',
   },
-  selectedCategory: {
+  selectedWallet: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
   },
-  categoryIcon: {
+  walletIcon: {
     width: 30,
     height: 30,
     borderRadius: 15,
@@ -162,10 +185,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 12,
   },
-  selectedCategoryText: {
+  selectedWalletInfo: {
+    flex: 1,
+  },
+  selectedWalletName: {
     fontSize: 16,
     color: '#1a1a1a',
-    flex: 1,
+    marginBottom: 2,
+  },
+  selectedWalletBalance: {
+    fontSize: 12,
+    color: '#666',
   },
   placeholderText: {
     fontSize: 16,
@@ -205,10 +235,10 @@ const styles = StyleSheet.create({
     padding: 40,
     alignItems: 'center',
   },
-  categoryList: {
+  walletList: {
     padding: 16,
   },
-  categoryItem: {
+  walletItem: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 12,
@@ -216,21 +246,32 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     backgroundColor: '#f8f9fa',
   },
-  categoryItemSelected: {
+  walletItemSelected: {
     backgroundColor: '#e7f3ff',
     borderWidth: 1,
     borderColor: '#007bff',
   },
-  categoryName: {
-    fontSize: 16,
-    color: '#1a1a1a',
+  walletInfo: {
     flex: 1,
     marginLeft: 12,
   },
-  categoryNameSelected: {
+  walletName: {
+    fontSize: 16,
+    color: '#1a1a1a',
+    marginBottom: 2,
+  },
+  walletNameSelected: {
     color: '#007bff',
     fontWeight: '600',
   },
+  walletBalance: {
+    fontSize: 12,
+    color: '#666',
+  },
+  emptyContainer: {
+    padding: 40,
+    alignItems: 'center',
+  },
 });
 
-export default CategoryPicker;
+export default WalletPicker;

@@ -224,7 +224,7 @@ const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
           style={styles.filterButton}
           onPress={() => setShowFilterModal(true)} // ✅ INI YANG HILANG!
         >
-          <Ionicons name="filter-outline" size={24} color="#007bff" />
+          <Ionicons name="funnel-outline" size={24} color="#007bff" />
           {hasActiveFilters && (
             <View style={styles.filterBadge}>
               <Text style={styles.filterBadgeText}>✓</Text>
