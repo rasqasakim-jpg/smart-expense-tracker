@@ -6,15 +6,25 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  RefreshControl,
+  Dimensions,
 } from 'react-native';
-import { Dimensions } from 'react-native';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useNavigation } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { LineChart } from 'react-native-chart-kit';
 import { Transaction } from '../../types/transaction';
+import { transactionAPI } from '../../services/transactionApi';
+import { 
+  getDashboardTotals, 
+  getMonthlyExpenses, 
+  getExpensesByCategory,
+  getIncomeExpenseComparison,
+  formatNumber 
+} from '../../utils/chartDataHelper';
 import TransactionItem from '../../components/transaction/TransactionItem';
-import SimpleBarChart from '../../components/charts/SimpleBarChart';
+import IncomeExpenseBarChart from '../../components/charts/IncomeExpenseBarChart';
 
 // Types untuk tab navigation
 type TabParamList = {
@@ -45,76 +55,50 @@ interface Props {
 
 const DashboardScreen: React.FC<Props> = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [userName, setUserName] = useState('User');
-  const [totalBalance, setTotalBalance] = useState(18000000);
-  const [totalIncome, setTotalIncome] = useState(3500000);
-  const [totalExpense, setTotalExpense] = useState(2100000);
-  const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
-
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [activeChartType, setActiveChartType] = useState<'monthly' | 'comparison'>('monthly');
+  
   // Tab navigation untuk switch tab
   const tabNavigation = useNavigation<TabNavigationProp>();
+
+  // Load data dari API
+  const loadDashboardData = async () => {
+    try {
+      const response = await transactionAPI.getAll();
+      const allTransactions = response.data;
+      setTransactions(allTransactions);
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
     loadDashboardData();
   }, []);
 
-  const loadDashboardData = async () => {
-    await new Promise<void>(resolve => setTimeout(resolve, 1000));
-    
-    const mockTransactions: Transaction[] = [
-      {
-        id: 1,
-        amount: 8000000,
-        type: 'INCOME',
-        description: 'Gaji Bulanan',
-        category: 'Pendapatan',
-        categoryId: 1,
-        walletId: 2,
-        walletName: 'Bank BCA',
-        transactionDate: '2026-01-05',
-        createdAt: '2026-01-05T08:00:00',
-      },
-      {
-        id: 2,
-        amount: 1200000,
-        type: 'EXPENSE',
-        description: 'Belanja Bulanan',
-        category: 'Belanja',
-        categoryId: 2,
-        walletId: 1,
-        walletName: 'Kas',
-        transactionDate: '2026-01-04',
-        createdAt: '2026-01-04T14:30:00',
-      },
-      {
-        id: 3,
-        amount: 450000,
-        type: 'EXPENSE',
-        description: 'Tagihan Listrik',
-        category: 'Tagihan',
-        categoryId: 3,
-        walletId: 2,
-        walletName: 'Bank BCA',
-        transactionDate: '2026-01-03',
-        createdAt: '2026-01-03T10:15:00',
-      },
-      {
-        id: 4,
-        amount: 250000,
-        type: 'EXPENSE',
-        description: 'Transportasi',
-        category: 'Transport',
-        categoryId: 4,
-        walletId: 1,
-        walletName: 'Kas',
-        transactionDate: '2026-01-02',
-        createdAt: '2026-01-02T18:45:00',
-      },
-    ];
-    
-    setRecentTransactions(mockTransactions);
-    setLoading(false);
+  const onRefresh = () => {
+    setRefreshing(true);
+    loadDashboardData();
   };
+
+  // Hitung totals dari data real menggunakan helper
+  const { totalBalance, totalIncome, totalExpense } = getDashboardTotals(transactions);
+  
+  // Ambil data untuk chart bulanan
+  const { labels: monthlyLabels, data: monthlyData } = getMonthlyExpenses(transactions, 2026);
+  
+  // Ambil data untuk kategori
+  const { labels: categoryLabels, data: categoryData } = getExpensesByCategory(transactions);
+  
+  // Ambil 5 transaksi terbaru untuk ditampilkan
+  const recentTransactions = [...transactions]
+    .sort((a, b) => new Date(b.transactionDate).getTime() - new Date(a.transactionDate).getTime())
+    .slice(0, 5);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -124,7 +108,6 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
     }).format(amount);
   };
 
-  // PERBAIKAN: Navigate ke tab Transactions
   const handleViewAllTransactions = () => {
     tabNavigation.navigate('Transactions');
   };
@@ -135,17 +118,47 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
     });
   };
 
-  // Chart data
-  const chartData = [
-     { label: 'Jan', value: 3000000, color: '#007bff' },
-     { label: 'Feb', value: 4500000, color: '#28a745' },
-     { label: 'Mar', value: 2800000, color: '#ffc107' },
-     { label: 'Apr', value: 5200000, color: '#dc3545' },
-     { label: 'Mei', value: 4100000, color: '#6f42c1' },
-     { label: 'Jun', value: 3900000, color: '#17a2b8' },
-  ];
+  // Chart data untuk LineChart (Monthly)
+  const monthlyChartData = {
+    labels: monthlyLabels,
+    datasets: [
+      {
+        data: monthlyData,
+        color: (opacity = 1) => `rgba(220, 53, 69, ${opacity})`, // Red untuk pengeluaran
+        strokeWidth: 3,
+      },
+    ],
+  };
 
-  if (loading) {
+  const chartConfig = {
+    backgroundColor: '#ffffff',
+    backgroundGradientFrom: '#ffffff',
+    backgroundGradientTo: '#ffffff',
+    decimalPlaces: 0,
+    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+    style: {
+      borderRadius: 16,
+    },
+    propsForDots: {
+      r: '5',
+      strokeWidth: '2',
+      stroke: '#dc3545',
+    },
+    formatYLabel: (value: string) => {
+      const num = parseInt(value);
+      return formatNumber(num);
+    },
+  };
+
+  // Data untuk kategori chart (preview di dashboard)
+  const topCategories = categoryLabels.slice(0, 3).map((label, index) => ({
+    name: label,
+    amount: categoryData[index],
+    color: ['#FF6B6B', '#4ECDC4', '#FFD166'][index] || '#6C757D'
+  }));
+
+  if (loading && !refreshing) {
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" color="#007bff" />
@@ -155,8 +168,19 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
   }
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* PERBAIKAN: Header Greeting sesuai Figma */}
+    <ScrollView 
+      style={styles.container} 
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          colors={['#007bff']}
+          tintColor="#007bff"
+        />
+      }
+    >
+      {/* Header Greeting */}
       <View style={styles.header}>
         <View>
           <Text style={styles.greeting}>Halo {userName},</Text>
@@ -164,7 +188,7 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
         </View>
       </View>
 
-      {/* PERBAIKAN: Total Saldo Card sesuai Figma */}
+      {/* Total Saldo Card */}
       <View style={styles.balanceCard}>
         <View style={styles.balanceHeader}>
           <Ionicons name="wallet-outline" size={20} color="#007bff" />
@@ -205,18 +229,137 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
         </View>
       </View>
 
-      {/* Statistik Bulanan */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Statistik Bulanan</Text>
-        <View style={styles.chartContainer}>
-          <SimpleBarChart
-            data={chartData}
-            height={180}
-            showValues={true}
-            title="Pengeluaran Per Bulan (Rp)"
-          />
-        </View>
+      {/* Chart Selection Tabs */}
+      <View style={styles.chartTabsContainer}>
+        <TouchableOpacity
+          style={[
+            styles.chartTab,
+            activeChartType === 'monthly' && styles.chartTabActive
+          ]}
+          onPress={() => setActiveChartType('monthly')}
+        >
+          <Text style={[
+            styles.chartTabText,
+            activeChartType === 'monthly' && styles.chartTabTextActive
+          ]}>
+            Statistik Bulanan
+          </Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          style={[
+            styles.chartTab,
+            activeChartType === 'comparison' && styles.chartTabActive
+          ]}
+          onPress={() => setActiveChartType('comparison')}
+        >
+          <Text style={[
+            styles.chartTabText,
+            activeChartType === 'comparison' && styles.chartTabTextActive
+          ]}>
+            Perbandingan
+          </Text>
+        </TouchableOpacity>
       </View>
+
+      {/* Chart Container */}
+      <View style={styles.section}>
+        {activeChartType === 'monthly' ? (
+          <>
+            <Text style={styles.sectionTitle}>Statistik Bulanan 2026</Text>
+            <Text style={styles.sectionSubtitle}>Pengeluaran per bulan</Text>
+            
+            {monthlyData.some(amount => amount > 0) ? (
+              <View style={styles.chartContainer}>
+                <LineChart
+                  data={monthlyChartData}
+                  width={Dimensions.get('window').width - 80}
+                  height={200}
+                  chartConfig={chartConfig}
+                  bezier
+                  style={styles.chart}
+                  fromZero={true}
+                  withInnerLines={true}
+                  withOuterLines={true}
+                  withVerticalLines={true}
+                  withHorizontalLines={true}
+                  segments={5}
+                />
+                
+                {/* Bulan dengan pengeluaran tertinggi */}
+                <View style={styles.chartStats}>
+                  {monthlyData.length > 0 && (
+                    <>
+                      <View style={styles.statRow}>
+                        <Text style={styles.statLabelSmall}>Bulan Tertinggi:</Text>
+                        <Text style={styles.statValueSmall}>
+                          {monthlyLabels[monthlyData.indexOf(Math.max(...monthlyData))]}
+                        </Text>
+                      </View>
+                      <View style={styles.statRow}>
+                        <Text style={styles.statLabelSmall}>Total Pengeluaran:</Text>
+                        <Text style={[styles.statValueSmall, styles.expenseText]}>
+                          {formatCurrency(monthlyData.reduce((a, b) => a + b, 0))}
+                        </Text>
+                      </View>
+                    </>
+                  )}
+                </View>
+              </View>
+            ) : (
+              <View style={styles.emptyChart}>
+                <Ionicons name="stats-chart-outline" size={48} color="#ccc" />
+                <Text style={styles.emptyChartText}>Belum ada data pengeluaran bulanan</Text>
+              </View>
+            )}
+          </>
+        ) : (
+          <>
+            <Text style={styles.sectionTitle}>Pemasukan vs Pengeluaran</Text>
+            <Text style={styles.sectionSubtitle}>6 bulan terakhir</Text>
+            
+            <IncomeExpenseBarChart 
+              transactions={transactions}
+              months={6}
+              height={220}
+            />
+          </>
+        )}
+      </View>
+
+      {/* Kategori Pengeluaran (Preview) */}
+      {categoryData.length > 0 && (
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Kategori Pengeluaran</Text>
+            <Text style={styles.sectionSubtitle}>Top 3 kategori</Text>
+          </View>
+          
+          <View style={styles.categoriesContainer}>
+            {topCategories.map((category, index) => (
+              <View key={index} style={styles.categoryItem}>
+                <View style={[styles.categoryColor, { backgroundColor: category.color }]} />
+                <View style={styles.categoryInfo}>
+                  <Text style={styles.categoryName}>{category.name}</Text>
+                  <Text style={styles.categoryAmount}>
+                    {formatCurrency(category.amount)}
+                  </Text>
+                </View>
+              </View>
+            ))}
+          </View>
+          
+          {categoryLabels.length > 3 && (
+            <TouchableOpacity 
+              style={styles.viewMoreButton}
+              onPress={() => {/* TODO: Navigate to category detail */}}
+            >
+              <Text style={styles.viewMoreText}>Lihat {categoryLabels.length - 3} kategori lainnya</Text>
+              <Ionicons name="chevron-forward" size={16} color="#007bff" />
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
 
       {/* Recent Transactions Header */}
       <View style={styles.transactionHeader}>
@@ -229,13 +372,26 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
 
       {/* Recent Transactions List */}
       <View style={styles.transactionList}>
-        {recentTransactions.map(transaction => (
-          <TransactionItem
-            key={transaction.id}
-            transaction={transaction}
-            onPress={() => handleTransactionPress(transaction)}
-          />
-        ))}
+        {recentTransactions.length > 0 ? (
+          recentTransactions.map(transaction => (
+            <TransactionItem
+              key={transaction.id}
+              transaction={transaction}
+              onPress={() => handleTransactionPress(transaction)}
+            />
+          ))
+        ) : (
+          <View style={styles.emptyTransactions}>
+            <Ionicons name="receipt-outline" size={48} color="#ccc" />
+            <Text style={styles.emptyTransactionsText}>Belum ada transaksi</Text>
+            <TouchableOpacity 
+              style={styles.addTransactionButton}
+              onPress={() => tabNavigation.navigate('Add')}
+            >
+              <Text style={styles.addTransactionText}>Tambah Transaksi Pertama</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
     </ScrollView>
   );
@@ -255,8 +411,8 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     color: '#666',
+    fontSize: 16,
   },
-  // PERBAIKAN: Header sesuai Figma
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -265,7 +421,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#000000',
+    borderBottomColor: '#eaeaea',
   },
   greeting: {
     fontSize: 16,
@@ -278,7 +434,6 @@ const styles = StyleSheet.create({
     color: '#333',
     marginTop: 2,
   },
-  // PERBAIKAN: Balance Card sesuai Figma
   balanceCard: {
     backgroundColor: '#ffffff',
     margin: 20,
@@ -307,8 +462,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#000000',
     marginBottom: 25,
+    textAlign: 'center',
   },
-   statsContainer: {
+  statsContainer: {
     flexDirection: 'row',
     width: '100%',
     justifyContent: 'space-between',
@@ -347,11 +503,11 @@ const styles = StyleSheet.create({
   },
   incomeText: {
     color: '#28a745',
-    fontSize: 12
+    fontSize: 16
   },
   expenseText: {
     color: '#dc3545',
-    fontSize: 12
+    fontSize: 16
   },
   divider: {
     width: 1,
@@ -359,6 +515,38 @@ const styles = StyleSheet.create({
     backgroundColor: '#eaeaea',
     marginHorizontal: 16,
   },
+  // Chart Tabs
+  chartTabsContainer: {
+    flexDirection: 'row',
+    marginHorizontal: 20,
+    marginBottom: 12,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 4,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  chartTab: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderRadius: 8,
+  },
+  chartTabActive: {
+    backgroundColor: '#007bff',
+  },
+  chartTabText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#666',
+  },
+  chartTabTextActive: {
+    color: '#fff',
+  },
+  // Section
   section: {
     backgroundColor: '#fff',
     marginHorizontal: 20,
@@ -371,11 +559,18 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
+  sectionHeader: {
+    marginBottom: 16,
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#1a1a1a',
-    marginBottom: 16,
+    marginBottom: 4,
+  },
+  sectionSubtitle: {
+    fontSize: 14,
+    color: '#666',
   },
   sectionTitleLeft: {
     fontSize: 18,
@@ -384,6 +579,90 @@ const styles = StyleSheet.create({
   },
   chartContainer: {
     alignItems: 'center',
+    marginTop: 8,
+  },
+  chart: {
+    borderRadius: 16,
+    marginLeft: -30,
+  },
+  chartStats: {
+    marginTop: 16,
+    width: '100%',
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12,
+    padding: 16,
+  },
+  statRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  statLabelSmall: {
+    fontSize: 14,
+    color: '#666',
+  },
+  statValueSmall: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1a1a1a',
+  },
+  emptyChart: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+  },
+  emptyChartText: {
+    fontSize: 16,
+    color: '#666',
+    marginTop: 12,
+    textAlign: 'center',
+  },
+  categoriesContainer: {
+    marginTop: 8,
+  },
+  categoryItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  categoryColor: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 12,
+  },
+  categoryInfo: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  categoryName: {
+    fontSize: 16,
+    color: '#1a1a1a',
+  },
+  categoryAmount: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#dc3545',
+  },
+  viewMoreButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 16,
+    paddingVertical: 12,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 8,
+  },
+  viewMoreText: {
+    fontSize: 14,
+    color: '#007bff',
+    fontWeight: '600',
+    marginRight: 4,
   },
   transactionHeader: {
     flexDirection: 'row',
@@ -391,6 +670,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     marginBottom: 12,
+    marginTop: 8,
   },
   allTransactionsLink: {
     fontSize: 14,
@@ -400,6 +680,28 @@ const styles = StyleSheet.create({
   transactionList: {
     paddingHorizontal: 20,
     paddingBottom: 40,
+  },
+  emptyTransactions: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+  },
+  emptyTransactionsText: {
+    fontSize: 16,
+    color: '#666',
+    marginTop: 12,
+    marginBottom: 16,
+  },
+  addTransactionButton: {
+    backgroundColor: '#007bff',
+    borderRadius: 8,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+  },
+  addTransactionText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
 
