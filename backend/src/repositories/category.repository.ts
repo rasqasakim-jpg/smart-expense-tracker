@@ -34,4 +34,10 @@ export class CategoryRepository {
         })    
     
     }
+
+    async findById(id: number) {
+        return await this.prisma.category.findUnique({
+            where: { id }
+        });
+    }
 }

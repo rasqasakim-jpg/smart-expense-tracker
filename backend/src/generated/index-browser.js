@@ -153,6 +153,16 @@ exports.Prisma.CategoryScalarFieldEnum = {
   user_id: 'user_id'
 };
 
+exports.Prisma.FinancialInsightScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  score: 'score',
+  status: 'status',
+  message: 'message',
+  tips: 'tips',
+  created_at: 'created_at'
+};
+
 exports.Prisma.NotificationScalarFieldEnum = {
   id: 'id',
   user_id: 'user_id',
@@ -260,6 +270,7 @@ exports.Prisma.ModelName = {
   Attachment: 'Attachment',
   Budget: 'Budget',
   Category: 'Category',
+  FinancialInsight: 'FinancialInsight',
   Notification: 'Notification',
   Otp: 'Otp',
   PasswordReset: 'PasswordReset',

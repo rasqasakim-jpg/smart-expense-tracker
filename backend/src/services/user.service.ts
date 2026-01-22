@@ -1,7 +1,6 @@
 import prisma from '../database';
 
 export class UserService {
-  // Tipe data langsung didefinisikan di dalam kurung parameter (Inline)
   async updateProfile(
     userId: string, 
     data: { 
@@ -12,7 +11,6 @@ export class UserService {
       occupation?: string; 
     }
   ) {
-    // 1. Cek User exist & include profile untuk validasi username
     const user = await prisma.user.findUnique({ 
         where: { id: userId },
         include: { profile: true } 

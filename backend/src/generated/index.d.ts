@@ -34,6 +34,11 @@ export type Budget = $Result.DefaultSelection<Prisma.$BudgetPayload>
  */
 export type Category = $Result.DefaultSelection<Prisma.$CategoryPayload>
 /**
+ * Model FinancialInsight
+ * 
+ */
+export type FinancialInsight = $Result.DefaultSelection<Prisma.$FinancialInsightPayload>
+/**
  * Model Notification
  * 
  */
@@ -271,6 +276,16 @@ export class PrismaClient<
     * ```
     */
   get category(): Prisma.CategoryDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.financialInsight`: Exposes CRUD operations for the **FinancialInsight** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more FinancialInsights
+    * const financialInsights = await prisma.financialInsight.findMany()
+    * ```
+    */
+  get financialInsight(): Prisma.FinancialInsightDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.notification`: Exposes CRUD operations for the **Notification** model.
@@ -789,6 +804,7 @@ export namespace Prisma {
     Attachment: 'Attachment',
     Budget: 'Budget',
     Category: 'Category',
+    FinancialInsight: 'FinancialInsight',
     Notification: 'Notification',
     Otp: 'Otp',
     PasswordReset: 'PasswordReset',
@@ -812,7 +828,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "activityLog" | "attachment" | "budget" | "category" | "notification" | "otp" | "passwordReset" | "profile" | "refreshToken" | "transaction" | "user" | "wallet"
+      modelProps: "activityLog" | "attachment" | "budget" | "category" | "financialInsight" | "notification" | "otp" | "passwordReset" | "profile" | "refreshToken" | "transaction" | "user" | "wallet"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1109,6 +1125,80 @@ export namespace Prisma {
           count: {
             args: Prisma.CategoryCountArgs<ExtArgs>
             result: $Utils.Optional<CategoryCountAggregateOutputType> | number
+          }
+        }
+      }
+      FinancialInsight: {
+        payload: Prisma.$FinancialInsightPayload<ExtArgs>
+        fields: Prisma.FinancialInsightFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.FinancialInsightFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FinancialInsightPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.FinancialInsightFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FinancialInsightPayload>
+          }
+          findFirst: {
+            args: Prisma.FinancialInsightFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FinancialInsightPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.FinancialInsightFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FinancialInsightPayload>
+          }
+          findMany: {
+            args: Prisma.FinancialInsightFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FinancialInsightPayload>[]
+          }
+          create: {
+            args: Prisma.FinancialInsightCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FinancialInsightPayload>
+          }
+          createMany: {
+            args: Prisma.FinancialInsightCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.FinancialInsightCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FinancialInsightPayload>[]
+          }
+          delete: {
+            args: Prisma.FinancialInsightDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FinancialInsightPayload>
+          }
+          update: {
+            args: Prisma.FinancialInsightUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FinancialInsightPayload>
+          }
+          deleteMany: {
+            args: Prisma.FinancialInsightDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.FinancialInsightUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.FinancialInsightUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FinancialInsightPayload>[]
+          }
+          upsert: {
+            args: Prisma.FinancialInsightUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FinancialInsightPayload>
+          }
+          aggregate: {
+            args: Prisma.FinancialInsightAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateFinancialInsight>
+          }
+          groupBy: {
+            args: Prisma.FinancialInsightGroupByArgs<ExtArgs>
+            result: $Utils.Optional<FinancialInsightGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.FinancialInsightCountArgs<ExtArgs>
+            result: $Utils.Optional<FinancialInsightCountAggregateOutputType> | number
           }
         }
       }
@@ -1816,6 +1906,7 @@ export namespace Prisma {
     attachment?: AttachmentOmit
     budget?: BudgetOmit
     category?: CategoryOmit
+    financialInsight?: FinancialInsightOmit
     notification?: NotificationOmit
     otp?: OtpOmit
     passwordReset?: PasswordResetOmit
@@ -1973,6 +2064,7 @@ export namespace Prisma {
     otps: number
     refresh_tokens: number
     activity_logs: number
+    financial_insights: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -1983,6 +2075,7 @@ export namespace Prisma {
     otps?: boolean | UserCountOutputTypeCountOtpsArgs
     refresh_tokens?: boolean | UserCountOutputTypeCountRefresh_tokensArgs
     activity_logs?: boolean | UserCountOutputTypeCountActivity_logsArgs
+    financial_insights?: boolean | UserCountOutputTypeCountFinancial_insightsArgs
   }
 
   // Custom InputTypes
@@ -2043,6 +2136,13 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountActivity_logsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ActivityLogWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountFinancial_insightsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FinancialInsightWhereInput
   }
 
 
@@ -6474,6 +6574,1120 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: CategoryInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model FinancialInsight
+   */
+
+  export type AggregateFinancialInsight = {
+    _count: FinancialInsightCountAggregateOutputType | null
+    _avg: FinancialInsightAvgAggregateOutputType | null
+    _sum: FinancialInsightSumAggregateOutputType | null
+    _min: FinancialInsightMinAggregateOutputType | null
+    _max: FinancialInsightMaxAggregateOutputType | null
+  }
+
+  export type FinancialInsightAvgAggregateOutputType = {
+    score: number | null
+  }
+
+  export type FinancialInsightSumAggregateOutputType = {
+    score: number | null
+  }
+
+  export type FinancialInsightMinAggregateOutputType = {
+    id: string | null
+    user_id: string | null
+    score: number | null
+    status: string | null
+    message: string | null
+    created_at: Date | null
+  }
+
+  export type FinancialInsightMaxAggregateOutputType = {
+    id: string | null
+    user_id: string | null
+    score: number | null
+    status: string | null
+    message: string | null
+    created_at: Date | null
+  }
+
+  export type FinancialInsightCountAggregateOutputType = {
+    id: number
+    user_id: number
+    score: number
+    status: number
+    message: number
+    tips: number
+    created_at: number
+    _all: number
+  }
+
+
+  export type FinancialInsightAvgAggregateInputType = {
+    score?: true
+  }
+
+  export type FinancialInsightSumAggregateInputType = {
+    score?: true
+  }
+
+  export type FinancialInsightMinAggregateInputType = {
+    id?: true
+    user_id?: true
+    score?: true
+    status?: true
+    message?: true
+    created_at?: true
+  }
+
+  export type FinancialInsightMaxAggregateInputType = {
+    id?: true
+    user_id?: true
+    score?: true
+    status?: true
+    message?: true
+    created_at?: true
+  }
+
+  export type FinancialInsightCountAggregateInputType = {
+    id?: true
+    user_id?: true
+    score?: true
+    status?: true
+    message?: true
+    tips?: true
+    created_at?: true
+    _all?: true
+  }
+
+  export type FinancialInsightAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FinancialInsight to aggregate.
+     */
+    where?: FinancialInsightWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FinancialInsights to fetch.
+     */
+    orderBy?: FinancialInsightOrderByWithRelationInput | FinancialInsightOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: FinancialInsightWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FinancialInsights from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FinancialInsights.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned FinancialInsights
+    **/
+    _count?: true | FinancialInsightCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: FinancialInsightAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: FinancialInsightSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: FinancialInsightMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: FinancialInsightMaxAggregateInputType
+  }
+
+  export type GetFinancialInsightAggregateType<T extends FinancialInsightAggregateArgs> = {
+        [P in keyof T & keyof AggregateFinancialInsight]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateFinancialInsight[P]>
+      : GetScalarType<T[P], AggregateFinancialInsight[P]>
+  }
+
+
+
+
+  export type FinancialInsightGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FinancialInsightWhereInput
+    orderBy?: FinancialInsightOrderByWithAggregationInput | FinancialInsightOrderByWithAggregationInput[]
+    by: FinancialInsightScalarFieldEnum[] | FinancialInsightScalarFieldEnum
+    having?: FinancialInsightScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: FinancialInsightCountAggregateInputType | true
+    _avg?: FinancialInsightAvgAggregateInputType
+    _sum?: FinancialInsightSumAggregateInputType
+    _min?: FinancialInsightMinAggregateInputType
+    _max?: FinancialInsightMaxAggregateInputType
+  }
+
+  export type FinancialInsightGroupByOutputType = {
+    id: string
+    user_id: string
+    score: number
+    status: string
+    message: string
+    tips: string[]
+    created_at: Date
+    _count: FinancialInsightCountAggregateOutputType | null
+    _avg: FinancialInsightAvgAggregateOutputType | null
+    _sum: FinancialInsightSumAggregateOutputType | null
+    _min: FinancialInsightMinAggregateOutputType | null
+    _max: FinancialInsightMaxAggregateOutputType | null
+  }
+
+  type GetFinancialInsightGroupByPayload<T extends FinancialInsightGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<FinancialInsightGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof FinancialInsightGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], FinancialInsightGroupByOutputType[P]>
+            : GetScalarType<T[P], FinancialInsightGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type FinancialInsightSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    user_id?: boolean
+    score?: boolean
+    status?: boolean
+    message?: boolean
+    tips?: boolean
+    created_at?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["financialInsight"]>
+
+  export type FinancialInsightSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    user_id?: boolean
+    score?: boolean
+    status?: boolean
+    message?: boolean
+    tips?: boolean
+    created_at?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["financialInsight"]>
+
+  export type FinancialInsightSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    user_id?: boolean
+    score?: boolean
+    status?: boolean
+    message?: boolean
+    tips?: boolean
+    created_at?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["financialInsight"]>
+
+  export type FinancialInsightSelectScalar = {
+    id?: boolean
+    user_id?: boolean
+    score?: boolean
+    status?: boolean
+    message?: boolean
+    tips?: boolean
+    created_at?: boolean
+  }
+
+  export type FinancialInsightOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "user_id" | "score" | "status" | "message" | "tips" | "created_at", ExtArgs["result"]["financialInsight"]>
+  export type FinancialInsightInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type FinancialInsightIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type FinancialInsightIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $FinancialInsightPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "FinancialInsight"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      user_id: string
+      score: number
+      status: string
+      message: string
+      tips: string[]
+      created_at: Date
+    }, ExtArgs["result"]["financialInsight"]>
+    composites: {}
+  }
+
+  type FinancialInsightGetPayload<S extends boolean | null | undefined | FinancialInsightDefaultArgs> = $Result.GetResult<Prisma.$FinancialInsightPayload, S>
+
+  type FinancialInsightCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<FinancialInsightFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: FinancialInsightCountAggregateInputType | true
+    }
+
+  export interface FinancialInsightDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['FinancialInsight'], meta: { name: 'FinancialInsight' } }
+    /**
+     * Find zero or one FinancialInsight that matches the filter.
+     * @param {FinancialInsightFindUniqueArgs} args - Arguments to find a FinancialInsight
+     * @example
+     * // Get one FinancialInsight
+     * const financialInsight = await prisma.financialInsight.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends FinancialInsightFindUniqueArgs>(args: SelectSubset<T, FinancialInsightFindUniqueArgs<ExtArgs>>): Prisma__FinancialInsightClient<$Result.GetResult<Prisma.$FinancialInsightPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one FinancialInsight that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {FinancialInsightFindUniqueOrThrowArgs} args - Arguments to find a FinancialInsight
+     * @example
+     * // Get one FinancialInsight
+     * const financialInsight = await prisma.financialInsight.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends FinancialInsightFindUniqueOrThrowArgs>(args: SelectSubset<T, FinancialInsightFindUniqueOrThrowArgs<ExtArgs>>): Prisma__FinancialInsightClient<$Result.GetResult<Prisma.$FinancialInsightPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FinancialInsight that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FinancialInsightFindFirstArgs} args - Arguments to find a FinancialInsight
+     * @example
+     * // Get one FinancialInsight
+     * const financialInsight = await prisma.financialInsight.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends FinancialInsightFindFirstArgs>(args?: SelectSubset<T, FinancialInsightFindFirstArgs<ExtArgs>>): Prisma__FinancialInsightClient<$Result.GetResult<Prisma.$FinancialInsightPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FinancialInsight that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FinancialInsightFindFirstOrThrowArgs} args - Arguments to find a FinancialInsight
+     * @example
+     * // Get one FinancialInsight
+     * const financialInsight = await prisma.financialInsight.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends FinancialInsightFindFirstOrThrowArgs>(args?: SelectSubset<T, FinancialInsightFindFirstOrThrowArgs<ExtArgs>>): Prisma__FinancialInsightClient<$Result.GetResult<Prisma.$FinancialInsightPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more FinancialInsights that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FinancialInsightFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all FinancialInsights
+     * const financialInsights = await prisma.financialInsight.findMany()
+     * 
+     * // Get first 10 FinancialInsights
+     * const financialInsights = await prisma.financialInsight.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const financialInsightWithIdOnly = await prisma.financialInsight.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends FinancialInsightFindManyArgs>(args?: SelectSubset<T, FinancialInsightFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FinancialInsightPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a FinancialInsight.
+     * @param {FinancialInsightCreateArgs} args - Arguments to create a FinancialInsight.
+     * @example
+     * // Create one FinancialInsight
+     * const FinancialInsight = await prisma.financialInsight.create({
+     *   data: {
+     *     // ... data to create a FinancialInsight
+     *   }
+     * })
+     * 
+     */
+    create<T extends FinancialInsightCreateArgs>(args: SelectSubset<T, FinancialInsightCreateArgs<ExtArgs>>): Prisma__FinancialInsightClient<$Result.GetResult<Prisma.$FinancialInsightPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many FinancialInsights.
+     * @param {FinancialInsightCreateManyArgs} args - Arguments to create many FinancialInsights.
+     * @example
+     * // Create many FinancialInsights
+     * const financialInsight = await prisma.financialInsight.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends FinancialInsightCreateManyArgs>(args?: SelectSubset<T, FinancialInsightCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many FinancialInsights and returns the data saved in the database.
+     * @param {FinancialInsightCreateManyAndReturnArgs} args - Arguments to create many FinancialInsights.
+     * @example
+     * // Create many FinancialInsights
+     * const financialInsight = await prisma.financialInsight.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many FinancialInsights and only return the `id`
+     * const financialInsightWithIdOnly = await prisma.financialInsight.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends FinancialInsightCreateManyAndReturnArgs>(args?: SelectSubset<T, FinancialInsightCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FinancialInsightPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a FinancialInsight.
+     * @param {FinancialInsightDeleteArgs} args - Arguments to delete one FinancialInsight.
+     * @example
+     * // Delete one FinancialInsight
+     * const FinancialInsight = await prisma.financialInsight.delete({
+     *   where: {
+     *     // ... filter to delete one FinancialInsight
+     *   }
+     * })
+     * 
+     */
+    delete<T extends FinancialInsightDeleteArgs>(args: SelectSubset<T, FinancialInsightDeleteArgs<ExtArgs>>): Prisma__FinancialInsightClient<$Result.GetResult<Prisma.$FinancialInsightPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one FinancialInsight.
+     * @param {FinancialInsightUpdateArgs} args - Arguments to update one FinancialInsight.
+     * @example
+     * // Update one FinancialInsight
+     * const financialInsight = await prisma.financialInsight.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends FinancialInsightUpdateArgs>(args: SelectSubset<T, FinancialInsightUpdateArgs<ExtArgs>>): Prisma__FinancialInsightClient<$Result.GetResult<Prisma.$FinancialInsightPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more FinancialInsights.
+     * @param {FinancialInsightDeleteManyArgs} args - Arguments to filter FinancialInsights to delete.
+     * @example
+     * // Delete a few FinancialInsights
+     * const { count } = await prisma.financialInsight.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends FinancialInsightDeleteManyArgs>(args?: SelectSubset<T, FinancialInsightDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FinancialInsights.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FinancialInsightUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many FinancialInsights
+     * const financialInsight = await prisma.financialInsight.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends FinancialInsightUpdateManyArgs>(args: SelectSubset<T, FinancialInsightUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FinancialInsights and returns the data updated in the database.
+     * @param {FinancialInsightUpdateManyAndReturnArgs} args - Arguments to update many FinancialInsights.
+     * @example
+     * // Update many FinancialInsights
+     * const financialInsight = await prisma.financialInsight.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more FinancialInsights and only return the `id`
+     * const financialInsightWithIdOnly = await prisma.financialInsight.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends FinancialInsightUpdateManyAndReturnArgs>(args: SelectSubset<T, FinancialInsightUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FinancialInsightPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one FinancialInsight.
+     * @param {FinancialInsightUpsertArgs} args - Arguments to update or create a FinancialInsight.
+     * @example
+     * // Update or create a FinancialInsight
+     * const financialInsight = await prisma.financialInsight.upsert({
+     *   create: {
+     *     // ... data to create a FinancialInsight
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the FinancialInsight we want to update
+     *   }
+     * })
+     */
+    upsert<T extends FinancialInsightUpsertArgs>(args: SelectSubset<T, FinancialInsightUpsertArgs<ExtArgs>>): Prisma__FinancialInsightClient<$Result.GetResult<Prisma.$FinancialInsightPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of FinancialInsights.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FinancialInsightCountArgs} args - Arguments to filter FinancialInsights to count.
+     * @example
+     * // Count the number of FinancialInsights
+     * const count = await prisma.financialInsight.count({
+     *   where: {
+     *     // ... the filter for the FinancialInsights we want to count
+     *   }
+     * })
+    **/
+    count<T extends FinancialInsightCountArgs>(
+      args?: Subset<T, FinancialInsightCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], FinancialInsightCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a FinancialInsight.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FinancialInsightAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends FinancialInsightAggregateArgs>(args: Subset<T, FinancialInsightAggregateArgs>): Prisma.PrismaPromise<GetFinancialInsightAggregateType<T>>
+
+    /**
+     * Group by FinancialInsight.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FinancialInsightGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends FinancialInsightGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: FinancialInsightGroupByArgs['orderBy'] }
+        : { orderBy?: FinancialInsightGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, FinancialInsightGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetFinancialInsightGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the FinancialInsight model
+   */
+  readonly fields: FinancialInsightFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for FinancialInsight.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__FinancialInsightClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the FinancialInsight model
+   */
+  interface FinancialInsightFieldRefs {
+    readonly id: FieldRef<"FinancialInsight", 'String'>
+    readonly user_id: FieldRef<"FinancialInsight", 'String'>
+    readonly score: FieldRef<"FinancialInsight", 'Int'>
+    readonly status: FieldRef<"FinancialInsight", 'String'>
+    readonly message: FieldRef<"FinancialInsight", 'String'>
+    readonly tips: FieldRef<"FinancialInsight", 'String[]'>
+    readonly created_at: FieldRef<"FinancialInsight", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * FinancialInsight findUnique
+   */
+  export type FinancialInsightFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinancialInsight
+     */
+    select?: FinancialInsightSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinancialInsight
+     */
+    omit?: FinancialInsightOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FinancialInsightInclude<ExtArgs> | null
+    /**
+     * Filter, which FinancialInsight to fetch.
+     */
+    where: FinancialInsightWhereUniqueInput
+  }
+
+  /**
+   * FinancialInsight findUniqueOrThrow
+   */
+  export type FinancialInsightFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinancialInsight
+     */
+    select?: FinancialInsightSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinancialInsight
+     */
+    omit?: FinancialInsightOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FinancialInsightInclude<ExtArgs> | null
+    /**
+     * Filter, which FinancialInsight to fetch.
+     */
+    where: FinancialInsightWhereUniqueInput
+  }
+
+  /**
+   * FinancialInsight findFirst
+   */
+  export type FinancialInsightFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinancialInsight
+     */
+    select?: FinancialInsightSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinancialInsight
+     */
+    omit?: FinancialInsightOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FinancialInsightInclude<ExtArgs> | null
+    /**
+     * Filter, which FinancialInsight to fetch.
+     */
+    where?: FinancialInsightWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FinancialInsights to fetch.
+     */
+    orderBy?: FinancialInsightOrderByWithRelationInput | FinancialInsightOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FinancialInsights.
+     */
+    cursor?: FinancialInsightWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FinancialInsights from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FinancialInsights.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FinancialInsights.
+     */
+    distinct?: FinancialInsightScalarFieldEnum | FinancialInsightScalarFieldEnum[]
+  }
+
+  /**
+   * FinancialInsight findFirstOrThrow
+   */
+  export type FinancialInsightFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinancialInsight
+     */
+    select?: FinancialInsightSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinancialInsight
+     */
+    omit?: FinancialInsightOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FinancialInsightInclude<ExtArgs> | null
+    /**
+     * Filter, which FinancialInsight to fetch.
+     */
+    where?: FinancialInsightWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FinancialInsights to fetch.
+     */
+    orderBy?: FinancialInsightOrderByWithRelationInput | FinancialInsightOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FinancialInsights.
+     */
+    cursor?: FinancialInsightWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FinancialInsights from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FinancialInsights.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FinancialInsights.
+     */
+    distinct?: FinancialInsightScalarFieldEnum | FinancialInsightScalarFieldEnum[]
+  }
+
+  /**
+   * FinancialInsight findMany
+   */
+  export type FinancialInsightFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinancialInsight
+     */
+    select?: FinancialInsightSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinancialInsight
+     */
+    omit?: FinancialInsightOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FinancialInsightInclude<ExtArgs> | null
+    /**
+     * Filter, which FinancialInsights to fetch.
+     */
+    where?: FinancialInsightWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FinancialInsights to fetch.
+     */
+    orderBy?: FinancialInsightOrderByWithRelationInput | FinancialInsightOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing FinancialInsights.
+     */
+    cursor?: FinancialInsightWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FinancialInsights from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FinancialInsights.
+     */
+    skip?: number
+    distinct?: FinancialInsightScalarFieldEnum | FinancialInsightScalarFieldEnum[]
+  }
+
+  /**
+   * FinancialInsight create
+   */
+  export type FinancialInsightCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinancialInsight
+     */
+    select?: FinancialInsightSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinancialInsight
+     */
+    omit?: FinancialInsightOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FinancialInsightInclude<ExtArgs> | null
+    /**
+     * The data needed to create a FinancialInsight.
+     */
+    data: XOR<FinancialInsightCreateInput, FinancialInsightUncheckedCreateInput>
+  }
+
+  /**
+   * FinancialInsight createMany
+   */
+  export type FinancialInsightCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many FinancialInsights.
+     */
+    data: FinancialInsightCreateManyInput | FinancialInsightCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * FinancialInsight createManyAndReturn
+   */
+  export type FinancialInsightCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinancialInsight
+     */
+    select?: FinancialInsightSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinancialInsight
+     */
+    omit?: FinancialInsightOmit<ExtArgs> | null
+    /**
+     * The data used to create many FinancialInsights.
+     */
+    data: FinancialInsightCreateManyInput | FinancialInsightCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FinancialInsightIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * FinancialInsight update
+   */
+  export type FinancialInsightUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinancialInsight
+     */
+    select?: FinancialInsightSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinancialInsight
+     */
+    omit?: FinancialInsightOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FinancialInsightInclude<ExtArgs> | null
+    /**
+     * The data needed to update a FinancialInsight.
+     */
+    data: XOR<FinancialInsightUpdateInput, FinancialInsightUncheckedUpdateInput>
+    /**
+     * Choose, which FinancialInsight to update.
+     */
+    where: FinancialInsightWhereUniqueInput
+  }
+
+  /**
+   * FinancialInsight updateMany
+   */
+  export type FinancialInsightUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update FinancialInsights.
+     */
+    data: XOR<FinancialInsightUpdateManyMutationInput, FinancialInsightUncheckedUpdateManyInput>
+    /**
+     * Filter which FinancialInsights to update
+     */
+    where?: FinancialInsightWhereInput
+    /**
+     * Limit how many FinancialInsights to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * FinancialInsight updateManyAndReturn
+   */
+  export type FinancialInsightUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinancialInsight
+     */
+    select?: FinancialInsightSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinancialInsight
+     */
+    omit?: FinancialInsightOmit<ExtArgs> | null
+    /**
+     * The data used to update FinancialInsights.
+     */
+    data: XOR<FinancialInsightUpdateManyMutationInput, FinancialInsightUncheckedUpdateManyInput>
+    /**
+     * Filter which FinancialInsights to update
+     */
+    where?: FinancialInsightWhereInput
+    /**
+     * Limit how many FinancialInsights to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FinancialInsightIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * FinancialInsight upsert
+   */
+  export type FinancialInsightUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinancialInsight
+     */
+    select?: FinancialInsightSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinancialInsight
+     */
+    omit?: FinancialInsightOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FinancialInsightInclude<ExtArgs> | null
+    /**
+     * The filter to search for the FinancialInsight to update in case it exists.
+     */
+    where: FinancialInsightWhereUniqueInput
+    /**
+     * In case the FinancialInsight found by the `where` argument doesn't exist, create a new FinancialInsight with this data.
+     */
+    create: XOR<FinancialInsightCreateInput, FinancialInsightUncheckedCreateInput>
+    /**
+     * In case the FinancialInsight was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<FinancialInsightUpdateInput, FinancialInsightUncheckedUpdateInput>
+  }
+
+  /**
+   * FinancialInsight delete
+   */
+  export type FinancialInsightDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinancialInsight
+     */
+    select?: FinancialInsightSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinancialInsight
+     */
+    omit?: FinancialInsightOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FinancialInsightInclude<ExtArgs> | null
+    /**
+     * Filter which FinancialInsight to delete.
+     */
+    where: FinancialInsightWhereUniqueInput
+  }
+
+  /**
+   * FinancialInsight deleteMany
+   */
+  export type FinancialInsightDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FinancialInsights to delete
+     */
+    where?: FinancialInsightWhereInput
+    /**
+     * Limit how many FinancialInsights to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * FinancialInsight without action
+   */
+  export type FinancialInsightDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinancialInsight
+     */
+    select?: FinancialInsightSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinancialInsight
+     */
+    omit?: FinancialInsightOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FinancialInsightInclude<ExtArgs> | null
   }
 
 
@@ -13198,6 +14412,7 @@ export namespace Prisma {
     otps?: boolean | User$otpsArgs<ExtArgs>
     refresh_tokens?: boolean | User$refresh_tokensArgs<ExtArgs>
     activity_logs?: boolean | User$activity_logsArgs<ExtArgs>
+    financial_insights?: boolean | User$financial_insightsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -13238,6 +14453,7 @@ export namespace Prisma {
     otps?: boolean | User$otpsArgs<ExtArgs>
     refresh_tokens?: boolean | User$refresh_tokensArgs<ExtArgs>
     activity_logs?: boolean | User$activity_logsArgs<ExtArgs>
+    financial_insights?: boolean | User$financial_insightsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -13254,6 +14470,7 @@ export namespace Prisma {
       otps: Prisma.$OtpPayload<ExtArgs>[]
       refresh_tokens: Prisma.$RefreshTokenPayload<ExtArgs>[]
       activity_logs: Prisma.$ActivityLogPayload<ExtArgs>[]
+      financial_insights: Prisma.$FinancialInsightPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -13664,6 +14881,7 @@ export namespace Prisma {
     otps<T extends User$otpsArgs<ExtArgs> = {}>(args?: Subset<T, User$otpsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OtpPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     refresh_tokens<T extends User$refresh_tokensArgs<ExtArgs> = {}>(args?: Subset<T, User$refresh_tokensArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RefreshTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     activity_logs<T extends User$activity_logsArgs<ExtArgs> = {}>(args?: Subset<T, User$activity_logsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    financial_insights<T extends User$financial_insightsArgs<ExtArgs> = {}>(args?: Subset<T, User$financial_insightsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FinancialInsightPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -14271,6 +15489,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: ActivityLogScalarFieldEnum | ActivityLogScalarFieldEnum[]
+  }
+
+  /**
+   * User.financial_insights
+   */
+  export type User$financial_insightsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FinancialInsight
+     */
+    select?: FinancialInsightSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FinancialInsight
+     */
+    omit?: FinancialInsightOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FinancialInsightInclude<ExtArgs> | null
+    where?: FinancialInsightWhereInput
+    orderBy?: FinancialInsightOrderByWithRelationInput | FinancialInsightOrderByWithRelationInput[]
+    cursor?: FinancialInsightWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: FinancialInsightScalarFieldEnum | FinancialInsightScalarFieldEnum[]
   }
 
   /**
@@ -15499,6 +16741,19 @@ export namespace Prisma {
   export type CategoryScalarFieldEnum = (typeof CategoryScalarFieldEnum)[keyof typeof CategoryScalarFieldEnum]
 
 
+  export const FinancialInsightScalarFieldEnum: {
+    id: 'id',
+    user_id: 'user_id',
+    score: 'score',
+    status: 'status',
+    message: 'message',
+    tips: 'tips',
+    created_at: 'created_at'
+  };
+
+  export type FinancialInsightScalarFieldEnum = (typeof FinancialInsightScalarFieldEnum)[keyof typeof FinancialInsightScalarFieldEnum]
+
+
   export const NotificationScalarFieldEnum: {
     id: 'id',
     user_id: 'user_id',
@@ -15981,6 +17236,73 @@ export namespace Prisma {
     user_id?: StringNullableWithAggregatesFilter<"Category"> | string | null
   }
 
+  export type FinancialInsightWhereInput = {
+    AND?: FinancialInsightWhereInput | FinancialInsightWhereInput[]
+    OR?: FinancialInsightWhereInput[]
+    NOT?: FinancialInsightWhereInput | FinancialInsightWhereInput[]
+    id?: StringFilter<"FinancialInsight"> | string
+    user_id?: StringFilter<"FinancialInsight"> | string
+    score?: IntFilter<"FinancialInsight"> | number
+    status?: StringFilter<"FinancialInsight"> | string
+    message?: StringFilter<"FinancialInsight"> | string
+    tips?: StringNullableListFilter<"FinancialInsight">
+    created_at?: DateTimeFilter<"FinancialInsight"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }
+
+  export type FinancialInsightOrderByWithRelationInput = {
+    id?: SortOrder
+    user_id?: SortOrder
+    score?: SortOrder
+    status?: SortOrder
+    message?: SortOrder
+    tips?: SortOrder
+    created_at?: SortOrder
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type FinancialInsightWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: FinancialInsightWhereInput | FinancialInsightWhereInput[]
+    OR?: FinancialInsightWhereInput[]
+    NOT?: FinancialInsightWhereInput | FinancialInsightWhereInput[]
+    user_id?: StringFilter<"FinancialInsight"> | string
+    score?: IntFilter<"FinancialInsight"> | number
+    status?: StringFilter<"FinancialInsight"> | string
+    message?: StringFilter<"FinancialInsight"> | string
+    tips?: StringNullableListFilter<"FinancialInsight">
+    created_at?: DateTimeFilter<"FinancialInsight"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }, "id">
+
+  export type FinancialInsightOrderByWithAggregationInput = {
+    id?: SortOrder
+    user_id?: SortOrder
+    score?: SortOrder
+    status?: SortOrder
+    message?: SortOrder
+    tips?: SortOrder
+    created_at?: SortOrder
+    _count?: FinancialInsightCountOrderByAggregateInput
+    _avg?: FinancialInsightAvgOrderByAggregateInput
+    _max?: FinancialInsightMaxOrderByAggregateInput
+    _min?: FinancialInsightMinOrderByAggregateInput
+    _sum?: FinancialInsightSumOrderByAggregateInput
+  }
+
+  export type FinancialInsightScalarWhereWithAggregatesInput = {
+    AND?: FinancialInsightScalarWhereWithAggregatesInput | FinancialInsightScalarWhereWithAggregatesInput[]
+    OR?: FinancialInsightScalarWhereWithAggregatesInput[]
+    NOT?: FinancialInsightScalarWhereWithAggregatesInput | FinancialInsightScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"FinancialInsight"> | string
+    user_id?: StringWithAggregatesFilter<"FinancialInsight"> | string
+    score?: IntWithAggregatesFilter<"FinancialInsight"> | number
+    status?: StringWithAggregatesFilter<"FinancialInsight"> | string
+    message?: StringWithAggregatesFilter<"FinancialInsight"> | string
+    tips?: StringNullableListFilter<"FinancialInsight">
+    created_at?: DateTimeWithAggregatesFilter<"FinancialInsight"> | Date | string
+  }
+
   export type NotificationWhereInput = {
     AND?: NotificationWhereInput | NotificationWhereInput[]
     OR?: NotificationWhereInput[]
@@ -16370,6 +17692,7 @@ export namespace Prisma {
     otps?: OtpListRelationFilter
     refresh_tokens?: RefreshTokenListRelationFilter
     activity_logs?: ActivityLogListRelationFilter
+    financial_insights?: FinancialInsightListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -16387,6 +17710,7 @@ export namespace Prisma {
     otps?: OtpOrderByRelationAggregateInput
     refresh_tokens?: RefreshTokenOrderByRelationAggregateInput
     activity_logs?: ActivityLogOrderByRelationAggregateInput
+    financial_insights?: FinancialInsightOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -16407,6 +17731,7 @@ export namespace Prisma {
     otps?: OtpListRelationFilter
     refresh_tokens?: RefreshTokenListRelationFilter
     activity_logs?: ActivityLogListRelationFilter
+    financial_insights?: FinancialInsightListRelationFilter
   }, "id" | "email">
 
   export type UserOrderByWithAggregationInput = {
@@ -16726,6 +18051,75 @@ export namespace Prisma {
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     deleted_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user_id?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type FinancialInsightCreateInput = {
+    id?: string
+    score: number
+    status: string
+    message: string
+    tips?: FinancialInsightCreatetipsInput | string[]
+    created_at?: Date | string
+    user: UserCreateNestedOneWithoutFinancial_insightsInput
+  }
+
+  export type FinancialInsightUncheckedCreateInput = {
+    id?: string
+    user_id: string
+    score: number
+    status: string
+    message: string
+    tips?: FinancialInsightCreatetipsInput | string[]
+    created_at?: Date | string
+  }
+
+  export type FinancialInsightUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    score?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    message?: StringFieldUpdateOperationsInput | string
+    tips?: FinancialInsightUpdatetipsInput | string[]
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutFinancial_insightsNestedInput
+  }
+
+  export type FinancialInsightUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    user_id?: StringFieldUpdateOperationsInput | string
+    score?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    message?: StringFieldUpdateOperationsInput | string
+    tips?: FinancialInsightUpdatetipsInput | string[]
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FinancialInsightCreateManyInput = {
+    id?: string
+    user_id: string
+    score: number
+    status: string
+    message: string
+    tips?: FinancialInsightCreatetipsInput | string[]
+    created_at?: Date | string
+  }
+
+  export type FinancialInsightUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    score?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    message?: StringFieldUpdateOperationsInput | string
+    tips?: FinancialInsightUpdatetipsInput | string[]
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FinancialInsightUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    user_id?: StringFieldUpdateOperationsInput | string
+    score?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    message?: StringFieldUpdateOperationsInput | string
+    tips?: FinancialInsightUpdatetipsInput | string[]
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type NotificationCreateInput = {
@@ -17110,6 +18504,7 @@ export namespace Prisma {
     otps?: OtpCreateNestedManyWithoutUserInput
     refresh_tokens?: RefreshTokenCreateNestedManyWithoutUserInput
     activity_logs?: ActivityLogCreateNestedManyWithoutUserInput
+    financial_insights?: FinancialInsightCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -17127,6 +18522,7 @@ export namespace Prisma {
     otps?: OtpUncheckedCreateNestedManyWithoutUserInput
     refresh_tokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     activity_logs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
+    financial_insights?: FinancialInsightUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserUpdateInput = {
@@ -17144,6 +18540,7 @@ export namespace Prisma {
     otps?: OtpUpdateManyWithoutUserNestedInput
     refresh_tokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     activity_logs?: ActivityLogUpdateManyWithoutUserNestedInput
+    financial_insights?: FinancialInsightUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -17161,6 +18558,7 @@ export namespace Prisma {
     otps?: OtpUncheckedUpdateManyWithoutUserNestedInput
     refresh_tokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     activity_logs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+    financial_insights?: FinancialInsightUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -17603,6 +19001,50 @@ export namespace Prisma {
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
+  export type StringNullableListFilter<$PrismaModel = never> = {
+    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    has?: string | StringFieldRefInput<$PrismaModel> | null
+    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
+    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
+  }
+
+  export type FinancialInsightCountOrderByAggregateInput = {
+    id?: SortOrder
+    user_id?: SortOrder
+    score?: SortOrder
+    status?: SortOrder
+    message?: SortOrder
+    tips?: SortOrder
+    created_at?: SortOrder
+  }
+
+  export type FinancialInsightAvgOrderByAggregateInput = {
+    score?: SortOrder
+  }
+
+  export type FinancialInsightMaxOrderByAggregateInput = {
+    id?: SortOrder
+    user_id?: SortOrder
+    score?: SortOrder
+    status?: SortOrder
+    message?: SortOrder
+    created_at?: SortOrder
+  }
+
+  export type FinancialInsightMinOrderByAggregateInput = {
+    id?: SortOrder
+    user_id?: SortOrder
+    score?: SortOrder
+    status?: SortOrder
+    message?: SortOrder
+    created_at?: SortOrder
+  }
+
+  export type FinancialInsightSumOrderByAggregateInput = {
+    score?: SortOrder
+  }
+
   export type BoolFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel>
     not?: NestedBoolFilter<$PrismaModel> | boolean
@@ -17903,6 +19345,12 @@ export namespace Prisma {
     none?: ActivityLogWhereInput
   }
 
+  export type FinancialInsightListRelationFilter = {
+    every?: FinancialInsightWhereInput
+    some?: FinancialInsightWhereInput
+    none?: FinancialInsightWhereInput
+  }
+
   export type WalletOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -17928,6 +19376,10 @@ export namespace Prisma {
   }
 
   export type ActivityLogOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type FinancialInsightOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -18142,6 +19594,29 @@ export namespace Prisma {
     deleteMany?: TransactionScalarWhereInput | TransactionScalarWhereInput[]
   }
 
+  export type FinancialInsightCreatetipsInput = {
+    set: string[]
+  }
+
+  export type UserCreateNestedOneWithoutFinancial_insightsInput = {
+    create?: XOR<UserCreateWithoutFinancial_insightsInput, UserUncheckedCreateWithoutFinancial_insightsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutFinancial_insightsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type FinancialInsightUpdatetipsInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type UserUpdateOneRequiredWithoutFinancial_insightsNestedInput = {
+    create?: XOR<UserCreateWithoutFinancial_insightsInput, UserUncheckedCreateWithoutFinancial_insightsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutFinancial_insightsInput
+    upsert?: UserUpsertWithoutFinancial_insightsInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutFinancial_insightsInput, UserUpdateWithoutFinancial_insightsInput>, UserUncheckedUpdateWithoutFinancial_insightsInput>
+  }
+
   export type UserCreateNestedOneWithoutNotificationsInput = {
     create?: XOR<UserCreateWithoutNotificationsInput, UserUncheckedCreateWithoutNotificationsInput>
     connectOrCreate?: UserCreateOrConnectWithoutNotificationsInput
@@ -18331,6 +19806,13 @@ export namespace Prisma {
     connect?: ActivityLogWhereUniqueInput | ActivityLogWhereUniqueInput[]
   }
 
+  export type FinancialInsightCreateNestedManyWithoutUserInput = {
+    create?: XOR<FinancialInsightCreateWithoutUserInput, FinancialInsightUncheckedCreateWithoutUserInput> | FinancialInsightCreateWithoutUserInput[] | FinancialInsightUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: FinancialInsightCreateOrConnectWithoutUserInput | FinancialInsightCreateOrConnectWithoutUserInput[]
+    createMany?: FinancialInsightCreateManyUserInputEnvelope
+    connect?: FinancialInsightWhereUniqueInput | FinancialInsightWhereUniqueInput[]
+  }
+
   export type ProfileUncheckedCreateNestedOneWithoutUserInput = {
     create?: XOR<ProfileCreateWithoutUserInput, ProfileUncheckedCreateWithoutUserInput>
     connectOrCreate?: ProfileCreateOrConnectWithoutUserInput
@@ -18384,6 +19866,13 @@ export namespace Prisma {
     connectOrCreate?: ActivityLogCreateOrConnectWithoutUserInput | ActivityLogCreateOrConnectWithoutUserInput[]
     createMany?: ActivityLogCreateManyUserInputEnvelope
     connect?: ActivityLogWhereUniqueInput | ActivityLogWhereUniqueInput[]
+  }
+
+  export type FinancialInsightUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<FinancialInsightCreateWithoutUserInput, FinancialInsightUncheckedCreateWithoutUserInput> | FinancialInsightCreateWithoutUserInput[] | FinancialInsightUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: FinancialInsightCreateOrConnectWithoutUserInput | FinancialInsightCreateOrConnectWithoutUserInput[]
+    createMany?: FinancialInsightCreateManyUserInputEnvelope
+    connect?: FinancialInsightWhereUniqueInput | FinancialInsightWhereUniqueInput[]
   }
 
   export type EnumUserRoleFieldUpdateOperationsInput = {
@@ -18498,6 +19987,20 @@ export namespace Prisma {
     deleteMany?: ActivityLogScalarWhereInput | ActivityLogScalarWhereInput[]
   }
 
+  export type FinancialInsightUpdateManyWithoutUserNestedInput = {
+    create?: XOR<FinancialInsightCreateWithoutUserInput, FinancialInsightUncheckedCreateWithoutUserInput> | FinancialInsightCreateWithoutUserInput[] | FinancialInsightUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: FinancialInsightCreateOrConnectWithoutUserInput | FinancialInsightCreateOrConnectWithoutUserInput[]
+    upsert?: FinancialInsightUpsertWithWhereUniqueWithoutUserInput | FinancialInsightUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: FinancialInsightCreateManyUserInputEnvelope
+    set?: FinancialInsightWhereUniqueInput | FinancialInsightWhereUniqueInput[]
+    disconnect?: FinancialInsightWhereUniqueInput | FinancialInsightWhereUniqueInput[]
+    delete?: FinancialInsightWhereUniqueInput | FinancialInsightWhereUniqueInput[]
+    connect?: FinancialInsightWhereUniqueInput | FinancialInsightWhereUniqueInput[]
+    update?: FinancialInsightUpdateWithWhereUniqueWithoutUserInput | FinancialInsightUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: FinancialInsightUpdateManyWithWhereWithoutUserInput | FinancialInsightUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: FinancialInsightScalarWhereInput | FinancialInsightScalarWhereInput[]
+  }
+
   export type ProfileUncheckedUpdateOneWithoutUserNestedInput = {
     create?: XOR<ProfileCreateWithoutUserInput, ProfileUncheckedCreateWithoutUserInput>
     connectOrCreate?: ProfileCreateOrConnectWithoutUserInput
@@ -18604,6 +20107,20 @@ export namespace Prisma {
     update?: ActivityLogUpdateWithWhereUniqueWithoutUserInput | ActivityLogUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: ActivityLogUpdateManyWithWhereWithoutUserInput | ActivityLogUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: ActivityLogScalarWhereInput | ActivityLogScalarWhereInput[]
+  }
+
+  export type FinancialInsightUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<FinancialInsightCreateWithoutUserInput, FinancialInsightUncheckedCreateWithoutUserInput> | FinancialInsightCreateWithoutUserInput[] | FinancialInsightUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: FinancialInsightCreateOrConnectWithoutUserInput | FinancialInsightCreateOrConnectWithoutUserInput[]
+    upsert?: FinancialInsightUpsertWithWhereUniqueWithoutUserInput | FinancialInsightUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: FinancialInsightCreateManyUserInputEnvelope
+    set?: FinancialInsightWhereUniqueInput | FinancialInsightWhereUniqueInput[]
+    disconnect?: FinancialInsightWhereUniqueInput | FinancialInsightWhereUniqueInput[]
+    delete?: FinancialInsightWhereUniqueInput | FinancialInsightWhereUniqueInput[]
+    connect?: FinancialInsightWhereUniqueInput | FinancialInsightWhereUniqueInput[]
+    update?: FinancialInsightUpdateWithWhereUniqueWithoutUserInput | FinancialInsightUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: FinancialInsightUpdateManyWithWhereWithoutUserInput | FinancialInsightUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: FinancialInsightScalarWhereInput | FinancialInsightScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutWalletsInput = {
@@ -18928,6 +20445,7 @@ export namespace Prisma {
     cotegory?: CategoryCreateNestedManyWithoutUserInput
     otps?: OtpCreateNestedManyWithoutUserInput
     refresh_tokens?: RefreshTokenCreateNestedManyWithoutUserInput
+    financial_insights?: FinancialInsightCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutActivity_logsInput = {
@@ -18944,6 +20462,7 @@ export namespace Prisma {
     cotegory?: CategoryUncheckedCreateNestedManyWithoutUserInput
     otps?: OtpUncheckedCreateNestedManyWithoutUserInput
     refresh_tokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+    financial_insights?: FinancialInsightUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutActivity_logsInput = {
@@ -18976,6 +20495,7 @@ export namespace Prisma {
     cotegory?: CategoryUpdateManyWithoutUserNestedInput
     otps?: OtpUpdateManyWithoutUserNestedInput
     refresh_tokens?: RefreshTokenUpdateManyWithoutUserNestedInput
+    financial_insights?: FinancialInsightUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutActivity_logsInput = {
@@ -18992,6 +20512,7 @@ export namespace Prisma {
     cotegory?: CategoryUncheckedUpdateManyWithoutUserNestedInput
     otps?: OtpUncheckedUpdateManyWithoutUserNestedInput
     refresh_tokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+    financial_insights?: FinancialInsightUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type TransactionCreateWithoutAttachmentsInput = {
@@ -19084,6 +20605,7 @@ export namespace Prisma {
     otps?: OtpCreateNestedManyWithoutUserInput
     refresh_tokens?: RefreshTokenCreateNestedManyWithoutUserInput
     activity_logs?: ActivityLogCreateNestedManyWithoutUserInput
+    financial_insights?: FinancialInsightCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutBudgetsInput = {
@@ -19100,6 +20622,7 @@ export namespace Prisma {
     otps?: OtpUncheckedCreateNestedManyWithoutUserInput
     refresh_tokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     activity_logs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
+    financial_insights?: FinancialInsightUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutBudgetsInput = {
@@ -19132,6 +20655,7 @@ export namespace Prisma {
     otps?: OtpUpdateManyWithoutUserNestedInput
     refresh_tokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     activity_logs?: ActivityLogUpdateManyWithoutUserNestedInput
+    financial_insights?: FinancialInsightUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutBudgetsInput = {
@@ -19148,6 +20672,7 @@ export namespace Prisma {
     otps?: OtpUncheckedUpdateManyWithoutUserNestedInput
     refresh_tokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     activity_logs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+    financial_insights?: FinancialInsightUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutCotegoryInput = {
@@ -19164,6 +20689,7 @@ export namespace Prisma {
     otps?: OtpCreateNestedManyWithoutUserInput
     refresh_tokens?: RefreshTokenCreateNestedManyWithoutUserInput
     activity_logs?: ActivityLogCreateNestedManyWithoutUserInput
+    financial_insights?: FinancialInsightCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutCotegoryInput = {
@@ -19180,6 +20706,7 @@ export namespace Prisma {
     otps?: OtpUncheckedCreateNestedManyWithoutUserInput
     refresh_tokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     activity_logs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
+    financial_insights?: FinancialInsightUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutCotegoryInput = {
@@ -19252,6 +20779,7 @@ export namespace Prisma {
     otps?: OtpUpdateManyWithoutUserNestedInput
     refresh_tokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     activity_logs?: ActivityLogUpdateManyWithoutUserNestedInput
+    financial_insights?: FinancialInsightUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCotegoryInput = {
@@ -19268,6 +20796,7 @@ export namespace Prisma {
     otps?: OtpUncheckedUpdateManyWithoutUserNestedInput
     refresh_tokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     activity_logs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+    financial_insights?: FinancialInsightUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type TransactionUpsertWithWhereUniqueWithoutCategoryInput = {
@@ -19304,6 +20833,90 @@ export namespace Prisma {
     deleted_at?: DateTimeNullableFilter<"Transaction"> | Date | string | null
   }
 
+  export type UserCreateWithoutFinancial_insightsInput = {
+    id?: string
+    full_name: string
+    email: string
+    password: string
+    role?: $Enums.UserRole
+    created_at?: Date | string
+    profile?: ProfileCreateNestedOneWithoutUserInput
+    wallets?: WalletCreateNestedManyWithoutUserInput
+    budgets?: BudgetCreateNestedManyWithoutUserInput
+    notifications?: NotificationCreateNestedManyWithoutUserInput
+    cotegory?: CategoryCreateNestedManyWithoutUserInput
+    otps?: OtpCreateNestedManyWithoutUserInput
+    refresh_tokens?: RefreshTokenCreateNestedManyWithoutUserInput
+    activity_logs?: ActivityLogCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutFinancial_insightsInput = {
+    id?: string
+    full_name: string
+    email: string
+    password: string
+    role?: $Enums.UserRole
+    created_at?: Date | string
+    profile?: ProfileUncheckedCreateNestedOneWithoutUserInput
+    wallets?: WalletUncheckedCreateNestedManyWithoutUserInput
+    budgets?: BudgetUncheckedCreateNestedManyWithoutUserInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+    cotegory?: CategoryUncheckedCreateNestedManyWithoutUserInput
+    otps?: OtpUncheckedCreateNestedManyWithoutUserInput
+    refresh_tokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+    activity_logs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutFinancial_insightsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutFinancial_insightsInput, UserUncheckedCreateWithoutFinancial_insightsInput>
+  }
+
+  export type UserUpsertWithoutFinancial_insightsInput = {
+    update: XOR<UserUpdateWithoutFinancial_insightsInput, UserUncheckedUpdateWithoutFinancial_insightsInput>
+    create: XOR<UserCreateWithoutFinancial_insightsInput, UserUncheckedCreateWithoutFinancial_insightsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutFinancial_insightsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutFinancial_insightsInput, UserUncheckedUpdateWithoutFinancial_insightsInput>
+  }
+
+  export type UserUpdateWithoutFinancial_insightsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    full_name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    profile?: ProfileUpdateOneWithoutUserNestedInput
+    wallets?: WalletUpdateManyWithoutUserNestedInput
+    budgets?: BudgetUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUpdateManyWithoutUserNestedInput
+    cotegory?: CategoryUpdateManyWithoutUserNestedInput
+    otps?: OtpUpdateManyWithoutUserNestedInput
+    refresh_tokens?: RefreshTokenUpdateManyWithoutUserNestedInput
+    activity_logs?: ActivityLogUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutFinancial_insightsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    full_name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    profile?: ProfileUncheckedUpdateOneWithoutUserNestedInput
+    wallets?: WalletUncheckedUpdateManyWithoutUserNestedInput
+    budgets?: BudgetUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
+    cotegory?: CategoryUncheckedUpdateManyWithoutUserNestedInput
+    otps?: OtpUncheckedUpdateManyWithoutUserNestedInput
+    refresh_tokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+    activity_logs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+  }
+
   export type UserCreateWithoutNotificationsInput = {
     id?: string
     full_name: string
@@ -19318,6 +20931,7 @@ export namespace Prisma {
     otps?: OtpCreateNestedManyWithoutUserInput
     refresh_tokens?: RefreshTokenCreateNestedManyWithoutUserInput
     activity_logs?: ActivityLogCreateNestedManyWithoutUserInput
+    financial_insights?: FinancialInsightCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -19334,6 +20948,7 @@ export namespace Prisma {
     otps?: OtpUncheckedCreateNestedManyWithoutUserInput
     refresh_tokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     activity_logs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
+    financial_insights?: FinancialInsightUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -19366,6 +20981,7 @@ export namespace Prisma {
     otps?: OtpUpdateManyWithoutUserNestedInput
     refresh_tokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     activity_logs?: ActivityLogUpdateManyWithoutUserNestedInput
+    financial_insights?: FinancialInsightUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -19382,6 +20998,7 @@ export namespace Prisma {
     otps?: OtpUncheckedUpdateManyWithoutUserNestedInput
     refresh_tokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     activity_logs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+    financial_insights?: FinancialInsightUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutOtpsInput = {
@@ -19398,6 +21015,7 @@ export namespace Prisma {
     cotegory?: CategoryCreateNestedManyWithoutUserInput
     refresh_tokens?: RefreshTokenCreateNestedManyWithoutUserInput
     activity_logs?: ActivityLogCreateNestedManyWithoutUserInput
+    financial_insights?: FinancialInsightCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutOtpsInput = {
@@ -19414,6 +21032,7 @@ export namespace Prisma {
     cotegory?: CategoryUncheckedCreateNestedManyWithoutUserInput
     refresh_tokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     activity_logs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
+    financial_insights?: FinancialInsightUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutOtpsInput = {
@@ -19446,6 +21065,7 @@ export namespace Prisma {
     cotegory?: CategoryUpdateManyWithoutUserNestedInput
     refresh_tokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     activity_logs?: ActivityLogUpdateManyWithoutUserNestedInput
+    financial_insights?: FinancialInsightUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutOtpsInput = {
@@ -19462,6 +21082,7 @@ export namespace Prisma {
     cotegory?: CategoryUncheckedUpdateManyWithoutUserNestedInput
     refresh_tokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     activity_logs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+    financial_insights?: FinancialInsightUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutProfileInput = {
@@ -19478,6 +21099,7 @@ export namespace Prisma {
     otps?: OtpCreateNestedManyWithoutUserInput
     refresh_tokens?: RefreshTokenCreateNestedManyWithoutUserInput
     activity_logs?: ActivityLogCreateNestedManyWithoutUserInput
+    financial_insights?: FinancialInsightCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutProfileInput = {
@@ -19494,6 +21116,7 @@ export namespace Prisma {
     otps?: OtpUncheckedCreateNestedManyWithoutUserInput
     refresh_tokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     activity_logs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
+    financial_insights?: FinancialInsightUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutProfileInput = {
@@ -19526,6 +21149,7 @@ export namespace Prisma {
     otps?: OtpUpdateManyWithoutUserNestedInput
     refresh_tokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     activity_logs?: ActivityLogUpdateManyWithoutUserNestedInput
+    financial_insights?: FinancialInsightUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutProfileInput = {
@@ -19542,6 +21166,7 @@ export namespace Prisma {
     otps?: OtpUncheckedUpdateManyWithoutUserNestedInput
     refresh_tokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     activity_logs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+    financial_insights?: FinancialInsightUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutRefresh_tokensInput = {
@@ -19558,6 +21183,7 @@ export namespace Prisma {
     cotegory?: CategoryCreateNestedManyWithoutUserInput
     otps?: OtpCreateNestedManyWithoutUserInput
     activity_logs?: ActivityLogCreateNestedManyWithoutUserInput
+    financial_insights?: FinancialInsightCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutRefresh_tokensInput = {
@@ -19574,6 +21200,7 @@ export namespace Prisma {
     cotegory?: CategoryUncheckedCreateNestedManyWithoutUserInput
     otps?: OtpUncheckedCreateNestedManyWithoutUserInput
     activity_logs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
+    financial_insights?: FinancialInsightUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutRefresh_tokensInput = {
@@ -19606,6 +21233,7 @@ export namespace Prisma {
     cotegory?: CategoryUpdateManyWithoutUserNestedInput
     otps?: OtpUpdateManyWithoutUserNestedInput
     activity_logs?: ActivityLogUpdateManyWithoutUserNestedInput
+    financial_insights?: FinancialInsightUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutRefresh_tokensInput = {
@@ -19622,6 +21250,7 @@ export namespace Prisma {
     cotegory?: CategoryUncheckedUpdateManyWithoutUserNestedInput
     otps?: OtpUncheckedUpdateManyWithoutUserNestedInput
     activity_logs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+    financial_insights?: FinancialInsightUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type WalletCreateWithoutTransactionsInput = {
@@ -19979,6 +21608,34 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type FinancialInsightCreateWithoutUserInput = {
+    id?: string
+    score: number
+    status: string
+    message: string
+    tips?: FinancialInsightCreatetipsInput | string[]
+    created_at?: Date | string
+  }
+
+  export type FinancialInsightUncheckedCreateWithoutUserInput = {
+    id?: string
+    score: number
+    status: string
+    message: string
+    tips?: FinancialInsightCreatetipsInput | string[]
+    created_at?: Date | string
+  }
+
+  export type FinancialInsightCreateOrConnectWithoutUserInput = {
+    where: FinancialInsightWhereUniqueInput
+    create: XOR<FinancialInsightCreateWithoutUserInput, FinancialInsightUncheckedCreateWithoutUserInput>
+  }
+
+  export type FinancialInsightCreateManyUserInputEnvelope = {
+    data: FinancialInsightCreateManyUserInput | FinancialInsightCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
   export type ProfileUpsertWithoutUserInput = {
     update: XOR<ProfileUpdateWithoutUserInput, ProfileUncheckedUpdateWithoutUserInput>
     create: XOR<ProfileCreateWithoutUserInput, ProfileUncheckedCreateWithoutUserInput>
@@ -20198,6 +21855,35 @@ export namespace Prisma {
     created_at?: DateTimeFilter<"ActivityLog"> | Date | string
   }
 
+  export type FinancialInsightUpsertWithWhereUniqueWithoutUserInput = {
+    where: FinancialInsightWhereUniqueInput
+    update: XOR<FinancialInsightUpdateWithoutUserInput, FinancialInsightUncheckedUpdateWithoutUserInput>
+    create: XOR<FinancialInsightCreateWithoutUserInput, FinancialInsightUncheckedCreateWithoutUserInput>
+  }
+
+  export type FinancialInsightUpdateWithWhereUniqueWithoutUserInput = {
+    where: FinancialInsightWhereUniqueInput
+    data: XOR<FinancialInsightUpdateWithoutUserInput, FinancialInsightUncheckedUpdateWithoutUserInput>
+  }
+
+  export type FinancialInsightUpdateManyWithWhereWithoutUserInput = {
+    where: FinancialInsightScalarWhereInput
+    data: XOR<FinancialInsightUpdateManyMutationInput, FinancialInsightUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type FinancialInsightScalarWhereInput = {
+    AND?: FinancialInsightScalarWhereInput | FinancialInsightScalarWhereInput[]
+    OR?: FinancialInsightScalarWhereInput[]
+    NOT?: FinancialInsightScalarWhereInput | FinancialInsightScalarWhereInput[]
+    id?: StringFilter<"FinancialInsight"> | string
+    user_id?: StringFilter<"FinancialInsight"> | string
+    score?: IntFilter<"FinancialInsight"> | number
+    status?: StringFilter<"FinancialInsight"> | string
+    message?: StringFilter<"FinancialInsight"> | string
+    tips?: StringNullableListFilter<"FinancialInsight">
+    created_at?: DateTimeFilter<"FinancialInsight"> | Date | string
+  }
+
   export type UserCreateWithoutWalletsInput = {
     id?: string
     full_name: string
@@ -20212,6 +21898,7 @@ export namespace Prisma {
     otps?: OtpCreateNestedManyWithoutUserInput
     refresh_tokens?: RefreshTokenCreateNestedManyWithoutUserInput
     activity_logs?: ActivityLogCreateNestedManyWithoutUserInput
+    financial_insights?: FinancialInsightCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutWalletsInput = {
@@ -20228,6 +21915,7 @@ export namespace Prisma {
     otps?: OtpUncheckedCreateNestedManyWithoutUserInput
     refresh_tokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     activity_logs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
+    financial_insights?: FinancialInsightUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutWalletsInput = {
@@ -20300,6 +21988,7 @@ export namespace Prisma {
     otps?: OtpUpdateManyWithoutUserNestedInput
     refresh_tokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     activity_logs?: ActivityLogUpdateManyWithoutUserNestedInput
+    financial_insights?: FinancialInsightUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutWalletsInput = {
@@ -20316,6 +22005,7 @@ export namespace Prisma {
     otps?: OtpUncheckedUpdateManyWithoutUserNestedInput
     refresh_tokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     activity_logs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+    financial_insights?: FinancialInsightUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type TransactionUpsertWithWhereUniqueWithoutWalletInput = {
@@ -20472,6 +22162,15 @@ export namespace Prisma {
     created_at?: Date | string
   }
 
+  export type FinancialInsightCreateManyUserInput = {
+    id?: string
+    score: number
+    status: string
+    message: string
+    tips?: FinancialInsightCreatetipsInput | string[]
+    created_at?: Date | string
+  }
+
   export type WalletUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
@@ -20624,6 +22323,33 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     action?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FinancialInsightUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    score?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    message?: StringFieldUpdateOperationsInput | string
+    tips?: FinancialInsightUpdatetipsInput | string[]
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FinancialInsightUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    score?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    message?: StringFieldUpdateOperationsInput | string
+    tips?: FinancialInsightUpdatetipsInput | string[]
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FinancialInsightUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    score?: IntFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    message?: StringFieldUpdateOperationsInput | string
+    tips?: FinancialInsightUpdatetipsInput | string[]
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 

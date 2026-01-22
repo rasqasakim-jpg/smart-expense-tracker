@@ -8,6 +8,7 @@ import transactionRoutes from "./routes/transaction.routes";
 import dashboardRoutes from "./routes/dashboard.routes";
 import budgetRoutes from './routes/budget.routes';         // Import file budget tadi
 import notificationRoutes from './routes/notification.routes';
+import aiRoutes from './routes/ai.routes';
 import { ErrorHandler } from './middlewares/error.handler';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './utils/swagger.config';
@@ -41,6 +42,7 @@ app.use('/api/transactions', transactionRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use('/api/budget', budgetRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/ai', aiRoutes);
 
 app.get('/', (_req: Request, res: Response) => {
     res.status(200).json({

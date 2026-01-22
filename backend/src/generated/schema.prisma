@@ -9,7 +9,7 @@ model ActivityLog {
 
 model Attachment {
   id             String      @id @default(uuid()) // Diubah ke UUID
-  transaction_id String // Foreign Key menjadi String (Transaction UUID)
+  transaction_id String
   file_path      String      @db.VarChar
   file_type      String      @db.VarChar
   created_at     DateTime    @default(now()) @db.Timestamp
@@ -39,6 +39,22 @@ model Category {
   user         User?         @relation(fields: [user_id], references: [id], onDelete: Cascade)
   // Relasi ke trancsavtion
   transactions Transaction[]
+}
+
+model FinancialInsight {
+  id      String @id @default(uuid())
+  user_id String
+
+  score   Int // 0-100
+  status  String // "AMAN", "WASPADA", "BAHAYA"
+  message String   @db.Text
+  tips    String[]
+
+  created_at DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
 }
 
 model Notification {
@@ -124,21 +140,22 @@ model User {
   role       UserRole @default(USER)
   created_at DateTime @default(now()) @db.Timestamp
 
-  profile        Profile?
-  wallets        Wallet[]
-  budgets        Budget[]
-  notifications  Notification[]
-  cotegory       Category[]
-  otps           Otp[]
-  refresh_tokens RefreshToken[]
-  activity_logs  ActivityLog[]
+  profile            Profile?
+  wallets            Wallet[]
+  budgets            Budget[]
+  notifications      Notification[]
+  cotegory           Category[]
+  otps               Otp[]
+  refresh_tokens     RefreshToken[]
+  activity_logs      ActivityLog[]
+  financial_insights FinancialInsight[]
 }
 
 model Wallet {
   id         String   @id @default(uuid()) // UUID untuk keamanan ID Wallet
   user_id    String // String karena User menggunakan UUID
   name       String   @db.VarChar
-  balance    Decimal  @default(0) @db.Decimal(12, 2) // Detail: 12 digit, 2 desimal
+  balance    Decimal  @default(0) @db.Decimal(12, 2)
   type       String
   created_at DateTime @default(now()) @db.Timestamp
 

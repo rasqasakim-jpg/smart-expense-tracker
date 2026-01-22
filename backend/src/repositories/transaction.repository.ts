@@ -143,4 +143,55 @@ export class TransactionRepository {
     });
   }
 
+  // ==========================================
+  // 👇 TAMBAHAN KHUSUS UNTUK AI INSIGHT 👇
+  // ==========================================
+
+async getMonthlyAggregates(userId: string, startDate: Date, endDate: Date) {
+    const aggregates = await this.prisma.transaction.groupBy({
+      by: ['type'],
+      where: {
+        user_id: userId,
+        deleted_at: null,
+        transaction_date: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+      _sum: { amount: true },
+    });
+
+    let totalIncome = 0;
+    let totalExpense = 0;
+
+    aggregates.forEach((agg) => {
+      // Kita pastikan konversi ke Number agar aman
+      const amount = Number(agg._sum.amount || 0);
+      if (agg.type === 'INCOME') totalIncome = amount;
+      else if (agg.type === 'EXPENSE') totalExpense = amount;
+    });
+
+    return { totalIncome, totalExpense };
+  }
+
+  // 2. Ambil Top 3 Kategori Boros (Group By Category)
+  async getTopExpenses(userId: string, startDate: Date, endDate: Date, limit: number = 3) {
+    return await this.prisma.transaction.groupBy({
+      by: ['category_id'],
+      where: {
+        user_id: userId,
+        deleted_at: null,
+        type: 'EXPENSE', // Cuma ambil pengeluaran
+        transaction_date: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+      _sum: { amount: true },
+      orderBy: {
+        _sum: { amount: 'desc' }, // Urutkan dari yang paling gede
+      },
+      take: limit, // Ambil 3 teratas
+    });
+  }
 }

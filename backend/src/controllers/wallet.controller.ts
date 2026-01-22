@@ -35,13 +35,13 @@ export class WalletController {
     if (process.env.NODE_ENV === 'development') {
       try {
         console.log(`[wallet] created id=${(wallet as any).id} name=${(wallet as any).name} userId=${userId}`);
-      } catch (_) {}
+      } catch (_) { }
     }
 
-    res.status(201).json({ 
-      success: true, 
-      message: "Operation success", 
-      data: wallet 
+    res.status(201).json({
+      success: true,
+      message: "Operation success",
+      data: wallet
     });
   });
 
@@ -60,17 +60,17 @@ export class WalletController {
     if (process.env.NODE_ENV === 'development') {
       try {
         console.log(`[wallet] updated id=${(wallet as any).id} name=${(wallet as any).name} userId=${userId}`);
-      } catch (_) {}
+      } catch (_) { }
     }
 
-    res.status(200).json({ 
-      success: true, 
-      message: "Operation success", 
-      data: wallet 
+    res.status(200).json({
+      success: true,
+      message: "Operation success",
+      data: wallet
     });
   });
-  
-public delete = asyncHandler(async (req: Request, res: Response) => {
+
+  public delete = asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user?.id;
     if (!userId) throw new Error("Unauthorized"); // Validasi
 
@@ -86,10 +86,10 @@ public delete = asyncHandler(async (req: Request, res: Response) => {
       console.log(`[wallet] deleted id=${id} by userId=${userId}`);
     }
 
-    res.status(200).json({ 
-      success: true, 
-      message: "Operation success", 
-      data: {} 
+    res.status(200).json({
+      success: true,
+      message: "Operation success",
+      data: {}
     });
   });
 
