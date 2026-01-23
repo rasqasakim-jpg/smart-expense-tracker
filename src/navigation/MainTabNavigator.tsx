@@ -5,7 +5,7 @@ import DashboardScreenWrapper from '../screens/main/DashboardScreenWrapper';
 import TransactionsScreen from '../screens/main/TransactionsScreen';
 import AddTransactionScreen from '../screens/main/AddTransactionScreen';
 import WalletsScreen from '../screens/main/WalletsScreen';
-import ProfileScreen from '../screens/main/ProfileScreen';
+import ProfileStackNavigator from '../screens/main/ProfileStackNavigator';
 
 const Tab = createBottomTabNavigator();
 
@@ -49,8 +49,7 @@ const MainTabNavigator: React.FC<MainTabNavigatorProps> = ({ onLogout }) => {
         }}
       />
       <Tab.Screen name="Wallets" component={WalletsScreen} />
-      <Tab.Screen name="Profile">
-        {(props) => <ProfileScreen {...props} onLogout={onLogout} />}
+      <Tab.Screen name="Profile" component={ProfileStackNavigator}>
       </Tab.Screen>
     </Tab.Navigator>
   );
