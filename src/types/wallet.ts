@@ -4,7 +4,6 @@ export interface Wallet {
   balance: number;
   type: 'CASH' | 'BANK' | 'E-WALLET' | 'SAVINGS';
   color: string;
-  icon: string;
   createdAt: string;
   updatedAt?: string;
 }

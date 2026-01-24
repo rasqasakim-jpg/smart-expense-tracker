@@ -16,6 +16,9 @@ import { StackNavigationProp } from '@react-navigation/stack';
 type ProfileStackParamList = {
   ProfileMain: undefined;
   ActivityLog: undefined;
+  Budget: undefined;
+  BudgetForm: undefined;
+  BudgetDetail: undefined;
 };
 
 type ProfileScreenNavigationProp = StackNavigationProp<ProfileStackParamList>;
@@ -26,6 +29,10 @@ const ProfileScreen = () => {
   // Fungsi untuk navigasi ke Activity Log
   const navigateToActivityLog = () => {
     (navigation as any).navigate('ActivityLog');
+  }
+
+  const navigateToBudget = () => {
+    (navigation as any).navigate('Budget');
   }
 
   return (
@@ -93,6 +100,22 @@ const ProfileScreen = () => {
                   Riwayat aktivitas Anda
                 </Text>
               </View>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#999" />
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.menuItem}
+            onPress={navigateToBudget}
+          >
+            <View style={styles.menuItemLeft}>
+              <Ionicons name="pie-chart-outline" size={22} color="#4A6FA5" />
+              <View style={styles.menuTextContainer}>
+                <Text style={styles.menuItemText}>Budget</Text>
+                <Text style={styles.menuItemDescription}>
+                  Atur batas pengeluaran per Kategori
+                </Text>
+             </View>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#999" />
           </TouchableOpacity>
