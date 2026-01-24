@@ -1,4 +1,4 @@
-import { PrismaClient, Prisma, TransactionType } from "../generated";
+import { PrismaClient, Prisma, TransactionType, } from "../generated";
 
 
 export interface TransactionFindAllOptions {
@@ -193,5 +193,24 @@ async getMonthlyAggregates(userId: string, startDate: Date, endDate: Date) {
       },
       take: limit, // Ambil 3 teratas
     });
+  }
+
+  async sumExpenseByMonth(userId: string, startDate: Date, endDate: Date): Promise<number> {
+    const result = await this.prisma.transaction.aggregate({
+        where: {
+            user_id: userId,
+            type: 'EXPENSE',
+            deleted_at: null,
+            transaction_date: {
+                gte: startDate,
+                lte: endDate
+            }
+        },
+        _sum: {
+            amount: true
+        }
+    });
+    // Jika null (belum ada transaksi), kembalikan 0
+    return Number(result._sum.amount || 0);
   }
 }

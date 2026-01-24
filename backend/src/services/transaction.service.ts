@@ -2,15 +2,17 @@ import { TransactionRepository } from "../repositories/transaction.repository";
 import { WalletRepository } from "../repositories/wallet.repository";
 import { BudgetRepository } from "../repositories/budget.repository"; // <--- TAMBAHAN
 import { NotificationService } from "./notification.service"; // <--- TAMBAHAN
+import { CategoryRepository } from "../repositories/category.repository";
 import prisma from "../database";
 import type { CreateTransactionDTO, UpdateTransactionDTO } from "../validations/transaction.validation"; 
-import { TransactionType } from "../generated";
+import { TransactionType, CategoryOption } from "../generated";
 
 export class TransactionService {
     private transactionRepo: TransactionRepository;
     private walletRepo: WalletRepository;
     private budgetRepo: BudgetRepository;           // <--- Properti Baru
     private notificationService: NotificationService; // <--- Properti Baru
+    private categoryRepo: CategoryRepository;
 
     constructor() {
         this.transactionRepo = new TransactionRepository(prisma);
@@ -18,16 +20,31 @@ export class TransactionService {
         
         // Inisialisasi dependensi baru
         this.budgetRepo = new BudgetRepository(prisma);
-        this.notificationService = new NotificationService(); 
+        this.notificationService = new NotificationService();
+        this.categoryRepo = new CategoryRepository(prisma)
     }
 
-    async createTransaction(userId: string, data: CreateTransactionDTO) {
+   async createTransaction(userId: string, data: CreateTransactionDTO) {
+        // 1. Cek Wallet
         const wallet = await this.walletRepo.findById(data.wallet_id);
         if (!wallet || wallet.user_id !== userId) {
             throw new Error("Wallet tidak ditemukan atau bukan milik anda");
         }
 
-        // 1. Jalankan Transaksi Database (Create Transaction + Update Wallet)
+        // 2. [LOGIC BARU] Validasi Kategori "Other"
+        // Kita perlu tahu nama kategori berdasarkan ID yang dikirim
+        const category = await this.categoryRepo.findById(data.category_id);
+        if (!category) throw new Error("Kategori tidak ditemukan");
+
+        // Cek apakah user memilih OTHER_EXPENSE atau OTHER_INCOME
+        if (category.name === CategoryOption.OTHER_EXPENSE || category.name === CategoryOption.OTHER_INCOME) {
+            // Jika ya, Note WAJIB diisi
+            if (!data.note || data.note.trim() === "") {
+                throw new Error("Untuk kategori 'Lainnya', catatan (note) wajib diisi sebagai keterangan.");
+            }
+        }
+
+        // 3. Jalankan Transaksi Database
         const result = await prisma.$transaction(async (tx) => {
             const newTransaction = await this.transactionRepo.create({
                 name: data.name,
@@ -36,12 +53,8 @@ export class TransactionService {
                 note: data.note ?? null,
                 transaction_date: new Date(data.transaction_date),
                 user_id: userId,
-                wallet: {
-                    connect: { id: data.wallet_id }
-                },
-                category: {
-                    connect: { id: data.category_id }
-                }
+                wallet: { connect: { id: data.wallet_id } },
+                category: { connect: { id: data.category_id } }
             }, tx);
 
             let newBalance = Number(wallet.balance);
@@ -59,58 +72,47 @@ export class TransactionService {
             return newTransaction;
         });
 
-        // 2. [LOGIC BARU] Cek Budget & Kirim Notifikasi (Fire and Forget)
-        // Kita jalankan SETELAH transaksi sukses agar tidak memblokir proses
+        // 4. Cek Budget (Optimized)
         if (result.type === "EXPENSE") {
-            // Gunakan await jika ingin memastikan notif terkirim sebelum response
             await this.checkOverBudget(userId, result.transaction_date);
         }
 
         return result;
     }
 
-    // --- HELPER PRIVATE: Cek Budget ---
+    // --- HELPER PRIVATE: Cek Budget (SUDAH DI-OPTIMASI) ---
     private async checkOverBudget(userId: string, transactionDate: Date) {
         try {
             // A. Ambil Budget Bulan Ini
             const budget = await this.budgetRepo.findByMonth(userId, transactionDate);
-            if (!budget) return; // Kalau user gak set budget, skip
+            if (!budget) return; 
 
-            // B. Hitung Total Pengeluaran Bulan Ini
-            // (Pastikan TransactionRepository punya method sumExpenseByMonth,z 
-            // jika belum ada, nanti kita buatkan, tapi biasanya pakai findAll juga bisa diakali)
-            // Untuk performa terbaik, repository harus punya query aggregate sum.
-            // Di sini saya pakai cara manual via findAll dulu kalau repo belum update:
+            // B. Tentukan Awal & Akhir Bulan
             const startOfMonth = new Date(transactionDate.getFullYear(), transactionDate.getMonth(), 1);
             const endOfMonth = new Date(transactionDate.getFullYear(), transactionDate.getMonth() + 1, 0);
             
-            const { data: expenses } = await this.transactionRepo.findAll(userId, {
-                startDate: startOfMonth,
-                endDate: endOfMonth,
-                type: TransactionType.EXPENSE,
-                page: 1,
-                limit: 10000 // Ambil semua
-            });
-
-            // Hitung manual total (Best practice: pakai prisma aggregate di repo, tapi ini work)
-            const totalExpense = expenses.reduce((sum, trx) => sum + Number(trx.amount), 0);
+            // C. [UPDATE] Pakai Aggregate Function (Lebih Cepat)
+            const totalExpense = await this.transactionRepo.sumExpenseByMonth(userId, startOfMonth, endOfMonth);
             
             const limit = Number(budget.monthly_limit);
 
-            // C. Cek Kondisi
+            // D. Cek Kondisi
             if (totalExpense > limit) {
                 const percentage = Math.round((totalExpense / limit) * 100);
                 const title = "🚨 Over Budget Alert!";
-                const message = `Waduh! Pengeluaranmu bulan ini (Rp ${totalExpense.toLocaleString()}) sudah tembus ${percentage}% dari budget (Rp ${limit.toLocaleString()}). Rem dikit dong!`;
+                const message = `Waduh! Pengeluaranmu bulan ini (Rp ${totalExpense.toLocaleString()}) sudah tembus ${percentage}% dari budget. Rem dikit dong!`;
 
                 await this.notificationService.sendAlert(userId, title, message);
-                console.log(`[NOTIF] Over budget alert sent to User ${userId}`);
+                
+                if (process.env.NODE_ENV === 'development') {
+                    console.log(`[NOTIF] Over budget alert sent to User ${userId}. Total: ${totalExpense}, Limit: ${limit}`);
+                }
             }
 
         } catch (error) {
             console.error("[WARNING] Gagal mengecek budget:", error);
-            // Error di sini jangan sampai bikin transaksi gagal
         }
+    
     }
 
     async getTransactions(

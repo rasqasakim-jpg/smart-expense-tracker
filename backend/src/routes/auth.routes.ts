@@ -82,6 +82,10 @@ router.post('/register', RateLimitMiddleware.authLimiter,authController.register
  */
 router.post('/login', RateLimitMiddleware.authLimiter, authController.login);
 
+
+router.post('/verify-otp', RateLimitMiddleware.authLimiter, authController.verifyOtp)
+
+
 /**
  * @swagger
  * /auth/me:
@@ -100,6 +104,13 @@ router.get(
   '/me',
   authMiddleware.handle,
   authController.me
+);
+
+
+router.post(
+  '/resend-otp', 
+  RateLimitMiddleware.authLimiter,
+  authController.resendOtp
 );
 
 export default router;

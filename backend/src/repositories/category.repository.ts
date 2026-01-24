@@ -1,4 +1,4 @@
-import { PrismaClient, TransactionType } from '../generated';
+import { PrismaClient, TransactionType, CategoryOption } from '../generated';
 
 export class CategoryRepository { 
     constructor(private prisma: PrismaClient) {}
@@ -23,17 +23,15 @@ export class CategoryRepository {
     }
 
 
-    async create (data: { name: string; icon?: string | undefined; type: TransactionType; user_id: string }) {
-        return await this.prisma.category.create({
-            data: { 
-                name: data.name,
-                icon: data.icon ?? null ,
-                type: data.type,
-                user_id: data.user_id
-            }
-        })    
-    
-    }
+  async create(data: { name: CategoryOption; type: TransactionType; user_id: string }) {
+    return await this.prisma.category.create({
+        data: { 
+            name: data.name,
+            type: data.type,
+            user_id: data.user_id
+        }
+    });
+}
 
     async findById(id: number) {
         return await this.prisma.category.findUnique({

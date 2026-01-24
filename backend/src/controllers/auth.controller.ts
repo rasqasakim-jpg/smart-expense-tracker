@@ -81,4 +81,46 @@ export class AuthController {
       data: user 
     });
   });
+
+  verifyOtp = asyncHandler(async (req: Request, res: Response) => {
+    const { userId, code } = req.body;
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[auth] verifyOtp called for userId=${userId} with code=${code}`);
+    }
+
+    if (!userId || !code) {
+      throw new Error("User ID dan kode OTP wajib diisi");
+    }
+
+    // Memanggil logic verifikasi yang sudah kita buat di AuthService
+    const result = await this.authService.verifyRegistration(userId, code);
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[auth] verifyOtp success for userId=${userId}`);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Akun berhasil diverifikasi",
+      data: result
+    });
+  });
+
+
+  resendOtp = asyncHandler(async (req: Request, res: Response) => {
+        const { email } = req.body;
+
+        if (!email) {
+            throw new Error("Email wajib diisi");
+        }
+
+        const result = await this.authService.resendOtp(email);
+
+        res.status(200).json({
+            success: true,
+            message: "Operation success",
+            data: result
+        });
+    });
 }

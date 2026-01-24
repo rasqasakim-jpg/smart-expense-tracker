@@ -29,3 +29,30 @@ enum UserRole {
   USER
   ADMIN
 }
+
+enum CategoryOption {
+  // EXPENSE
+  FOOD_AND_DRINK
+  TRANSPORTATION
+  SHOPPING
+  ENTERTAINMENT
+  BILLS
+  HEALTH
+  EDUCATION
+  OTHER_EXPENSE
+
+  // INCOME
+  SALARY
+  BONUS
+  INVESTMENT
+  FREELANCE
+  OTHER_INCOME
+}
+
+  
+enum WalletType {
+  CASH
+  BANK
+  E_WALLET
+  SAVINGS
+}

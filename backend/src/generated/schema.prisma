@@ -26,8 +26,7 @@ model Budget {
 
 model Category {
   id         Int             @id @default(autoincrement())
-  name       String          @db.VarChar
-  icon       String?         @db.VarChar
+  name       CategoryOption
   type       TransactionType
   created_at DateTime        @default(now()) @db.Timestamp
 
@@ -152,14 +151,13 @@ model User {
 }
 
 model Wallet {
-  id         String   @id @default(uuid()) // UUID untuk keamanan ID Wallet
-  user_id    String // String karena User menggunakan UUID
-  name       String   @db.VarChar
-  balance    Decimal  @default(0) @db.Decimal(12, 2)
-  type       String
-  created_at DateTime @default(now()) @db.Timestamp
-
-  deleted_at DateTime? @db.Timestamp
+  id         String     @id @default(uuid())
+  user_id    String
+  name       String     @db.VarChar
+  balance    Decimal    @default(0) @db.Decimal(12, 2)
+  type       WalletType
+  created_at DateTime   @default(now()) @db.Timestamp
+  deleted_at DateTime?  @db.Timestamp
 
   // Relasi
   user         User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
@@ -195,4 +193,30 @@ enum OtpType {
 enum UserRole {
   USER
   ADMIN
+}
+
+enum CategoryOption {
+  // EXPENSE
+  FOOD_AND_DRINK
+  TRANSPORTATION
+  SHOPPING
+  ENTERTAINMENT
+  BILLS
+  HEALTH
+  EDUCATION
+  OTHER_EXPENSE
+
+  // INCOME
+  SALARY
+  BONUS
+  INVESTMENT
+  FREELANCE
+  OTHER_INCOME
+}
+
+enum WalletType {
+  CASH
+  BANK
+  E_WALLET
+  SAVINGS
 }

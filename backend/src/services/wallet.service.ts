@@ -1,5 +1,9 @@
+// services/wallet.service.ts
 import { WalletRepository } from '../repositories/wallet.repository';
-import prisma from '../database'; // <--- Import singleton prisma di sini
+import prisma from '../database';
+// 👇 1. Import Enum dari generated prisma
+import { WalletType } from '../generated'; 
+
 export class WalletService { 
     private walletRepo: WalletRepository;
 
@@ -11,38 +15,68 @@ export class WalletService {
         return await this.walletRepo.findAll(userId);
     }
 
+    // 👇 2. Terima 'type' sebagai string biasa dari Controller
     async createWallet(userId: string, data: { name: string; type: string; balance: number }) {
+       
+       // --- VALIDASI MANUAL START ---
+       // Kita cek: Apakah string yang dikirim user ada di dalam daftar WalletType?
+       const isValidType = Object.values(WalletType).includes(data.type as any);
+
+       if (!isValidType) {
+           // Jika tidak cocok, lempar error
+           throw new Error(`Tipe wallet '${data.type}' tidak valid. Pilihan: ${Object.values(WalletType).join(', ')}`);
+       }
+       // --- VALIDASI MANUAL END ---
+
+       // 3. Casting: Karena sudah valid, kita paksa (cast) jadi tipe WalletType
+       const typeEnum = data.type as WalletType;
+
        return await this.walletRepo.create({
-        ...data,
-        user_id: userId
+           name: data.name,
+           balance: data.balance,
+           type: typeEnum, // Repository menerima Enum, bukan string
+           user_id: userId
        });
     }
 
-  async updateWallet(userId: string, walletId: string, data: any) {
-    const wallet = await this.walletRepo.findById(walletId);
-    
-    if (!wallet || wallet.user_id !== userId) {
-      const error: any = new Error("Wallet tidak ditemukan atau akses dilarang");
-      error.status = 404; // Set 404 Not Found
-      throw error;
+    async updateWallet(userId: string, walletId: string, data: { name?: string; type?: string; balance?: number }) {
+        const wallet = await this.walletRepo.findById(walletId);
+        
+        if (!wallet || wallet.user_id !== userId) {
+            const error: any = new Error("Wallet tidak ditemukan atau akses dilarang");
+            error.status = 404;
+            throw error;
+        }
+
+        const updateData: any = {
+            name: data.name,
+            balance: data.balance
+        };
+
+        // --- VALIDASI UPDATE ---
+        // Cek jika user mengirim field 'type' untuk diupdate
+        if (data.type) {
+            const isValidType = Object.values(WalletType).includes(data.type as any);
+            
+            if (!isValidType) {
+                 throw new Error(`Tipe wallet '${data.type}' tidak valid.`);
+            }
+
+            // Assign sebagai Enum
+            updateData.type = data.type as WalletType;
+        }
+
+        return await this.walletRepo.update(walletId, updateData);
     }
 
-    return await this.walletRepo.update(walletId, {
-        name: data.name,
-        type: data.type,
-        balance: data.balance
-    });
-  }
-
-  async deleteWallet(userId: string, walletId: string) {
-    const wallet = await this.walletRepo.findById(walletId);
-    
-    if (!wallet || wallet.user_id !== userId) {
-      const error: any = new Error("Wallet tidak ditemukan atau akses dilarang");
-      error.status = 404;
-      throw error;
+    async deleteWallet(userId: string, walletId: string) {
+        // ... (sama seperti sebelumnya, tidak ada perubahan karena delete cuma butuh ID)
+        const wallet = await this.walletRepo.findById(walletId);
+        if (!wallet || wallet.user_id !== userId) {
+            const error: any = new Error("Wallet tidak ditemukan");
+            error.status = 404;
+            throw error;
+        }
+        return await this.walletRepo.delete(walletId);
     }
-
-    return await this.walletRepo.delete(walletId);
-  }
 }

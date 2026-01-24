@@ -146,7 +146,6 @@ exports.Prisma.BudgetScalarFieldEnum = {
 exports.Prisma.CategoryScalarFieldEnum = {
   id: 'id',
   name: 'name',
-  icon: 'icon',
   type: 'type',
   created_at: 'created_at',
   deleted_at: 'deleted_at',
@@ -250,6 +249,22 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.CategoryOption = exports.$Enums.CategoryOption = {
+  FOOD_AND_DRINK: 'FOOD_AND_DRINK',
+  TRANSPORTATION: 'TRANSPORTATION',
+  SHOPPING: 'SHOPPING',
+  ENTERTAINMENT: 'ENTERTAINMENT',
+  BILLS: 'BILLS',
+  HEALTH: 'HEALTH',
+  EDUCATION: 'EDUCATION',
+  OTHER_EXPENSE: 'OTHER_EXPENSE',
+  SALARY: 'SALARY',
+  BONUS: 'BONUS',
+  INVESTMENT: 'INVESTMENT',
+  FREELANCE: 'FREELANCE',
+  OTHER_INCOME: 'OTHER_INCOME'
+};
+
 exports.TransactionType = exports.$Enums.TransactionType = {
   INCOME: 'INCOME',
   EXPENSE: 'EXPENSE'
@@ -263,6 +278,13 @@ exports.OtpType = exports.$Enums.OtpType = {
 exports.UserRole = exports.$Enums.UserRole = {
   USER: 'USER',
   ADMIN: 'ADMIN'
+};
+
+exports.WalletType = exports.$Enums.WalletType = {
+  CASH: 'CASH',
+  BANK: 'BANK',
+  E_WALLET: 'E_WALLET',
+  SAVINGS: 'SAVINGS'
 };
 
 exports.Prisma.ModelName = {
