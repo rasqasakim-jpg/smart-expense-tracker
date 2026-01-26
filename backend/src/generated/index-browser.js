@@ -191,7 +191,8 @@ exports.Prisma.ProfileScalarFieldEnum = {
   username: 'username',
   address: 'address',
   date_of_birth: 'date_of_birth',
-  occupation: 'occupation'
+  occupation: 'occupation',
+  relationship: 'relationship'
 };
 
 exports.Prisma.RefreshTokenScalarFieldEnum = {
@@ -273,6 +274,15 @@ exports.TransactionType = exports.$Enums.TransactionType = {
 exports.OtpType = exports.$Enums.OtpType = {
   REGISTRATION: 'REGISTRATION',
   PASSWORD_RESET: 'PASSWORD_RESET'
+};
+
+exports.RelationshipStatus = exports.$Enums.RelationshipStatus = {
+  SINGLE: 'SINGLE',
+  IN_RELATIONSHIP: 'IN_RELATIONSHIP',
+  MARRIED: 'MARRIED',
+  MARRIED_WITH_KIDS: 'MARRIED_WITH_KIDS',
+  DIVORCED: 'DIVORCED',
+  WIDOWED: 'WIDOWED'
 };
 
 exports.UserRole = exports.$Enums.UserRole = {

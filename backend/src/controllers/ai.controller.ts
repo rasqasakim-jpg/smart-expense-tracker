@@ -41,4 +41,23 @@ export class AiController {
       data: data
     });
   });
+
+
+  public chatWithBot = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user?.id;
+    const { message } = req.body; // Ambil pesan user dari body
+
+    if (!userId) throw new Error("Unauthorized");
+    if (!message) throw new Error("Message is required");
+
+    // Panggil Service
+    const reply = await this.aiService.chatWithAi(userId, message);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        reply: reply // Jawaban dari AI
+      }
+    });
+  });
 }

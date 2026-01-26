@@ -135,6 +135,18 @@ export const WalletType: {
 
 export type WalletType = (typeof WalletType)[keyof typeof WalletType]
 
+
+export const RelationshipStatus: {
+  SINGLE: 'SINGLE',
+  IN_RELATIONSHIP: 'IN_RELATIONSHIP',
+  MARRIED: 'MARRIED',
+  MARRIED_WITH_KIDS: 'MARRIED_WITH_KIDS',
+  DIVORCED: 'DIVORCED',
+  WIDOWED: 'WIDOWED'
+};
+
+export type RelationshipStatus = (typeof RelationshipStatus)[keyof typeof RelationshipStatus]
+
 }
 
 export type TransactionType = $Enums.TransactionType
@@ -156,6 +168,10 @@ export const CategoryOption: typeof $Enums.CategoryOption
 export type WalletType = $Enums.WalletType
 
 export const WalletType: typeof $Enums.WalletType
+
+export type RelationshipStatus = $Enums.RelationshipStatus
+
+export const RelationshipStatus: typeof $Enums.RelationshipStatus
 
 /**
  * ##  Prisma Client ʲˢ
@@ -10898,6 +10914,7 @@ export namespace Prisma {
     address: string | null
     date_of_birth: Date | null
     occupation: string | null
+    relationship: $Enums.RelationshipStatus | null
   }
 
   export type ProfileMaxAggregateOutputType = {
@@ -10907,6 +10924,7 @@ export namespace Prisma {
     address: string | null
     date_of_birth: Date | null
     occupation: string | null
+    relationship: $Enums.RelationshipStatus | null
   }
 
   export type ProfileCountAggregateOutputType = {
@@ -10916,6 +10934,7 @@ export namespace Prisma {
     address: number
     date_of_birth: number
     occupation: number
+    relationship: number
     _all: number
   }
 
@@ -10927,6 +10946,7 @@ export namespace Prisma {
     address?: true
     date_of_birth?: true
     occupation?: true
+    relationship?: true
   }
 
   export type ProfileMaxAggregateInputType = {
@@ -10936,6 +10956,7 @@ export namespace Prisma {
     address?: true
     date_of_birth?: true
     occupation?: true
+    relationship?: true
   }
 
   export type ProfileCountAggregateInputType = {
@@ -10945,6 +10966,7 @@ export namespace Prisma {
     address?: true
     date_of_birth?: true
     occupation?: true
+    relationship?: true
     _all?: true
   }
 
@@ -11027,6 +11049,7 @@ export namespace Prisma {
     address: string | null
     date_of_birth: Date | null
     occupation: string | null
+    relationship: $Enums.RelationshipStatus
     _count: ProfileCountAggregateOutputType | null
     _min: ProfileMinAggregateOutputType | null
     _max: ProfileMaxAggregateOutputType | null
@@ -11053,6 +11076,7 @@ export namespace Prisma {
     address?: boolean
     date_of_birth?: boolean
     occupation?: boolean
+    relationship?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["profile"]>
 
@@ -11063,6 +11087,7 @@ export namespace Prisma {
     address?: boolean
     date_of_birth?: boolean
     occupation?: boolean
+    relationship?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["profile"]>
 
@@ -11073,6 +11098,7 @@ export namespace Prisma {
     address?: boolean
     date_of_birth?: boolean
     occupation?: boolean
+    relationship?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["profile"]>
 
@@ -11083,9 +11109,10 @@ export namespace Prisma {
     address?: boolean
     date_of_birth?: boolean
     occupation?: boolean
+    relationship?: boolean
   }
 
-  export type ProfileOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "user_id" | "username" | "address" | "date_of_birth" | "occupation", ExtArgs["result"]["profile"]>
+  export type ProfileOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "user_id" | "username" | "address" | "date_of_birth" | "occupation" | "relationship", ExtArgs["result"]["profile"]>
   export type ProfileInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
   }
@@ -11108,6 +11135,7 @@ export namespace Prisma {
       address: string | null
       date_of_birth: Date | null
       occupation: string | null
+      relationship: $Enums.RelationshipStatus
     }, ExtArgs["result"]["profile"]>
     composites: {}
   }
@@ -11538,6 +11566,7 @@ export namespace Prisma {
     readonly address: FieldRef<"Profile", 'String'>
     readonly date_of_birth: FieldRef<"Profile", 'DateTime'>
     readonly occupation: FieldRef<"Profile", 'String'>
+    readonly relationship: FieldRef<"Profile", 'RelationshipStatus'>
   }
     
 
@@ -16815,7 +16844,8 @@ export namespace Prisma {
     username: 'username',
     address: 'address',
     date_of_birth: 'date_of_birth',
-    occupation: 'occupation'
+    occupation: 'occupation',
+    relationship: 'relationship'
   };
 
   export type ProfileScalarFieldEnum = (typeof ProfileScalarFieldEnum)[keyof typeof ProfileScalarFieldEnum]
@@ -17005,6 +17035,20 @@ export namespace Prisma {
    * Reference to a field of type 'OtpType[]'
    */
   export type ListEnumOtpTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OtpType[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'RelationshipStatus'
+   */
+  export type EnumRelationshipStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RelationshipStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'RelationshipStatus[]'
+   */
+  export type ListEnumRelationshipStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RelationshipStatus[]'>
     
 
 
@@ -17520,6 +17564,7 @@ export namespace Prisma {
     address?: StringNullableFilter<"Profile"> | string | null
     date_of_birth?: DateTimeNullableFilter<"Profile"> | Date | string | null
     occupation?: StringNullableFilter<"Profile"> | string | null
+    relationship?: EnumRelationshipStatusFilter<"Profile"> | $Enums.RelationshipStatus
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
   }
 
@@ -17530,6 +17575,7 @@ export namespace Prisma {
     address?: SortOrderInput | SortOrder
     date_of_birth?: SortOrderInput | SortOrder
     occupation?: SortOrderInput | SortOrder
+    relationship?: SortOrder
     user?: UserOrderByWithRelationInput
   }
 
@@ -17543,6 +17589,7 @@ export namespace Prisma {
     address?: StringNullableFilter<"Profile"> | string | null
     date_of_birth?: DateTimeNullableFilter<"Profile"> | Date | string | null
     occupation?: StringNullableFilter<"Profile"> | string | null
+    relationship?: EnumRelationshipStatusFilter<"Profile"> | $Enums.RelationshipStatus
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
   }, "id" | "user_id" | "username">
 
@@ -17553,6 +17600,7 @@ export namespace Prisma {
     address?: SortOrderInput | SortOrder
     date_of_birth?: SortOrderInput | SortOrder
     occupation?: SortOrderInput | SortOrder
+    relationship?: SortOrder
     _count?: ProfileCountOrderByAggregateInput
     _max?: ProfileMaxOrderByAggregateInput
     _min?: ProfileMinOrderByAggregateInput
@@ -17568,6 +17616,7 @@ export namespace Prisma {
     address?: StringNullableWithAggregatesFilter<"Profile"> | string | null
     date_of_birth?: DateTimeNullableWithAggregatesFilter<"Profile"> | Date | string | null
     occupation?: StringNullableWithAggregatesFilter<"Profile"> | string | null
+    relationship?: EnumRelationshipStatusWithAggregatesFilter<"Profile"> | $Enums.RelationshipStatus
   }
 
   export type RefreshTokenWhereInput = {
@@ -18320,6 +18369,7 @@ export namespace Prisma {
     address?: string | null
     date_of_birth?: Date | string | null
     occupation?: string | null
+    relationship?: $Enums.RelationshipStatus
     user: UserCreateNestedOneWithoutProfileInput
   }
 
@@ -18330,6 +18380,7 @@ export namespace Prisma {
     address?: string | null
     date_of_birth?: Date | string | null
     occupation?: string | null
+    relationship?: $Enums.RelationshipStatus
   }
 
   export type ProfileUpdateInput = {
@@ -18338,6 +18389,7 @@ export namespace Prisma {
     address?: NullableStringFieldUpdateOperationsInput | string | null
     date_of_birth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     occupation?: NullableStringFieldUpdateOperationsInput | string | null
+    relationship?: EnumRelationshipStatusFieldUpdateOperationsInput | $Enums.RelationshipStatus
     user?: UserUpdateOneRequiredWithoutProfileNestedInput
   }
 
@@ -18348,6 +18400,7 @@ export namespace Prisma {
     address?: NullableStringFieldUpdateOperationsInput | string | null
     date_of_birth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     occupation?: NullableStringFieldUpdateOperationsInput | string | null
+    relationship?: EnumRelationshipStatusFieldUpdateOperationsInput | $Enums.RelationshipStatus
   }
 
   export type ProfileCreateManyInput = {
@@ -18357,6 +18410,7 @@ export namespace Prisma {
     address?: string | null
     date_of_birth?: Date | string | null
     occupation?: string | null
+    relationship?: $Enums.RelationshipStatus
   }
 
   export type ProfileUpdateManyMutationInput = {
@@ -18365,6 +18419,7 @@ export namespace Prisma {
     address?: NullableStringFieldUpdateOperationsInput | string | null
     date_of_birth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     occupation?: NullableStringFieldUpdateOperationsInput | string | null
+    relationship?: EnumRelationshipStatusFieldUpdateOperationsInput | $Enums.RelationshipStatus
   }
 
   export type ProfileUncheckedUpdateManyInput = {
@@ -18374,6 +18429,7 @@ export namespace Prisma {
     address?: NullableStringFieldUpdateOperationsInput | string | null
     date_of_birth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     occupation?: NullableStringFieldUpdateOperationsInput | string | null
+    relationship?: EnumRelationshipStatusFieldUpdateOperationsInput | $Enums.RelationshipStatus
   }
 
   export type RefreshTokenCreateInput = {
@@ -19213,6 +19269,13 @@ export namespace Prisma {
     created_at?: SortOrder
   }
 
+  export type EnumRelationshipStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.RelationshipStatus | EnumRelationshipStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.RelationshipStatus[] | ListEnumRelationshipStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RelationshipStatus[] | ListEnumRelationshipStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumRelationshipStatusFilter<$PrismaModel> | $Enums.RelationshipStatus
+  }
+
   export type ProfileCountOrderByAggregateInput = {
     id?: SortOrder
     user_id?: SortOrder
@@ -19220,6 +19283,7 @@ export namespace Prisma {
     address?: SortOrder
     date_of_birth?: SortOrder
     occupation?: SortOrder
+    relationship?: SortOrder
   }
 
   export type ProfileMaxOrderByAggregateInput = {
@@ -19229,6 +19293,7 @@ export namespace Prisma {
     address?: SortOrder
     date_of_birth?: SortOrder
     occupation?: SortOrder
+    relationship?: SortOrder
   }
 
   export type ProfileMinOrderByAggregateInput = {
@@ -19238,6 +19303,17 @@ export namespace Prisma {
     address?: SortOrder
     date_of_birth?: SortOrder
     occupation?: SortOrder
+    relationship?: SortOrder
+  }
+
+  export type EnumRelationshipStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.RelationshipStatus | EnumRelationshipStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.RelationshipStatus[] | ListEnumRelationshipStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RelationshipStatus[] | ListEnumRelationshipStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumRelationshipStatusWithAggregatesFilter<$PrismaModel> | $Enums.RelationshipStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumRelationshipStatusFilter<$PrismaModel>
+    _max?: NestedEnumRelationshipStatusFilter<$PrismaModel>
   }
 
   export type RefreshTokenCountOrderByAggregateInput = {
@@ -19731,6 +19807,10 @@ export namespace Prisma {
     create?: XOR<UserCreateWithoutProfileInput, UserUncheckedCreateWithoutProfileInput>
     connectOrCreate?: UserCreateOrConnectWithoutProfileInput
     connect?: UserWhereUniqueInput
+  }
+
+  export type EnumRelationshipStatusFieldUpdateOperationsInput = {
+    set?: $Enums.RelationshipStatus
   }
 
   export type UserUpdateOneRequiredWithoutProfileNestedInput = {
@@ -20507,6 +20587,23 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumOtpTypeFilter<$PrismaModel>
     _max?: NestedEnumOtpTypeFilter<$PrismaModel>
+  }
+
+  export type NestedEnumRelationshipStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.RelationshipStatus | EnumRelationshipStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.RelationshipStatus[] | ListEnumRelationshipStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RelationshipStatus[] | ListEnumRelationshipStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumRelationshipStatusFilter<$PrismaModel> | $Enums.RelationshipStatus
+  }
+
+  export type NestedEnumRelationshipStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.RelationshipStatus | EnumRelationshipStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.RelationshipStatus[] | ListEnumRelationshipStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RelationshipStatus[] | ListEnumRelationshipStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumRelationshipStatusWithAggregatesFilter<$PrismaModel> | $Enums.RelationshipStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumRelationshipStatusFilter<$PrismaModel>
+    _max?: NestedEnumRelationshipStatusFilter<$PrismaModel>
   }
 
   export type NestedEnumUserRoleFilter<$PrismaModel = never> = {
@@ -21528,6 +21625,7 @@ export namespace Prisma {
     address?: string | null
     date_of_birth?: Date | string | null
     occupation?: string | null
+    relationship?: $Enums.RelationshipStatus
   }
 
   export type ProfileUncheckedCreateWithoutUserInput = {
@@ -21536,6 +21634,7 @@ export namespace Prisma {
     address?: string | null
     date_of_birth?: Date | string | null
     occupation?: string | null
+    relationship?: $Enums.RelationshipStatus
   }
 
   export type ProfileCreateOrConnectWithoutUserInput = {
@@ -21759,6 +21858,7 @@ export namespace Prisma {
     address?: NullableStringFieldUpdateOperationsInput | string | null
     date_of_birth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     occupation?: NullableStringFieldUpdateOperationsInput | string | null
+    relationship?: EnumRelationshipStatusFieldUpdateOperationsInput | $Enums.RelationshipStatus
   }
 
   export type ProfileUncheckedUpdateWithoutUserInput = {
@@ -21767,6 +21867,7 @@ export namespace Prisma {
     address?: NullableStringFieldUpdateOperationsInput | string | null
     date_of_birth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     occupation?: NullableStringFieldUpdateOperationsInput | string | null
+    relationship?: EnumRelationshipStatusFieldUpdateOperationsInput | $Enums.RelationshipStatus
   }
 
   export type WalletUpsertWithWhereUniqueWithoutUserInput = {

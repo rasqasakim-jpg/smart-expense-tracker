@@ -56,3 +56,14 @@ enum WalletType {
   E_WALLET
   SAVINGS
 }
+
+
+// 1. Buat Enum Status Hubungan
+enum RelationshipStatus {
+  SINGLE              // Lajang
+  IN_RELATIONSHIP     // Pacaran / Tunangan
+  MARRIED             // Menikah
+  MARRIED_WITH_KIDS   // Menikah & Punya Anak
+  DIVORCED            // Cerai
+  WIDOWED             // Janda/Duda
+}

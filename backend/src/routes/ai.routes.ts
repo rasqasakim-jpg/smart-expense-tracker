@@ -9,5 +9,6 @@ const authMiddleware = new AuthMiddleware();
 // GET http://localhost:5000/api/ai/insight
 // Middleware 'authenticate' wajib ada biar kita tau siapa yang request (req.user.id)
 router.get('/insight', authMiddleware.handle, aiController.getInsight);
+router.post('/chat', authMiddleware.handle, aiController.chatWithBot);
 
 export default router;

@@ -53,7 +53,7 @@ export class TransactionRepository {
         where: whereCondition,
         include: {
           category: {
-            select: { id: true, name: true, icon: true, type: true }
+            select: { id: true, name: true, type: true }
           },
           wallet: {
             select: { id: true, name: true }
@@ -147,7 +147,7 @@ export class TransactionRepository {
   // 👇 TAMBAHAN KHUSUS UNTUK AI INSIGHT 👇
   // ==========================================
 
-async getMonthlyAggregates(userId: string, startDate: Date, endDate: Date) {
+  async getMonthlyAggregates(userId: string, startDate: Date, endDate: Date) {
     const aggregates = await this.prisma.transaction.groupBy({
       by: ['type'],
       where: {
@@ -197,20 +197,37 @@ async getMonthlyAggregates(userId: string, startDate: Date, endDate: Date) {
 
   async sumExpenseByMonth(userId: string, startDate: Date, endDate: Date): Promise<number> {
     const result = await this.prisma.transaction.aggregate({
-        where: {
-            user_id: userId,
-            type: 'EXPENSE',
-            deleted_at: null,
-            transaction_date: {
-                gte: startDate,
-                lte: endDate
-            }
-        },
-        _sum: {
-            amount: true
+      where: {
+        user_id: userId,
+        type: 'EXPENSE',
+        deleted_at: null,
+        transaction_date: {
+          gte: startDate,
+          lte: endDate
         }
+      },
+      _sum: {
+        amount: true
+      }
     });
     // Jika null (belum ada transaksi), kembalikan 0
     return Number(result._sum.amount || 0);
+  }
+
+
+  async findRecent(useId: string, limit: number) {
+    return await this.prisma.transaction.findMany({
+      where: {
+        user_id: useId,
+        deleted_at: null,
+      },
+      orderBy: {
+        transaction_date: "desc",
+      },
+      take: limit,
+      include: {
+        category: true
+      },
+    });
   }
 }

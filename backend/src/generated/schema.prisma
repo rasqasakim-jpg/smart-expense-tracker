@@ -87,13 +87,16 @@ model Profile {
   id      String @id @default(uuid())
   user_id String @unique
 
-  // Username pindah ke sini
-  username String @unique @db.VarChar
-
+  username      String    @unique @db.VarChar
   address       String?   @db.Text
   date_of_birth DateTime? @db.Date
   occupation    String?   @db.VarChar
 
+  // 👇 TAMBAHAN BARU DI SINI 👇
+  relationship RelationshipStatus @default(SINGLE)
+  // Kita kasih default 'SINGLE' biar user baru tidak error
+
+  // Relasi ke User (Tidak berubah)
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
@@ -219,4 +222,14 @@ enum WalletType {
   BANK
   E_WALLET
   SAVINGS
+}
+
+// 1. Buat Enum Status Hubungan
+enum RelationshipStatus {
+  SINGLE // Lajang
+  IN_RELATIONSHIP // Pacaran / Tunangan
+  MARRIED // Menikah
+  MARRIED_WITH_KIDS // Menikah & Punya Anak
+  DIVORCED // Cerai
+  WIDOWED // Janda/Duda
 }
