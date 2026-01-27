@@ -11,17 +11,17 @@ export class GeminiService {
             throw new Error("GEMINI_API_KEY tidak ditemukan di .env");
         }
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-        // Menggunakan model Flash agar respon cepat dan hemat
+        // Tetap pakai model 2.5 Flash
         this.model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
     }
 
     // ==========================================
-    // 1. FITUR INSIGHT (Analisa Keuangan Bulanan)
+    // 1. FITUR INSIGHT (Gaya: Smart Casual & Sopan)
     // ==========================================
     async analyzeFinancialHealth(data: {
         userName: string;
-        userOccupation: string;     // 👈 Parameter Baru: Pekerjaan
-        userRelationship: string;   // 👈 Parameter Baru: Status Hubungan
+        userOccupation: string;
+        userRelationship: string;
         totalIncome: number;
         totalExpense: number;
         budgetLimit: number;
@@ -32,103 +32,104 @@ export class GeminiService {
             ? Math.round((data.totalExpense / data.budgetLimit) * 100)
             : 0;
 
-        // Prompt dimodifikasi agar AI sadar status user
+        // 👇 PROMPT BARU: "Smart Casual" (Santai, Sopan, Profesional)
         const prompt = `
-      Bertindaklah sebagai "Financial Bestie" (Konsultan Keuangan) yang santai tapi bijak.
-      
-      PROFIL USER:
+      Peran: Financial Advisor Pribadi yang Ramah, Cerdas, dan Profesional.
+      Tone: "Smart Casual" (Gunakan Bahasa Indonesia yang baku dan sopan, tapi mengalir santai, hangat, dan tidak kaku seperti robot).
+
+      DATA PENGGUNA:
       - Nama: ${data.userName}
       - Pekerjaan: ${data.userOccupation}
-      - Status Hubungan: ${data.userRelationship} (PENTING! Sesuaikan konteks saranmu dengan status ini)
-
-      DATA KEUANGAN:
+      - Status: ${data.userRelationship}
+      
+      DATA KEUANGAN BULAN INI:
       - Pemasukan: Rp ${data.totalIncome.toLocaleString('id-ID')}
       - Pengeluaran: Rp ${data.totalExpense.toLocaleString('id-ID')}
       - Budget: Rp ${data.budgetLimit.toLocaleString('id-ID')}
-      - Sisa Budget: Rp ${remaining.toLocaleString('id-ID')} (${usagePercent}% terpakai)
-      - Top Boros: ${data.topCategories.join(', ')}
+      - Sisa: Rp ${remaining.toLocaleString('id-ID')} (${usagePercent}% terpakai)
+      - Top Pengeluaran: ${data.topCategories.join(', ')}
 
-      PANDUAN SARAN BERDASARKAN STATUS:
-      - Jika "SINGLE" (Lajang): Fokus ke nabung gadget, travel, self-reward, atau investasi awal.
-      - Jika "MARRIED" (Menikah): Fokus ke kebutuhan rumah tangga, diskusi dengan pasangan.
-      - Jika "MARRIED_WITH_KIDS" (Punya Anak): Fokus ke dana pendidikan, susu/popok, dan dana darurat keluarga.
-      - Jika "STUDENT" (Mahasiswa/Pelajar): Fokus ke hemat uang saku dan cari diskonan.
+      PANDUAN SARAN (Sesuaikan dengan Profil):
+      1. Jika "STUDENT/SINGLE": Berikan semangat untuk investasi skill atau menabung gadget, dengan bahasa yang memotivasi anak muda.
+      2. Jika "MARRIED": Gunakan bahasa yang lebih dewasa, fokus pada kestabilan keluarga.
+      3. Kaitkan saran dengan pekerjaan mereka (misal IT, Bisnis, dll) jika relevan.
 
       TUGAS:
-      Analisa data di atas. Berikan output format JSON saja (tanpa markdown).
+      Berikan output HANYA JSON.
       {
         "score": number (0-100),
         "status": "AMAN" | "WASPADA" | "BAHAYA",
-        "message": "string (komentar 1-2 kalimat bahasa gaul sopan sesuai status user)",
-        "tips": ["string", "string", "string"] (3 tips praktis yang relevan)
+        "message": "string (Komentar 2-3 kalimat. Sapa pengguna dengan namanya. Gunakan bahasa yang hangat dan apresiatif)",
+        "tips": ["string", "string", "string"] (3 tips praktis, singkat, dan jelas)
       }
     `;
 
         try {
-            if (process.env.NODE_ENV === 'development') {
-                console.log("[Gemini] Sending insight prompt...");
-            }
+            console.log("📡 [Gemini] Mengirim request insight (Smart Casual)...");
 
             const result = await this.model.generateContent(prompt);
             const response = await result.response;
             const text = response.text();
 
-            // Bersihkan markdown JSON
-            const cleanText = text.replace(/```json|```/g, "").trim();
+            // Logic pembersih JSON
+            const firstBrace = text.indexOf('{');
+            const lastBrace = text.lastIndexOf('}');
 
-            return JSON.parse(cleanText);
+            if (firstBrace === -1 || lastBrace === -1) {
+                throw new Error("Format JSON tidak ditemukan.");
+            }
+
+            const cleanJson = text.substring(firstBrace, lastBrace + 1);
+            return JSON.parse(cleanJson);
 
         } catch (error: any) {
-            console.error("\n❌ GEMINI ERROR DETAILS:", error);
+            console.error("\n❌ GEMINI ERROR:", error);
             
-            // Return Default kalau Error
             return {
                 score: 0,
                 status: "ERROR",
-                message: "Asisten sedang sibuk, coba lagi nanti ya!",
+                message: "Maaf, asisten keuangan sedang istirahat sebentar. Silakan coba lagi nanti ya.",
                 tips: []
             };
         }
     }
 
-
     // ==========================================
-    // 2. FITUR CHATBOT (Tanya Jawab)
+    // 2. FITUR CHATBOT (Gaya: Ramah & Membantu)
     // ==========================================
     async chatWithFinancialBot(
         contextData: string, 
         userQuestion: string, 
-        userOccupation: string,   // 👈 Parameter Baru
-        userRelationship: string  // 👈 Parameter Baru
+        userOccupation: string,
+        userRelationship: string
     ) {
-        // Prompt Chatbot dengan Persona
         const prompt = `
-      Bertindaklah sebagai "Financial Assistant" pribadi yang pintar, ramah, dan gaul.
+      Peran: Asisten Keuangan Virtual yang Ramah dan Pintar.
+      Tone: Sopan, Santai, tapi tetap Profesional (seperti Customer Service premium atau Teller Bank yang ramah).
       
-      PROFIL USER YANG KAMU BANTU:
+      KONTEKS PENGGUNA:
       - Pekerjaan: ${userOccupation}
-      - Status Keluarga: ${userRelationship}
-      (Sesuaikan gaya bahasa dan saranmu dengan profil user ini).
+      - Status: ${userRelationship}
 
-      DATA KEUANGAN USER (Fakta Mutlak):
+      DATA KEUANGAN:
       ${contextData}
 
-      ATURAN:
-      1. Jawab pertanyaan user BERDASARKAN data di atas.
-      2. Jangan halusinasi data yang tidak ada.
-      3. Berikan jawaban yang singkat, padat, dan solutif.
-      4. Gunakan gaya bahasa santai tapi sopan.
+      PERTANYAAN: "${userQuestion}"
 
-      PERTANYAAN USER: "${userQuestion}"
+      INSTRUKSI JAWABAN:
+      1. Jawablah dengan bahasa Indonesia yang baik, mengalir, dan nyaman dibaca.
+      2. Jangan gunakan bahasa gaul kasar (hindari: lu/gw, anjay, dsb).
+      3. Gunakan kata sapaan "Anda" atau sebut nama jika perlu.
+      4. Berikan jawaban yang solutif berdasarkan data di atas.
+      5. Jawablah secara ringkas dan padat.
     `;
 
         try {
             const result = await this.model.generateContent(prompt);
-            const response = await result.response;
-            return response.text(); // Return string biasa (teks jawaban)
+            return result.response.text();
         } catch (error) {
             console.error("Gemini Chat Error:", error);
-            return "Waduh, aku lagi pusing nih (Error koneksi AI). Tanya lagi nanti ya!";
+            return "Mohon maaf, koneksi saya sedang tidak stabil. Boleh diulangi pertanyaannya?";
         }
     }
 }

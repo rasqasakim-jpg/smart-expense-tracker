@@ -141,8 +141,8 @@ export const RelationshipStatus: {
   IN_RELATIONSHIP: 'IN_RELATIONSHIP',
   MARRIED: 'MARRIED',
   MARRIED_WITH_KIDS: 'MARRIED_WITH_KIDS',
-  DIVORCED: 'DIVORCED',
-  WIDOWED: 'WIDOWED'
+  WIDOWED: 'WIDOWED',
+  WIDOWED_WITH_KIDS: 'WIDOWED_WITH_KIDS'
 };
 
 export type RelationshipStatus = (typeof RelationshipStatus)[keyof typeof RelationshipStatus]

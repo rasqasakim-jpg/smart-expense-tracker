@@ -231,6 +231,6 @@ enum RelationshipStatus {
   IN_RELATIONSHIP // Pacaran / Tunangan
   MARRIED // Menikah
   MARRIED_WITH_KIDS // Menikah & Punya Anak
-  DIVORCED // Cerai
   WIDOWED // Janda/Duda
+  WIDOWED_WITH_KIDS // Janda/Duda punya anak k
 }
