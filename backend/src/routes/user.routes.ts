@@ -1,51 +1,26 @@
 import { Router } from 'express';
 import { UserController } from '../controllers/user.controller';
 import { AuthMiddleware } from '../middlewares/auth.middleware';
+import { uploadAvatar } from '../middlewares/upload.middleware';
 
 const router = Router();
 const userController = new UserController();
 const authMiddleware = new AuthMiddleware();
 
-/**
- * @swagger
- * tags:
- *   - name: Users
- *     description: Manajemen data user
- */
+// 👇 Route baru untuk melihat profile
+// Method: GET
+// Endpoint: /api/users/profile
+router.get(
+    '/profile',
+    authMiddleware.handle, 
+    userController.getProfile
+);
 
-/**
- * @swagger
- * /api/users/profile:
- *   patch:
- *     tags: [Users]
- *     summary: Update profile user
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               username:
- *                 type: string
- *                 example: fairuuz_z
- *               address:
- *                 type: string
- *                 example: Yogyakarta
- *               occupation:
- *                 type: string
- *                 example: Mahasiswa
- *     responses:
- *       200:
- *         description: Profile berhasil diperbarui
- *       401:
- *         description: Unauthorized
- */
-router.patch(
-  '/profile',
-  authMiddleware.handle,
+// Route update yang tadi (PUT/PATCH)
+router.put(
+  '/profile', 
+  authMiddleware.handle, 
+  uploadAvatar.single('avatar'), 
   userController.updateProfile
 );
 

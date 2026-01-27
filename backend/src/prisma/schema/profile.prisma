@@ -10,6 +10,7 @@ model Profile {
   // 👇 TAMBAHAN BARU DI SINI 👇
   relationship  RelationshipStatus @default(SINGLE) 
   // Kita kasih default 'SINGLE' biar user baru tidak error
+  avatar        String?   @db.VarChar
 
   // Relasi ke User (Tidak berubah)
   user          User      @relation(fields: [user_id], references: [id], onDelete: Cascade)

@@ -192,7 +192,8 @@ exports.Prisma.ProfileScalarFieldEnum = {
   address: 'address',
   date_of_birth: 'date_of_birth',
   occupation: 'occupation',
-  relationship: 'relationship'
+  relationship: 'relationship',
+  avatar: 'avatar'
 };
 
 exports.Prisma.RefreshTokenScalarFieldEnum = {

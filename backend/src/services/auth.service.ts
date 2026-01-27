@@ -162,5 +162,90 @@ export class AuthService {
     }
 
 
-}
 
+    async requestPasswordReset(email: string) {
+        // 1. Cek apakah email terdaftar
+        const user = await prisma.user.findUnique({
+            where: { email }
+        });
+
+        if (!user) {
+            throw new Error("Email tidak ditemukan");
+        }
+
+        // 2. Bersihkan OTP lama (PENTING: supaya kode lama gak valid lagi)
+        await this.otpRepository.deleteUserOtps(user.id);
+
+        // 3. Generate Kode OTP Baru
+        const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+        // 4. Simpan ke DB dengan tipe 'PASSWORD_RESET' (Biar beda sama register)
+        // Pastikan prisma schema enum kamu mendukung 'PASSWORD_RESET' atau pakai string biasa
+        await this.otpRepository.createOtp(user.id, otpCode, 'PASSWORD_RESET');
+
+        // 5. Kirim Email
+        // Note: Kamu mungkin mau update MailService biar subjectnya "Reset Password" bukan "Registrasi"
+        // Tapi pakai yang ada dulu gapapa.
+        await this.mailService.sendOTP(user.email, otpCode);
+
+        // 6. Log Activity
+        await this.activityLogService.log(
+            user.id,
+            ActivityAction.FORGOT_PASSWORD, // Pastikan tambahkan enum ini di types kamu
+            `Password reset requested for: ${email}`
+        );
+
+        return { message: "Kode OTP untuk reset password telah dikirim ke email" };
+    }
+
+    // TAHAP 2: User input OTP + Password Baru
+    async resetPassword(data: any) {
+        const { email, code, newPassword, confirmPassword } = data;
+
+        // 1. Validasi Input Dasar
+        if (!email || !code || !newPassword) {
+            throw new Error("Data tidak lengkap");
+        }
+
+        if (newPassword !== confirmPassword) {
+            throw new Error("Password dan konfirmasi password tidak cocok");
+        }
+
+        // 2. Cari User dulu untuk dapat ID-nya
+        const user = await prisma.user.findUnique({ where: { email } });
+        if (!user) {
+            throw new Error("User tidak ditemukan");
+        }
+
+        // 3. Cek apakah OTP Valid (pakai fungsi repo yang sudah ada)
+        // Logic di repo kamu harusnya ngecek: userId cocok? kode cocok? belum expired?
+        const isValidOtp = await this.otpRepository.findValidOtp(user.id, code);
+
+        if (!isValidOtp) {
+            throw new Error("Kode OTP salah atau sudah kadaluarsa");
+        }
+
+        // 4. Hash Password Baru
+        const hashedPassword = await hashPassword(newPassword);
+
+        // 5. Update Password di Database
+        await prisma.user.update({
+            where: { id: user.id },
+            data: { 
+                password: hashedPassword 
+            }
+        });
+
+        // 6. Hapus OTP (Supaya tidak bisa dipakai ulang)
+        await this.otpRepository.deleteUserOtps(user.id);
+
+        // 7. Log Activity
+        await this.activityLogService.log(
+            user.id,
+            ActivityAction.RESET_PASSWORD, // Tambahkan enum ini
+            "User successfully changed password via forgot-password flow"
+        );
+
+        return { message: "Password berhasil diubah. Silakan login kembali." };
+    }
+}

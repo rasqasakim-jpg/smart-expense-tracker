@@ -23,7 +23,7 @@ export class AuthController {
     if (process.env.NODE_ENV === 'development') {
       try {
         console.log(`[auth] registered id=${(newUser as any).id} email=${(newUser as any).email}`);
-      } catch (_) {}
+      } catch (_) { }
     }
 
     res.status(201).json({
@@ -48,13 +48,13 @@ export class AuthController {
         // Asumsi loginResult punya properti user atau token
         const userId = (loginResult as any).user?.id || 'unknown';
         console.log(`[auth] login success for userId=${userId}`);
-      } catch (_) {}
+      } catch (_) { }
     }
 
     res.status(200).json({
       success: true,
       message: "Operation success",
-      data: loginResult 
+      data: loginResult
     });
   });
 
@@ -69,16 +69,16 @@ export class AuthController {
     }
 
     // Tidak ada service call khusus karena data sudah ada di req.user (dari middleware)
-    
+
     // --- LOG END ---
     if (process.env.NODE_ENV === 'development') {
-        console.log(`[auth] me returned for userId=${user.id}`);
+      console.log(`[auth] me returned for userId=${user.id}`);
     }
-    
+
     res.status(200).json({
       success: true,
       message: "Operation success",
-      data: user 
+      data: user
     });
   });
 
@@ -109,18 +109,50 @@ export class AuthController {
 
 
   resendOtp = asyncHandler(async (req: Request, res: Response) => {
-        const { email } = req.body;
+    const { email } = req.body;
 
-        if (!email) {
-            throw new Error("Email wajib diisi");
-        }
+    if (!email) {
+      throw new Error("Email wajib diisi");
+    }
 
-        const result = await this.authService.resendOtp(email);
+    const result = await this.authService.resendOtp(email);
 
-        res.status(200).json({
-            success: true,
-            message: "Operation success",
-            data: result
-        });
+    res.status(200).json({
+      success: true,
+      message: "Operation success",
+      data: result
     });
+  });
+
+ forgotPassword = asyncHandler(async (req: Request, res: Response) => {
+    const { email } = req.body;
+
+    if (!email) {
+      throw new Error("Email wajib diisi");
+    }
+
+    const result = await this.authService.requestPasswordReset(email);
+
+    // Menggunakan format standar response aplikasi
+    res.status(200).json({
+      success: true,
+      message: "Permintaan reset password berhasil diproses",
+      data: result
+    });
+  });
+
+  // 2. Endpoint untuk Eksekusi Reset Password (Input OTP + Pass Baru) - Updated
+  resetPassword = asyncHandler(async (req: Request, res: Response) => {
+    // Langsung lempar body ke service
+    const result = await this.authService.resetPassword(req.body);
+
+    // Menggunakan format standar response aplikasi
+    res.status(200).json({
+      success: true,
+      message: "Password berhasil diubah",
+      data: result
+    });
+  });
 }
+
+

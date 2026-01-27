@@ -113,4 +113,17 @@ router.post(
   authController.resendOtp
 );
 
+
+router.post(
+  '/forgot-password', 
+  RateLimitMiddleware.authLimiter, 
+  authController.forgotPassword // Langsung panggil method
+);
+
+router.post(
+  '/reset-password', 
+  RateLimitMiddleware.authLimiter, 
+  authController.resetPassword // Langsung panggil method
+);
+
 export default router;
