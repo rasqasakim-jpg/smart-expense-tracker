@@ -5,35 +5,54 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Image,
   SafeAreaView,
 } from 'react-native';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 
-// Define navigation types untuk Activity Log
+// ✅ FIX: Define local param list
 type ProfileStackParamList = {
   ProfileMain: undefined;
   ActivityLog: undefined;
   Budget: undefined;
   BudgetForm: undefined;
   BudgetDetail: undefined;
+  Language: undefined;
+  Security: undefined;
+  Settings: undefined;
 };
 
-type ProfileScreenNavigationProp = StackNavigationProp<ProfileStackParamList>;
+type ProfileScreenNavigationProp = StackNavigationProp<ProfileStackParamList, 'ProfileMain'>;
 
 const ProfileScreen = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<ProfileScreenNavigationProp>();
 
-  // Fungsi untuk navigasi ke Activity Log
+  // Fungsi untuk navigasi
   const navigateToActivityLog = () => {
-    (navigation as any).navigate('ActivityLog');
-  }
+    navigation.navigate('ActivityLog');
+  };
 
   const navigateToBudget = () => {
-    (navigation as any).navigate('Budget');
-  }
+    navigation.navigate('Budget');
+  };
+
+  const navigateToLanguage = () => {
+    navigation.navigate('Language');
+  };
+
+  const navigateToSecurity = () => {
+    navigation.navigate('Security');
+  };
+
+  const navigateToSettings = () => {
+    navigation.navigate('Settings');
+  };
+
+  // Fungsi untuk logout
+  const handleLogout = () => {
+    console.log('Logout pressed');
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -42,7 +61,6 @@ const ProfileScreen = () => {
         <View style={styles.profileHeader}>
           <View style={styles.avatarContainer}>
             <TouchableOpacity style={styles.avatar}>
-            {/* Avatar/Profile Picture */}
               <Ionicons name='person-outline' size={30} color={'#000000'}/>  
             </TouchableOpacity>
           </View>
@@ -63,31 +81,41 @@ const ProfileScreen = () => {
             <Ionicons name="chevron-forward" size={20} color="#999" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem}>
-            <View style={styles.menuItemLeft}>
-              <Ionicons name="notifications-outline" size={22} color="#4A6FA5" />
-              <Text style={styles.menuItemText}>Notifikasi</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color="#999" />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.menuItem}>
+          {/* Security */}
+          <TouchableOpacity 
+            style={styles.menuItem}
+            onPress={navigateToSecurity}
+          >
             <View style={styles.menuItemLeft}>
               <Ionicons name="shield-checkmark-outline" size={22} color="#4A6FA5" />
-              <Text style={styles.menuItemText}>Keamanan</Text>
+              <View style={styles.menuTextContainer}>
+                <Text style={styles.menuItemText}>Keamanan</Text>
+                <Text style={styles.menuItemDescription}>
+                  Kelola kata sandi dan keamanan akun
+                </Text>
+              </View>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#999" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem}>
+          {/* Language */}
+          <TouchableOpacity 
+            style={styles.menuItem}
+            onPress={navigateToLanguage}
+          >
             <View style={styles.menuItemLeft}>
               <Ionicons name="language-outline" size={22} color="#4A6FA5" />
-              <Text style={styles.menuItemText}>Bahasa</Text>
+              <View style={styles.menuTextContainer}>
+                <Text style={styles.menuItemText}>Bahasa</Text>
+                <Text style={styles.menuItemDescription}>
+                  Pilih bahasa aplikasi
+                </Text>
+              </View>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#999" />
           </TouchableOpacity>
 
-          {/* ✅ TAMBAHKAN ACTIVITY LOG MENU DI SINI */}
+          {/* Activity Log */}
           <TouchableOpacity 
             style={styles.menuItem}
             onPress={navigateToActivityLog}
@@ -104,6 +132,7 @@ const ProfileScreen = () => {
             <Ionicons name="chevron-forward" size={20} color="#999" />
           </TouchableOpacity>
 
+          {/* Budget */}
           <TouchableOpacity 
             style={styles.menuItem}
             onPress={navigateToBudget}
@@ -120,10 +149,19 @@ const ProfileScreen = () => {
             <Ionicons name="chevron-forward" size={20} color="#999" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem}>
+          {/* Settings - NEW */}
+          <TouchableOpacity 
+            style={styles.menuItem}
+            onPress={navigateToSettings}
+          >
             <View style={styles.menuItemLeft}>
-              <Ionicons name="help-circle-outline" size={22} color="#4A6FA5" />
-              <Text style={styles.menuItemText}>Bantuan & FAQ</Text>
+              <Ionicons name="settings-outline" size={22} color="#4A6FA5" />
+              <View style={styles.menuTextContainer}>
+                <Text style={styles.menuItemText}>Pengaturan Aplikasi</Text>
+                <Text style={styles.menuItemDescription}>
+                  Atur tampilan, notifikasi, dan data
+                </Text>
+              </View>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#999" />
           </TouchableOpacity>
@@ -159,7 +197,10 @@ const ProfileScreen = () => {
         </View>
 
         {/* Logout Button */}
-        <TouchableOpacity style={styles.logoutButton}>
+        <TouchableOpacity 
+          style={styles.logoutButton}
+          onPress={handleLogout}
+        >
           <Ionicons name="log-out-outline" size={22} color="#fff" />
           <Text style={styles.logoutButtonText}>Logout</Text>
         </TouchableOpacity>

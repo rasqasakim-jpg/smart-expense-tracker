@@ -299,13 +299,13 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
               </TouchableOpacity>
             </View>
 
-            {/* DEMO CREDENTIALS */}
+            {/* DEMO CREDENTIALS
             <View style={styles.demoContainer}>
               <Text style={styles.demoTitle}>Demo Testing:</Text>
               <Text style={styles.demoText}>• Email: existing@test.com → Error "Email sudah terdaftar"</Text>
               <Text style={styles.demoText}>• Email lain → Success → OTP Screen</Text>
               <Text style={styles.demoText}>• OTP Code: 123456 → Success → Login</Text>
-            </View>
+            </View> */}
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

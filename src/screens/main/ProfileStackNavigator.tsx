@@ -5,14 +5,22 @@ import ActivityStackNavigator from '../activity/ActivityStackNavigator';
 import BudgetListScreen from '../budget/BudgetListScreen';
 import BudgetFormScreen from '../budget/BudgetFormScreen';
 import BudgetDetailScreen from '../budget/BudgetDetailScreen';
+import LanguageScreen from '../profile/LanguageScreen';
+import SecurityScreen from '../profile/SecurityScreen';
+import SettingsScreen from '../profile/SettingsScreen'; 
+import ChangePasswordScreen from '../profile/ChangePasswordScreen';
 
-// Define stack param list dengan Budget
+// Update param list dengan Settings
 export type ProfileStackParamList = {
   ProfileMain: undefined;
   ActivityLog: undefined;
   Budget: undefined;
   BudgetForm: { budget?: any };
   BudgetDetail: { budgetId: number };
+  Language: undefined;
+  Security: undefined;
+  ChangePassword: undefined;
+  Settings: undefined;
 };
 
 const Stack = createStackNavigator<ProfileStackParamList>();
@@ -61,6 +69,40 @@ const ProfileStackNavigator = () => {
       <Stack.Screen 
         name="BudgetDetail" 
         component={BudgetDetailScreen} 
+        options={{
+          presentation: 'card'
+        }}
+      />
+      
+      {/* Settings Screens */}
+      <Stack.Screen 
+        name="Language" 
+        component={LanguageScreen} 
+        options={{
+          presentation: 'card'
+        }}
+      />
+      
+      <Stack.Screen 
+        name="Security" 
+        component={SecurityScreen} 
+        options={{
+          presentation: 'card'
+        }}
+      />
+      
+      <Stack.Screen 
+        name="ChangePassword" 
+        component={ChangePasswordScreen} 
+        options={{
+          presentation: 'card'
+        }}
+      />
+      
+      {/* New Settings Screen */}
+      <Stack.Screen 
+        name="Settings" 
+        component={SettingsScreen} 
         options={{
           presentation: 'card'
         }}
