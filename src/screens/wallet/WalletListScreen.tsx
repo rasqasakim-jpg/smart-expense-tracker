@@ -11,7 +11,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import { Wallet } from '../../types/wallet';
 import WalletCard from '../../components/wallet/WalletCard';
-import { colors, typography, spacing, borderRadius, shadows } from '../../styles/designSysttem';
+import { colors, typography, spacing, borderRadius, shadows } from '../../styles/designSystem';
 
 type WalletStackParamList = {
   WalletList: undefined;

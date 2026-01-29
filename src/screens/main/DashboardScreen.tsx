@@ -22,7 +22,7 @@ import {
 } from '../../utils/chartDataHelper';
 import TransactionItem from '../../components/transaction/TransactionItem';
 import SkeletonLoader from '../../components/common/SkeletonLoader';
-import { colors, typography, spacing, borderRadius, shadows } from '../../styles/designSysttem';
+import { colors, typography, spacing, borderRadius, shadows } from '../../styles/designSystem';
 
 // Types untuk tab navigation
 type TabParamList = {
@@ -57,6 +57,9 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
   const [userName, setUserName] = useState('User');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   
+  // State untuk control skeleton saat refresh
+  const [showSkeletonOnRefresh, setShowSkeletonOnRefresh] = useState(false);
+  
   // Tab navigation untuk switch tab
   const tabNavigation = useNavigation<TabNavigationProp>();
 
@@ -71,6 +74,7 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
     } finally {
       setLoading(false);
       setRefreshing(false);
+      setShowSkeletonOnRefresh(false);
     }
   };
 
@@ -78,9 +82,19 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
     loadDashboardData();
   }, []);
 
-  const onRefresh = () => {
+  // ==================== REFRESH HANDLING ====================
+  const handleRefresh = () => {
     setRefreshing(true);
-    loadDashboardData();
+    // Tampilkan skeleton setelah 300ms jika refresh lama
+    const skeletonTimeout = setTimeout(() => {
+      if (refreshing) {
+        setShowSkeletonOnRefresh(true);
+      }
+    }, 300);
+    
+    loadDashboardData().finally(() => {
+      clearTimeout(skeletonTimeout);
+    });
   };
 
   // Hitung totals dari data real menggunakan helper
@@ -147,7 +161,18 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
 
   // ==================== SKELETON LOADER ====================
   const renderSkeletonDashboard = () => (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView 
+      style={styles.container} 
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
+          colors={['#007bff']}
+          tintColor="#007bff"
+        />
+      }
+    >
       {/* Header Greeting Skeleton */}
       <View style={styles.skeletonGreeting}>
         <SkeletonLoader 
@@ -315,7 +340,10 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
     </ScrollView>
   );
 
-  if (loading && !refreshing) {
+  // ==================== RENDER LOGIC ====================
+  
+  // Jika initial loading ATAU refresh lebih dari 300ms -> tampilkan skeleton
+  if ((loading && !refreshing) || showSkeletonOnRefresh) {
     return renderSkeletonDashboard();
   }
 
@@ -326,7 +354,7 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
-          onRefresh={onRefresh}
+          onRefresh={handleRefresh}
           colors={['#007bff']}
           tintColor="#007bff"
         />
@@ -608,7 +636,7 @@ const styles = StyleSheet.create({
   },
   statsContainer: {
     flexDirection: 'row',
-    width: '100%',
+    width: '105%',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
@@ -618,8 +646,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   statIcon: {
-    width: 40,
-    height: 40,
+    width: 35,
+    height: 35,
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',

@@ -15,7 +15,7 @@ import TransactionItem from '../../components/transaction/TransactionItem';
 import ScreenHeader from '../../components/layout/ScreenHeader';
 import TransactionFilterModal from '../../components/transaction/TransactionFilterModal';
 import SkeletonLoader from '../../components/common/SkeletonLoader';
-import { colors, typography, spacing, borderRadius, shadows } from '../../styles/designSysttem';
+import { colors, typography, spacing, borderRadius, shadows } from '../../styles/designSystem';
 
 type TransactionListScreenNavigationProp = StackNavigationProp<
   TransactionStackParamList,

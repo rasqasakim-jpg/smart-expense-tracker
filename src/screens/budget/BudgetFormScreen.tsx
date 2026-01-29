@@ -55,14 +55,14 @@ const BudgetFormScreen: React.FC<Props> = ({ navigation, route }) => {
 
   // Mock categories (nanti integrate dengan category service)
   const categories = [
-    { id: 2, name: 'Belanja', Ionicons: 'shopping-cart' },
+    { id: 2, name: 'Belanja', Ionicons: 'cart-outline' },
     { id: 3, name: 'Tagihan', Ionicons: 'receipt' },
-    { id: 4, name: 'Transport', Ionicons: 'directions-car' },
+    { id: 4, name: 'Transport', Ionicons: 'car-sport-outline' },
     { id: 5, name: 'Makanan', Ionicons: 'restaurant' },
-    { id: 6, name: 'Hiburan', Ionicons: 'movie' },
-    { id: 7, name: 'Kesehatan', Ionicons: 'local-hospital' },
+    { id: 6, name: 'Hiburan', Ionicons: 'videocam-outline' },
+    { id: 7, name: 'Kesehatan', Ionicons: 'medkit-outline' },
     { id: 8, name: 'Pendidikan', Ionicons: 'school' },
-    { id: 9, name: 'Lainnya', Ionicons: 'more-horiz' },
+    { id: 9, name: 'Lainnya', Ionicons: 'ellipsis-horizontal-outline' },
   ];
 
   const periodOptions = [
@@ -433,6 +433,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8f9fa',
+    paddingTop: 50
   },
   formContainer: {
     padding: 16,

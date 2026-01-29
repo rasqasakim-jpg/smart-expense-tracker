@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; // ← TAMBAH useEffect
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -12,22 +12,28 @@ import {
   SafeAreaView,
   KeyboardAvoidingView,
   Platform,
+  Animated,
 } from 'react-native';
 import { Formik } from 'formik';
 import { loginSchema } from '../../utils/validation';
 import { LoginRequest } from '../../types/auth';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RouteProp } from '@react-navigation/native'; // ← IMPORT INI
+import { RouteProp } from '@react-navigation/native';
 import { AuthStackParamList } from '../../navigation/AuthNavigator';
 import Ionicons from '@react-native-vector-icons/ionicons';
-import { colors, typography, spacing, borderRadius, shadows } from '../../styles/designSysttem';
+import { colors, typography, spacing, borderRadius, shadows } from '../../styles/designSystem';
+
+// Import components animation yang sudah dibuat
+import SuccessToast from '../../components/common/SuccesToast';
+import LoadingOverlay from '../../components/common/LoadingOverlay';
+import AnimatedButton from '../../components/common/AnimatedButton';
 
 type LoginScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Login'>;
-type LoginScreenRouteProp = RouteProp<AuthStackParamList, 'Login'>; // ← TAMBAH INI
+type LoginScreenRouteProp = RouteProp<AuthStackParamList, 'Login'>;
 
 interface Props {
   navigation: LoginScreenNavigationProp;
-  route: LoginScreenRouteProp; // ← TAMBAH INI
+  route: LoginScreenRouteProp;
   onLoginSuccess?: () => void;
 }
 
@@ -36,51 +42,135 @@ const LoginScreen: React.FC<Props> = ({ navigation, route, onLoginSuccess }) => 
   const [showPassword, setShowPassword] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  
+  // Animation values
+  const headerSlideAnim = useRef(new Animated.Value(-100)).current;
+  const formFadeAnim = useRef(new Animated.Value(0)).current;
+  const formSlideAnim = useRef(new Animated.Value(50)).current;
+  const buttonScaleAnim = useRef(new Animated.Value(1)).current;
+  const emailErrorAnim = useRef(new Animated.Value(0)).current;
+  const passwordErrorAnim = useRef(new Animated.Value(0)).current;
+
+  // Animasi saat screen pertama load
+  useEffect(() => {
+    // Header slide in dari atas
+    Animated.spring(headerSlideAnim, {
+      toValue: 0,
+      friction: 8,
+      tension: 40,
+      useNativeDriver: true,
+    }).start();
+
+    // Form fade in dengan delay
+    Animated.parallel([
+      Animated.timing(formFadeAnim, {
+        toValue: 1,
+        duration: 500,
+        delay: 300,
+        useNativeDriver: true,
+      }),
+      Animated.spring(formSlideAnim, {
+        toValue: 0,
+        friction: 8,
+        tension: 40,
+        delay: 300,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
 
   // Handle success message dari OTP verification atau route params
   useEffect(() => {
     if (route.params?.message) {
       setSuccessMessage(route.params.message);
+      setShowSuccessToast(true);
+      
+      // Auto hide toast setelah 3 detik
+      const timer = setTimeout(() => {
+        setShowSuccessToast(false);
+      }, 3000);
+      
       // Clear params setelah ditampilkan
       navigation.setParams({ message: undefined });
+      return () => clearTimeout(timer);
     }
   }, [route.params?.message, navigation]);
 
-  // Tampilkan success message jika ada
+  // Animate error messages when they appear
   useEffect(() => {
-    if (successMessage) {
-      Alert.alert('Success', successMessage);
-      setSuccessMessage(null);
+    if (formErrors.email) {
+      Animated.timing(emailErrorAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      emailErrorAnim.setValue(0);
     }
-  }, [successMessage]);
+  }, [formErrors.email]);
+
+  useEffect(() => {
+    if (formErrors.password) {
+      Animated.timing(passwordErrorAnim, {
+        toValue: 1,
+        duration: 300,
+        delay: 50,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      passwordErrorAnim.setValue(0);
+    }
+  }, [formErrors.password]);
 
   const handleLogin = async (values: LoginRequest) => {
     try {
       setLoading(true);
       setFormErrors({});
       
+      // Button loading animation
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(buttonScaleAnim, {
+            toValue: 1.05,
+            duration: 500,
+            useNativeDriver: true,
+          }),
+          Animated.timing(buttonScaleAnim, {
+            toValue: 1,
+            duration: 500,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+      
       // Validate with Yup
       await loginSchema.validate(values, { abortEarly: false });
       
       // Simulasi API call
-      await new Promise<void>(resolve => setTimeout(resolve, 1000));
+      await new Promise<void>(resolve => setTimeout(resolve, 1500));
+      
+      // Stop loading animation
+      buttonScaleAnim.stopAnimation();
+      Animated.timing(buttonScaleAnim, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
       
       // Demo credentials untuk testing
       if (values.email === 'demo@test.com' && values.password === 'demo123') {
-        Alert.alert(
-          'Login Berhasil',
-          'Selamat datang di Smart Expense Tracker!',
-          [
-            {
-              text: 'Lanjutkan',
-              onPress: () => {
-                if (onLoginSuccess) {
-                  onLoginSuccess();
-                }
-              },
-            },
-          ]
-        );
+        // Success toast
+        setSuccessMessage('Login berhasil! Selamat datang.');
+        setShowSuccessToast(true);
+        
+        // Navigate setelah 1.5 detik
+        setTimeout(() => {
+          if (onLoginSuccess) {
+            onLoginSuccess();
+          }
+        }, 1500);
+        
       } else if (values.email === 'error@test.com') {
         // Simulate API validation error
         throw {
@@ -93,13 +183,26 @@ const LoginScreen: React.FC<Props> = ({ navigation, route, onLoginSuccess }) => 
         };
       } else {
         // Default success
-        if (onLoginSuccess) {
-          onLoginSuccess();
-        }
+        setSuccessMessage('Login berhasil!');
+        setShowSuccessToast(true);
+        
+        setTimeout(() => {
+          if (onLoginSuccess) {
+            onLoginSuccess();
+          }
+        }, 1500);
       }
       
     } catch (error: any) {
       console.log('Login error:', error);
+      
+      // Stop loading animation
+      buttonScaleAnim.stopAnimation();
+      Animated.timing(buttonScaleAnim, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
       
       // Handle Yup validation errors
       if (error.name === 'ValidationError') {
@@ -108,6 +211,26 @@ const LoginScreen: React.FC<Props> = ({ navigation, route, onLoginSuccess }) => 
           errors[err.path] = err.message;
         });
         setFormErrors(errors);
+        
+        // Shake animation untuk form error
+        Animated.sequence([
+          Animated.timing(formSlideAnim, {
+            toValue: 10,
+            duration: 50,
+            useNativeDriver: true,
+          }),
+          Animated.timing(formSlideAnim, {
+            toValue: -10,
+            duration: 50,
+            useNativeDriver: true,
+          }),
+          Animated.timing(formSlideAnim, {
+            toValue: 0,
+            duration: 50,
+            useNativeDriver: true,
+          }),
+        ]).start();
+        
         return;
       }
       
@@ -118,10 +241,30 @@ const LoginScreen: React.FC<Props> = ({ navigation, route, onLoginSuccess }) => 
           errors[key] = error.errors[key][0];
         });
         setFormErrors(errors);
+        
+        // Shake animation
+        Animated.sequence([
+          Animated.timing(formSlideAnim, {
+            toValue: 10,
+            duration: 50,
+            useNativeDriver: true,
+          }),
+          Animated.timing(formSlideAnim, {
+            toValue: -10,
+            duration: 50,
+            useNativeDriver: true,
+          }),
+          Animated.timing(formSlideAnim, {
+            toValue: 0,
+            duration: 50,
+            useNativeDriver: true,
+          }),
+        ]).start();
+        
         return;
       }
       
-      // Handle network/server errors
+      // Handle other errors
       Alert.alert(
         'Login Gagal',
         error?.message || 'Email atau password salah. Coba lagi.',
@@ -133,13 +276,26 @@ const LoginScreen: React.FC<Props> = ({ navigation, route, onLoginSuccess }) => 
     }
   };
 
-  // Clear error when user starts typing
+  // Clear error when user starts typing dengan animation
   const clearError = (field: string) => {
     if (formErrors[field]) {
-      setFormErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[field];
-        return newErrors;
+      // Fade out animation untuk error message
+      Animated.timing(formFadeAnim, {
+        toValue: 0.5,
+        duration: 150,
+        useNativeDriver: true,
+      }).start(() => {
+        setFormErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors[field];
+          return newErrors;
+        });
+        
+        Animated.timing(formFadeAnim, {
+          toValue: 1,
+          duration: 150,
+          useNativeDriver: true,
+        }).start();
       });
     }
   };
@@ -147,6 +303,19 @@ const LoginScreen: React.FC<Props> = ({ navigation, route, onLoginSuccess }) => 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar backgroundColor="#007AFF" barStyle="light-content" />
+      
+      {/* Success Toast */}
+      <SuccessToast
+        message={successMessage || ''}
+        visible={showSuccessToast}
+        onHide={() => setShowSuccessToast(false)}
+      />
+      
+      {/* Loading Overlay */}
+      <LoadingOverlay 
+        visible={loading} 
+        message="Memproses login..." 
+      />
       
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -157,15 +326,28 @@ const LoginScreen: React.FC<Props> = ({ navigation, route, onLoginSuccess }) => 
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* HEADER */}
-          <View style={styles.header}>
+          {/* HEADER dengan animation */}
+          <Animated.View 
+            style={[
+              styles.header,
+              { transform: [{ translateY: headerSlideAnim }] }
+            ]}
+          >
             <Ionicons name="wallet" size={50} color="#fff" />
             <Text style={styles.headerTitle}>Smart Expense Tracker</Text>
             <Text style={styles.subtitle}>Kelola keuangan dengan mudah</Text>
-          </View>
+          </Animated.View>
 
-          {/* FORM */}
-          <View style={styles.formContainer}>
+          {/* FORM dengan animation */}
+          <Animated.View 
+            style={[
+              styles.formContainer,
+              {
+                opacity: formFadeAnim,
+                transform: [{ translateY: formSlideAnim }]
+              }
+            ]}
+          >
             <Text style={styles.formTitle}>Masuk ke Akun Anda</Text>
             
             <Formik
@@ -203,10 +385,23 @@ const LoginScreen: React.FC<Props> = ({ navigation, route, onLoginSuccess }) => 
                       />
                     </View>
                     {formErrors.email && (
-                      <View style={styles.errorContainer}>
+                      <Animated.View 
+                        style={[
+                          styles.errorContainer,
+                          { 
+                            opacity: emailErrorAnim,
+                            transform: [{
+                              translateY: emailErrorAnim.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [-10, 0],
+                              })
+                            }]
+                          }
+                        ]}
+                      >
                         <Ionicons name="alert-circle" size={14} color="#FF3B30" />
                         <Text style={styles.errorText}>{formErrors.email}</Text>
-                      </View>
+                      </Animated.View>
                     )}
                   </View>
 
@@ -249,10 +444,23 @@ const LoginScreen: React.FC<Props> = ({ navigation, route, onLoginSuccess }) => 
                       </TouchableOpacity>
                     </View>
                     {formErrors.password && (
-                      <View style={styles.errorContainer}>
+                      <Animated.View 
+                        style={[
+                          styles.errorContainer,
+                          { 
+                            opacity: passwordErrorAnim,
+                            transform: [{
+                              translateY: passwordErrorAnim.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [-10, 0],
+                              })
+                            }]
+                          }
+                        ]}
+                      >
                         <Ionicons name="alert-circle" size={14} color="#FF3B30" />
                         <Text style={styles.errorText}>{formErrors.password}</Text>
-                      </View>
+                      </Animated.View>
                     )}
                   </View>
 
@@ -265,21 +473,20 @@ const LoginScreen: React.FC<Props> = ({ navigation, route, onLoginSuccess }) => 
                     <Text style={styles.forgotPasswordText}>Lupa password?</Text>
                   </TouchableOpacity>
 
-                  {/* LOGIN BUTTON */}
-                  <TouchableOpacity
-                    style={[styles.button, loading && styles.buttonDisabled]}
-                    onPress={() => handleSubmit()}
-                    disabled={loading}
+                  {/* LOGIN BUTTON dengan AnimatedButton */}
+                  <Animated.View
+                    style={{ transform: [{ scale: buttonScaleAnim }] }}
                   >
-                    {loading ? (
-                      <ActivityIndicator color="#fff" />
-                    ) : (
-                      <>
-                        <Ionicons name="log-in-outline" size={20} color="#fff" />
-                        <Text style={styles.buttonText}>  Masuk ke Aplikasi</Text>
-                      </>
-                    )}
-                  </TouchableOpacity>
+                    <AnimatedButton
+                      title="Masuk ke Aplikasi"
+                      onPress={() => handleSubmit()}
+                      loading={loading}
+                      type="primary"
+                      icon={<Ionicons name="log-in-outline" size={20} color="#fff" />}
+                      style={styles.button}
+                      disabled={loading}
+                    />
+                  </Animated.View>
                 </>
               )}
             </Formik>
@@ -294,7 +501,7 @@ const LoginScreen: React.FC<Props> = ({ navigation, route, onLoginSuccess }) => 
                 <Text style={styles.signupLink}>Daftar sekarang</Text>
               </TouchableOpacity>
             </View>
-          </View>
+          </Animated.View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -396,23 +603,7 @@ const styles = StyleSheet.create({
     fontWeight: typography.medium,
   },
   button: {
-    backgroundColor: colors.primary,
-    borderRadius: borderRadius.md,
-    padding: spacing.lg,
-    alignItems: 'center',
     marginBottom: spacing.lg,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    ...shadows.sm,
-  },
-  buttonDisabled: {
-    backgroundColor: colors.secondary,
-    opacity: 0.7,
-  },
-  buttonText: {
-    color: colors.textLight,
-    fontSize: typography.h6,
-    fontWeight: typography.semiBold,
   },
   signupContainer: {
     flexDirection: 'row',

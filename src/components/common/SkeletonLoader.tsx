@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Animated, StyleSheet, Dimensions } from 'react-native';
-import { colors } from '../../styles/designSysttem';
+import { colors } from '../../styles/designSystem';
 
 interface SkeletonLoaderProps {
   width?: number | string;

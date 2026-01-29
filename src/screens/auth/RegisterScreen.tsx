@@ -12,6 +12,7 @@ import {
   StatusBar,
   KeyboardAvoidingView,
   Platform,
+  Animated,
 } from 'react-native';
 import { Formik } from 'formik';
 import { registerSchema } from '../../utils/validation';
@@ -19,6 +20,9 @@ import { RegisterRequest } from '../../types/auth';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParamList } from '../../navigation/AuthNavigator';
 import Ionicons from '@react-native-vector-icons/ionicons'; // ← FIX IMPORT
+import SuccessToast from '../../components/common/SuccesToast';
+import LoadingOverlay from '../../components/common/LoadingOverlay';
+import AnimatedButton from '../../components/common/AnimatedButton';
 
 type RegisterScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Register'>;
 
@@ -30,7 +34,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-
+  
   const handleRegister = async (values: RegisterRequest) => {
     try {
       setLoading(true);

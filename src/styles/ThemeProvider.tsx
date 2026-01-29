@@ -1,6 +1,6 @@
 import React, { createContext, useContext } from 'react';
 import { useColorScheme } from 'react-native';
-import { colors, typography, spacing, borderRadius, shadows } from './designSysttem';
+import { colors, typography, spacing, borderRadius, shadows } from './designSystem';
 
 interface Theme {
   colors: typeof colors;
