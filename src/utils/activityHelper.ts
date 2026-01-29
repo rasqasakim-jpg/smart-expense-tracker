@@ -143,41 +143,40 @@ const isSameDay = (date1: Date, date2: Date): boolean => {
   );
 };
 
-// Get icon berdasarkan activity type (gunakan react-native-vector-icons/Feather)
 export const getActivityIcon = (type: ActivityType): { name: string; color: string } => {
   switch (type) {
     case 'LOGIN':
-      return { name: 'log-in', color: '#28a745' }; // Green
+      return { name: 'log-in-outline', color: '#28a745' }; // Green
     case 'REGISTER':
-      return { name: 'user-plus', color: '#007bff' }; // Blue
+      return { name: 'person-add-outline', color: '#007bff' }; // Blue
     case 'TRANSACTION_CREATE':
-      return { name: 'plus-circle', color: '#6f42c1' }; // Purple
+      return { name: 'add-circle-outline', color: '#6f42c1' }; // Purple
     case 'TRANSACTION_UPDATE':
-      return { name: 'edit-2', color: '#ffc107' }; // Yellow
+      return { name: 'create-outline', color: '#ffc107' }; // Yellow
     case 'TRANSACTION_DELETE':
-      return { name: 'trash-2', color: '#dc3545' }; // Red
+      return { name: 'trash-outline', color: '#dc3545' }; // Red
     case 'WALLET_CREATE':
-      return { name: 'credit-card', color: '#17a2b8' }; // Cyan
+      return { name: 'wallet-outline', color: '#17a2b8' }; // Cyan
     case 'WALLET_UPDATE':
-      return { name: 'refresh-cw', color: '#fd7e14' }; // Orange
+      return { name: 'refresh-circle-outline', color: '#fd7e14' }; // Orange
     case 'WALLET_DELETE':
-      return { name: 'x-circle', color: '#dc3545' }; // Red
+      return { name: 'close-circle-outline', color: '#dc3545' }; // Red
     case 'CATEGORY_CREATE':
-      return { name: 'folder-plus', color: '#20c997' }; // Teal
+      return { name: 'folder-open-outline', color: '#20c997' }; // Teal
     case 'CATEGORY_UPDATE':
-      return { name: 'folder', color: '#6c757d' }; // Gray
+      return { name: 'folder-outline', color: '#6c757d' }; // Gray
     case 'CATEGORY_DELETE':
-      return { name: 'folder-minus', color: '#dc3545' }; // Red
+      return { name: 'remove-circle-outline', color: '#dc3545' }; // Red
     case 'PROFILE_UPDATE':
-      return { name: 'user', color: '#e83e8c' }; // Pink
+      return { name: 'person-outline', color: '#e83e8c' }; // Pink
     case 'OTP_SENT':
-      return { name: 'mail', color: '#007bff' }; // Blue
+      return { name: 'mail-outline', color: '#007bff' }; // Blue
     case 'PASSWORD_RESET':
-      return { name: 'lock', color: '#28a745' }; // Green
+      return { name: 'lock-closed-outline', color: '#28a745' }; // Green
     case 'SYSTEM':
-      return { name: 'settings', color: '#6c757d' }; // Gray
+      return { name: 'settings-outline', color: '#6c757d' }; // Gray
     default:
-      return { name: 'activity', color: '#007bff' };
+      return { name: 'help-circle-outline', color: '#007bff' };
   }
 };
 

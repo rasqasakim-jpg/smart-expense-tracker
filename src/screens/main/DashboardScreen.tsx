@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  ActivityIndicator,
   RefreshControl,
   Dimensions,
 } from 'react-native';
@@ -22,6 +21,8 @@ import {
   formatNumber 
 } from '../../utils/chartDataHelper';
 import TransactionItem from '../../components/transaction/TransactionItem';
+import SkeletonLoader from '../../components/common/SkeletonLoader';
+import { colors, typography, spacing, borderRadius, shadows } from '../../styles/designSysttem';
 
 // Types untuk tab navigation
 type TabParamList = {
@@ -144,13 +145,178 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
     },
   };
 
-  if (loading && !refreshing) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#007bff" />
-        <Text style={styles.loadingText}>Memuat dashboard...</Text>
+  // ==================== SKELETON LOADER ====================
+  const renderSkeletonDashboard = () => (
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      {/* Header Greeting Skeleton */}
+      <View style={styles.skeletonGreeting}>
+        <SkeletonLoader 
+          width={200} 
+          height={24} 
+          borderRadius={borderRadius.sm} 
+        />
       </View>
-    );
+
+      {/* Balance Card Skeleton */}
+      <View style={styles.skeletonBalanceCard}>
+        {/* Balance Title Skeleton */}
+        <View style={styles.skeletonBalanceHeader}>
+          <SkeletonLoader 
+            width={120} 
+            height={16} 
+            borderRadius={borderRadius.sm} 
+          />
+        </View>
+        
+        {/* Balance Amount Skeleton */}
+        <SkeletonLoader 
+          width={200} 
+          height={40} 
+          borderRadius={borderRadius.sm} 
+          style={{ marginBottom: spacing.xl, alignSelf: 'center' }}
+        />
+        
+        {/* Income & Expense Stats Skeleton */}
+        <View style={styles.skeletonStatsContainer}>
+          <View style={styles.skeletonStatItem}>
+            <SkeletonLoader 
+              width={40} 
+              height={40} 
+              borderRadius={borderRadius.round} 
+              style={{ marginRight: spacing.md }}
+            />
+            <View style={styles.skeletonStatInfo}>
+              <SkeletonLoader 
+                width={80} 
+                height={12} 
+                borderRadius={borderRadius.sm} 
+                style={{ marginBottom: spacing.xs }}
+              />
+              <SkeletonLoader 
+                width={120} 
+                height={20} 
+                borderRadius={borderRadius.sm} 
+              />
+            </View>
+          </View>
+          
+          <SkeletonLoader 
+            width={1} 
+            height={40} 
+            borderRadius={0} 
+            style={{ marginHorizontal: spacing.lg }}
+          />
+          
+          <View style={styles.skeletonStatItem}>
+            <SkeletonLoader 
+              width={40} 
+              height={40} 
+              borderRadius={borderRadius.round} 
+              style={{ marginRight: spacing.md }}
+            />
+            <View style={styles.skeletonStatInfo}>
+              <SkeletonLoader 
+                width={80} 
+                height={12} 
+                borderRadius={borderRadius.sm} 
+                style={{ marginBottom: spacing.xs }}
+              />
+              <SkeletonLoader 
+                width={120} 
+                height={20} 
+                borderRadius={borderRadius.sm} 
+              />
+            </View>
+          </View>
+        </View>
+      </View>
+
+      {/* Statistik Bulanan Chart Skeleton */}
+      <View style={styles.skeletonChartSection}>
+        {/* Section Title Skeleton */}
+        <SkeletonLoader 
+          width={150} 
+          height={24} 
+          borderRadius={borderRadius.sm} 
+          style={{ marginBottom: spacing.xs }}
+        />
+        <SkeletonLoader 
+          width={120} 
+          height={16} 
+          borderRadius={borderRadius.sm} 
+          style={{ marginBottom: spacing.lg }}
+        />
+        
+        {/* Chart Skeleton */}
+        <SkeletonLoader 
+          width="100%" 
+          height={200} 
+          borderRadius={borderRadius.lg} 
+        />
+        
+        {/* Chart Stats Skeleton */}
+        <View style={styles.skeletonChartStats}>
+          <View style={styles.skeletonStatRow}>
+            <SkeletonLoader width={100} height={16} borderRadius={borderRadius.sm} />
+            <SkeletonLoader width={80} height={16} borderRadius={borderRadius.sm} />
+          </View>
+          <View style={styles.skeletonStatRow}>
+            <SkeletonLoader width={120} height={16} borderRadius={borderRadius.sm} />
+            <SkeletonLoader width={100} height={16} borderRadius={borderRadius.sm} />
+          </View>
+        </View>
+      </View>
+
+      {/* Recent Transactions Header Skeleton */}
+      <View style={styles.skeletonTransactionHeader}>
+        <SkeletonLoader width={150} height={24} borderRadius={borderRadius.sm} />
+        <SkeletonLoader width={100} height={16} borderRadius={borderRadius.sm} />
+      </View>
+
+      {/* Recent Transactions List Skeleton */}
+      <View style={styles.skeletonTransactionList}>
+        {[1, 2, 3, 4, 5].map((item) => (
+          <View key={item} style={styles.skeletonTransactionItem}>
+            <SkeletonLoader 
+              width={40} 
+              height={40} 
+              borderRadius={borderRadius.round} 
+              style={{ marginRight: spacing.md }}
+            />
+            <View style={styles.skeletonTransactionContent}>
+              <SkeletonLoader 
+                width={180} 
+                height={16} 
+                borderRadius={borderRadius.sm} 
+                style={{ marginBottom: spacing.xs }}
+              />
+              <View style={styles.skeletonTransactionMeta}>
+                <SkeletonLoader 
+                  width={80} 
+                  height={12} 
+                  borderRadius={borderRadius.sm} 
+                  style={{ marginRight: spacing.sm }}
+                />
+                <SkeletonLoader 
+                  width={100} 
+                  height={12} 
+                  borderRadius={borderRadius.sm} 
+                />
+              </View>
+            </View>
+            <SkeletonLoader 
+              width={100} 
+              height={20} 
+              borderRadius={borderRadius.sm} 
+            />
+          </View>
+        ))}
+      </View>
+    </ScrollView>
+  );
+
+  if (loading && !refreshing) {
+    return renderSkeletonDashboard();
   }
 
   return (
@@ -304,68 +470,140 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
-    paddingTop: 50
+    backgroundColor: colors.background,
   },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
+  
+  // ============ SKELETON STYLES ============
+  skeletonGreeting: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.xxl,
+    paddingBottom: spacing.lg,
+    backgroundColor: colors.white,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderLight,
+    alignItems: 'flex-start',
+  },
+  skeletonBalanceCard: {
+    backgroundColor: colors.white,
+    margin: spacing.lg,
+    borderRadius: borderRadius.lg,
+    padding: spacing.xl,
+    ...shadows.lg,
+  },
+  skeletonBalanceHeader: {
+    marginBottom: spacing.md,
+  },
+  skeletonStatsContainer: {
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
-  loadingText: {
-    marginTop: 12,
-    color: '#666',
-    fontSize: 16,
+  skeletonStatItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
   },
+  skeletonStatInfo: {
+    flex: 1,
+  },
+  skeletonChartSection: {
+    backgroundColor: colors.white,
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.lg,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    ...shadows.md,
+  },
+  skeletonChartStats: {
+    marginTop: spacing.lg,
+    width: '100%',
+    backgroundColor: colors.light,
+    borderRadius: borderRadius.md,
+    padding: spacing.lg,
+  },
+  skeletonStatRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.sm,
+  },
+  skeletonTransactionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.md,
+    marginTop: spacing.sm,
+  },
+  skeletonTransactionList: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.xl,
+  },
+  skeletonTransactionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
+    ...shadows.sm,
+  },
+  skeletonTransactionContent: {
+    flex: 1,
+  },
+  skeletonTransactionMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  
+  // ============ REGULAR STYLES ============
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: '#fff',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.lg,
+    backgroundColor: colors.white,
     borderBottomWidth: 1,
-    borderBottomColor: '#eaeaea',
+    borderBottomColor: colors.borderLight,
+    paddingTop: spacing.xxl,
   },
   greeting: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: typography.h6,
+    fontWeight: typography.semiBold,
+    color: colors.textPrimary,
   },
   welcome: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#333',
-    marginTop: 2,
+    fontSize: typography.h4,
+    fontWeight: typography.bold,
+    color: colors.textPrimary,
+    marginTop: spacing.xs,
   },
   balanceCard: {
-    backgroundColor: '#ffffff',
-    margin: 20,
-    borderRadius: 20,
-    padding: 25,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
+    backgroundColor: colors.white,
+    margin: spacing.lg,
+    borderRadius: borderRadius.lg,
+    padding: spacing.xl,
+    ...shadows.lg,
   },
   balanceHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   balanceTitle: {
-    fontSize: 14,
-    color: 'rgba(0, 0, 0, 0.9)',
-    fontWeight: '600',
-    marginLeft: 8,
+    fontSize: typography.body,
+    color: colors.textPrimary,
+    fontWeight: typography.semiBold,
+    marginLeft: spacing.sm,
     letterSpacing: 0.5,
   },
   balanceAmount: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    color: '#000000',
-    marginBottom: 25,
+    fontSize: typography.h1,
+    fontWeight: typography.bold,
+    color: colors.textPrimary,
+    marginBottom: spacing.xl,
     textAlign: 'center',
   },
   statsContainer: {
@@ -385,150 +623,143 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: spacing.md,
   },
   incomeIcon: {
-    backgroundColor: '#28a745',
+    backgroundColor: colors.success,
   },
   expenseIcon: {
-    backgroundColor: '#dc3545',
+    backgroundColor: colors.danger,
   },
   statInfo: {
     flex: 1,
   },
   statLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 2,
+    fontSize: typography.small,
+    color: colors.textSecondary,
+    marginBottom: spacing.xs,
   },
   statAmount: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: typography.h5,
+    fontWeight: typography.bold,
   },
   incomeText: {
-    color: '#28a745',
-    fontSize: 16
+    color: colors.success,
+    fontSize: typography.h6,
   },
   expenseText: {
-    color: '#dc3545',
-    fontSize: 16
+    color: colors.danger,
+    fontSize: typography.h6,
   },
   divider: {
     width: 1,
     height: 40,
-    backgroundColor: '#eaeaea',
-    marginHorizontal: 16,
+    backgroundColor: colors.borderLight,
+    marginHorizontal: spacing.lg,
   },
-  // Section
   section: {
-    backgroundColor: '#fff',
-    marginHorizontal: 20,
-    marginBottom: 20,
-    borderRadius: 16,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  sectionHeader: {
-    marginBottom: 16,
+    backgroundColor: colors.white,
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.lg,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    ...shadows.md,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
-    marginBottom: 4,
+    fontSize: typography.h5,
+    fontWeight: typography.bold,
+    color: colors.textPrimary,
+    marginBottom: spacing.xs,
   },
   sectionSubtitle: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: typography.body,
+    color: colors.textSecondary,
   },
   sectionTitleLeft: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
+    fontSize: typography.h5,
+    fontWeight: typography.bold,
+    color: colors.textPrimary,
   },
   chartContainer: {
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: spacing.sm,
   },
   chart: {
-    borderRadius: 16,
-    marginLeft: -30,
+    borderRadius: borderRadius.lg,
+    marginLeft: -spacing.lg,
   },
   chartStats: {
-    marginTop: 16,
+    marginTop: spacing.lg,
     width: '100%',
-    backgroundColor: '#f8f9fa',
-    borderRadius: 12,
-    padding: 16,
+    backgroundColor: colors.light,
+    borderRadius: borderRadius.md,
+    padding: spacing.lg,
   },
   statRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   statLabelSmall: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: typography.body,
+    color: colors.textSecondary,
   },
   statValueSmall: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1a1a1a',
+    fontSize: typography.body,
+    fontWeight: typography.semiBold,
+    color: colors.textPrimary,
   },
   emptyChart: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 40,
+    paddingVertical: spacing.xl,
   },
   emptyChartText: {
-    fontSize: 16,
-    color: '#666',
-    marginTop: 12,
+    fontSize: typography.h6,
+    color: colors.textSecondary,
+    marginTop: spacing.md,
     textAlign: 'center',
   },
   transactionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    marginBottom: 12,
-    marginTop: 8,
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.md,
+    marginTop: spacing.sm,
   },
   allTransactionsLink: {
-    fontSize: 14,
-    color: '#007bff',
-    fontWeight: '600',
+    fontSize: typography.body,
+    color: colors.primary,
+    fontWeight: typography.semiBold,
   },
   transactionList: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.xl,
   },
   emptyTransactions: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 40,
+    paddingVertical: spacing.xl,
   },
   emptyTransactionsText: {
-    fontSize: 16,
-    color: '#666',
-    marginTop: 12,
-    marginBottom: 16,
+    fontSize: typography.h6,
+    color: colors.textSecondary,
+    marginTop: spacing.md,
+    marginBottom: spacing.lg,
   },
   addTransactionButton: {
-    backgroundColor: '#007bff',
-    borderRadius: 8,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.md,
+    ...shadows.sm,
   },
   addTransactionText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
+    color: colors.textLight,
+    fontSize: typography.body,
+    fontWeight: typography.semiBold,
   },
 });
 

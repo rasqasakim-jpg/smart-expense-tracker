@@ -6,7 +6,6 @@ import {
   FlatList,
   TouchableOpacity,
   TextInput,
-  ActivityIndicator,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Ionicons from '@react-native-vector-icons/ionicons';
@@ -14,9 +13,10 @@ import { transactionAPI } from '../../services/transactionApi';
 import { Transaction, TransactionSection, TransactionStackParamList } from '../../types/transaction';
 import TransactionItem from '../../components/transaction/TransactionItem';
 import ScreenHeader from '../../components/layout/ScreenHeader';
-import TransactionFilterModal from '../../components/transaction/TransactionFilterModal'
+import TransactionFilterModal from '../../components/transaction/TransactionFilterModal';
+import SkeletonLoader from '../../components/common/SkeletonLoader';
+import { colors, typography, spacing, borderRadius, shadows } from '../../styles/designSysttem';
 
-// ✅ Type yang benar
 type TransactionListScreenNavigationProp = StackNavigationProp<
   TransactionStackParamList,
   'TransactionList'
@@ -26,7 +26,6 @@ interface Props {
   navigation: TransactionListScreenNavigationProp;
 }
 
-// Mock data untuk filter
 const mockCategories = [
   { id: 1, name: 'Pendapatan', type: 'INCOME' },
   { id: 2, name: 'Belanja', type: 'EXPENSE' },
@@ -45,10 +44,10 @@ const mockWallets = [
 const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sections, setSections] = useState<TransactionSection[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Set true initially
   const [refreshing, setRefreshing] = useState(false);
-  const [showFilterModal, setShowFilterModal] = useState(false); // ✅ TAMBAH STATE INI
-  const [activeFilters, setActiveFilters] = useState<any>({}); // ✅ TAMBAH FILTER STATE
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [activeFilters, setActiveFilters] = useState<any>({});
 
   useEffect(() => {
     loadTransactions();
@@ -58,7 +57,6 @@ const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
     try {
       setLoading(true);
       
-      // Gabungkan search dengan filter lainnya
       const allFilters = {
         ...filters,
         search: searchQuery || undefined,
@@ -134,14 +132,12 @@ const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
     await loadTransactions(activeFilters);
   };
 
-  // ✅ FIX: Navigate dengan params yang benar
   const handleTransactionPress = (transaction: Transaction) => {
     navigation.navigate('TransactionDetail', { 
       transactionId: transaction.id 
     });
   };
 
-  // ✅ FIX: Navigate tanpa params untuk tambah baru
   const handleAddTransaction = () => {
     navigation.navigate('TransactionForm');
   };
@@ -151,13 +147,11 @@ const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
     loadTransactions(activeFilters);
   };
 
-  // ✅ TAMBAH: Handle filter apply
   const handleFilterApply = async (filters: any) => {
     setActiveFilters(filters);
     await loadTransactions(filters);
   };
 
-  // ✅ TAMBAH: Handle clear filters
   const handleClearFilters = async () => {
     setActiveFilters({});
     setSearchQuery('');
@@ -183,17 +177,89 @@ const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
     />
   );
 
-  // Tampilkan filter badge jika ada active filter
   const hasActiveFilters = Object.keys(activeFilters).length > 0;
 
-  if (loading && !refreshing) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#007bff" />
-        <Text style={styles.loadingText}>Memuat transaksi...</Text>
+  // ==================== SKELETON LOADER RENDER ====================
+  const renderSkeletonLoader = () => (
+    <View style={styles.skeletonContainer}>
+      {/* Search Bar Skeleton */}
+      <View style={styles.skeletonSearchContainer}>
+        <SkeletonLoader 
+          width="100%" 
+          height={40} 
+          borderRadius={borderRadius.md}
+        />
       </View>
-    );
-  }
+      
+      {/* Section Skeletons */}
+      {[1, 2, 3].map((sectionIndex) => (
+        <View key={sectionIndex} style={styles.skeletonSection}>
+          {/* Section Title Skeleton */}
+          <SkeletonLoader 
+            width={120} 
+            height={20} 
+            borderRadius={borderRadius.sm}
+            style={{ marginBottom: spacing.md }}
+          />
+          
+          {/* Transaction Items Skeletons */}
+          {[1, 2, 3, 4].map((itemIndex) => (
+            <View key={itemIndex} style={styles.skeletonItem}>
+              {/* Icon Skeleton */}
+              <SkeletonLoader 
+                width={40} 
+                height={40} 
+                borderRadius={borderRadius.round}
+                style={{ marginRight: spacing.md }}
+              />
+              
+              <View style={styles.skeletonItemContent}>
+                {/* Description Skeleton */}
+                <SkeletonLoader 
+                  width={180} 
+                  height={16} 
+                  borderRadius={borderRadius.sm}
+                  style={{ marginBottom: spacing.xs }}
+                />
+                
+                {/* Category & Date Skeleton */}
+                <View style={styles.skeletonMeta}>
+                  <SkeletonLoader 
+                    width={80} 
+                    height={12} 
+                    borderRadius={borderRadius.sm}
+                    style={{ marginRight: spacing.sm }}
+                  />
+                  <SkeletonLoader 
+                    width={100} 
+                    height={12} 
+                    borderRadius={borderRadius.sm}
+                  />
+                </View>
+              </View>
+              
+              {/* Amount Skeleton */}
+              <SkeletonLoader 
+                width={100} 
+                height={20} 
+                borderRadius={borderRadius.sm}
+              />
+            </View>
+          ))}
+          
+          {/* Separator Skeleton */}
+          {sectionIndex < 3 && (
+            <SkeletonLoader 
+              width="100%" 
+              height={1} 
+              borderRadius={0}
+              style={{ marginVertical: spacing.lg }}
+            />
+          )}
+        </View>
+      ))}
+    </View>
+  );
 
   return (
     <View style={styles.container}>
@@ -201,88 +267,93 @@ const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
         title="Semua Transaksi"
       />
 
-      <View style={styles.searchContainer}>
-        <View style={styles.searchInputContainer}>
-          <Ionicons name="search" size={20} color="#999" style={styles.searchIcon} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Cari transaksi..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            onSubmitEditing={handleSearch}
-            returnKeyType="search"
-          />
-          {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery('')}>
-              <Ionicons name="close" size={20} color="#999" />
+      {loading ? (
+        // Show skeleton loader during initial load
+        renderSkeletonLoader()
+      ) : (
+        // Show actual content when data is loaded
+        <>
+          <View style={styles.searchContainer}>
+            <View style={styles.searchInputContainer}>
+              <Ionicons name="search" size={20} color="#999" style={styles.searchIcon} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Cari transaksi..."
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                onSubmitEditing={handleSearch}
+                returnKeyType="search"
+              />
+              {searchQuery.length > 0 && (
+                <TouchableOpacity onPress={() => setSearchQuery('')}>
+                  <Ionicons name="close" size={20} color="#999" />
+                </TouchableOpacity>
+              )}
+            </View>
+            
+            <TouchableOpacity 
+              style={styles.filterButton}
+              onPress={() => setShowFilterModal(true)}
+            >
+              <Ionicons name="funnel-outline" size={24} color="#007bff" />
+              {hasActiveFilters && (
+                <View style={styles.filterBadge}>
+                  <Text style={styles.filterBadgeText}>✓</Text>
+                </View>
+              )}
             </TouchableOpacity>
-          )}
-        </View>
-        
-        {/* ✅ FIX: Tambahkan onPress handler untuk filter button */}
-        <TouchableOpacity 
-          style={styles.filterButton}
-          onPress={() => setShowFilterModal(true)} // ✅ INI YANG HILANG!
-        >
-          <Ionicons name="funnel-outline" size={24} color="#007bff" />
+          </View>
+
           {hasActiveFilters && (
-            <View style={styles.filterBadge}>
-              <Text style={styles.filterBadgeText}>✓</Text>
+            <View style={styles.filterInfoContainer}>
+              <Text style={styles.filterInfoText}>
+                Filter aktif • 
+                {activeFilters.type && ` ${activeFilters.type === 'INCOME' ? 'Pemasukan' : 'Pengeluaran'}`}
+                {activeFilters.categoryId && ` • ${mockCategories.find(c => c.id === activeFilters.categoryId)?.name}`}
+                {activeFilters.walletId && ` • ${mockWallets.find(w => w.id === activeFilters.walletId)?.name}`}
+              </Text>
+              <TouchableOpacity onPress={handleClearFilters}>
+                <Text style={styles.clearFilterText}>Hapus</Text>
+              </TouchableOpacity>
             </View>
           )}
-        </TouchableOpacity>
-      </View>
 
-      {/* Filter info bar */}
-      {hasActiveFilters && (
-        <View style={styles.filterInfoContainer}>
-          <Text style={styles.filterInfoText}>
-            Filter aktif • 
-            {activeFilters.type && ` ${activeFilters.type === 'INCOME' ? 'Pemasukan' : 'Pengeluaran'}`}
-            {activeFilters.categoryId && ` • ${mockCategories.find(c => c.id === activeFilters.categoryId)?.name}`}
-            {activeFilters.walletId && ` • ${mockWallets.find(w => w.id === activeFilters.walletId)?.name}`}
-          </Text>
-          <TouchableOpacity onPress={handleClearFilters}>
-            <Text style={styles.clearFilterText}>Hapus</Text>
-          </TouchableOpacity>
-        </View>
+          <FlatList
+            data={sections}
+            keyExtractor={(item, index) => `${item.title}-${index}`}
+            renderItem={({ item: section }) => (
+              <View>
+                {renderSectionHeader(section.title)}
+                <FlatList
+                  data={section.data}
+                  renderItem={renderTransactionItem}
+                  keyExtractor={(item) => item.id.toString()}
+                  scrollEnabled={false}
+                />
+                {section.data.length > 0 && renderSeparator()}
+              </View>
+            )}
+            contentContainerStyle={styles.listContainer}
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Ionicons name="receipt-outline" size={64} color="#ccc" />
+                <Text style={styles.emptyText}>
+                  {hasActiveFilters ? 'Tidak ada transaksi dengan filter ini' : 'Belum ada transaksi'}
+                </Text>
+                <Text style={styles.emptySubtext}>
+                  {hasActiveFilters 
+                    ? 'Coba ubah filter atau hapus filter'
+                    : 'Tambah transaksi pertama Anda'
+                  }
+                </Text>
+              </View>
+            }
+          />
+        </>
       )}
 
-      <FlatList
-        data={sections}
-        keyExtractor={(item, index) => `${item.title}-${index}`}
-        renderItem={({ item: section }) => (
-          <View>
-            {renderSectionHeader(section.title)}
-            <FlatList
-              data={section.data}
-              renderItem={renderTransactionItem}
-              keyExtractor={(item) => item.id.toString()}
-              scrollEnabled={false}
-            />
-            {section.data.length > 0 && renderSeparator()}
-          </View>
-        )}
-        contentContainerStyle={styles.listContainer}
-        refreshing={refreshing}
-        onRefresh={handleRefresh}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Ionicons name="receipt-outline" size={64} color="#ccc" />
-            <Text style={styles.emptyText}>
-              {hasActiveFilters ? 'Tidak ada transaksi dengan filter ini' : 'Belum ada transaksi'}
-            </Text>
-            <Text style={styles.emptySubtext}>
-              {hasActiveFilters 
-                ? 'Coba ubah filter atau hapus filter'
-                : 'Tambah transaksi pertama Anda'
-              }
-            </Text>
-          </View>
-        }
-      />
-
-      {/* ✅ TAMBAH: TransactionFilterModal di sini */}
       <TransactionFilterModal
         visible={showFilterModal}
         onClose={() => setShowFilterModal(false)}
@@ -297,8 +368,31 @@ const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
-    paddingTop: 50
+    backgroundColor: colors.background,
+    paddingTop: spacing.xxl
+  },
+  skeletonContainer: {
+    flex: 1,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+  },
+  skeletonSearchContainer: {
+    marginBottom: spacing.lg,
+  },
+  skeletonSection: {
+    marginBottom: spacing.xl,
+  },
+  skeletonItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
+  skeletonItemContent: {
+    flex: 1,
+  },
+  skeletonMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   centered: {
     flex: 1,
@@ -306,114 +400,115 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    marginTop: 12,
-    color: '#666',
+    marginTop: spacing.md,
+    color: colors.textSecondary,
+    fontSize: typography.body,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#fff',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    backgroundColor: colors.white,
     borderBottomWidth: 1,
-    borderBottomColor: '#eaeaea',
+    borderBottomColor: colors.borderLight,
   },
   searchInputContainer: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f8f9fa',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    marginRight: 12,
+    backgroundColor: colors.light,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.md,
+    marginRight: spacing.md,
   },
   searchIcon: {
-    marginRight: 8,
+    marginRight: spacing.sm,
   },
   searchInput: {
     flex: 1,
     height: 40,
-    fontSize: 16,
-    color: '#333',
+    fontSize: typography.h6,
+    color: colors.textPrimary,
   },
   filterButton: {
-    padding: 8,
-    position: 'relative', // Untuk badge
+    padding: spacing.sm,
+    position: 'relative',
   },
   filterBadge: {
     position: 'absolute',
-    top: 4,
-    right: 4,
-    backgroundColor: '#28a745',
+    top: spacing.xs,
+    right: spacing.xs,
+    backgroundColor: colors.success,
     width: 16,
     height: 16,
-    borderRadius: 8,
+    borderRadius: borderRadius.round,
     justifyContent: 'center',
     alignItems: 'center',
   },
   filterBadgeText: {
-    color: '#fff',
-    fontSize: 10,
-    fontWeight: 'bold',
+    color: colors.white,
+    fontSize: typography.tiny,
+    fontWeight: typography.bold,
   },
   filterInfoContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#e7f3ff',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    backgroundColor: colors.primaryLight,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: '#cfe2ff',
+    borderBottomColor: colors.primary,
   },
   filterInfoText: {
-    fontSize: 14,
-    color: '#084298',
+    fontSize: typography.body,
+    color: colors.primaryDark,
     flex: 1,
   },
   clearFilterText: {
-    fontSize: 14,
-    color: '#dc3545',
-    fontWeight: '600',
-    marginLeft: 12,
+    fontSize: typography.body,
+    color: colors.danger,
+    fontWeight: typography.semiBold,
+    marginLeft: spacing.md,
   },
   listContainer: {
-    padding: 16,
-    paddingBottom: 32,
+    padding: spacing.lg,
+    paddingBottom: spacing.xl,
   },
   sectionHeader: {
-    marginTop: 16,
-    marginBottom: 12,
+    marginTop: spacing.lg,
+    marginBottom: spacing.md,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
+    fontSize: typography.h5,
+    fontWeight: typography.bold,
+    color: colors.textPrimary,
   },
   separator: {
     alignItems: 'center',
-    marginVertical: 16,
+    marginVertical: spacing.lg,
   },
   separatorLine: {
     width: '100%',
     height: 1,
-    backgroundColor: '#eaeaea',
+    backgroundColor: colors.borderLight,
   },
   emptyContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 60,
+    paddingVertical: spacing.xxl,
   },
   emptyText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#666',
-    marginTop: 16,
+    fontSize: typography.h5,
+    fontWeight: typography.semiBold,
+    color: colors.textSecondary,
+    marginTop: spacing.lg,
   },
   emptySubtext: {
-    fontSize: 14,
-    color: '#999',
-    marginTop: 8,
+    fontSize: typography.body,
+    color: colors.darkGray,
+    marginTop: spacing.sm,
   },
 });
 
