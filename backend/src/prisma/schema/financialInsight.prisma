@@ -1,0 +1,15 @@
+model FinancialInsight {
+  id         String   @id @default(uuid())
+  user_id    String
+  
+  score      Int      // 0-100
+  status     String   // "AMAN", "WASPADA", "BAHAYA"
+  message    String   @db.Text
+  tips       String[] 
+  
+  created_at DateTime @default(now())
+
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+}
