@@ -1,0 +1,11 @@
+model Otp {
+  id           Int      @id @default(autoincrement())
+  email        String   // Digunakan untuk track OTP sebelum user dibuat
+  code         String   @db.VarChar(6)
+  type         OtpType 
+  payload      Json?    // Menyimpan {fullName, password} sementara
+  expired_at   DateTime @db.Timestamp
+  
+  user_id      String?  // Opsional, baru diisi saat Forgot Password
+  user         User?    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
