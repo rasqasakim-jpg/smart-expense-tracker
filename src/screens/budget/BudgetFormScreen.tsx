@@ -192,7 +192,7 @@ const BudgetFormScreen: React.FC<Props> = ({ navigation, route }) => {
             ) : (
               <Text style={styles.pickerPlaceholder}>Pilih kategori</Text>
             )}
-            <Ionicons name="arrow-down" size={24} color="#666" />
+            <Ionicons name="pricetags-outline" size={24} color="#666" />
           </TouchableOpacity>
         </View>
 
@@ -229,7 +229,7 @@ const BudgetFormScreen: React.FC<Props> = ({ navigation, route }) => {
             <Text style={styles.pickerText}>
               {formatBudgetPeriod(formData.period, formData.month)}
             </Text>
-            <Ionicons name="arrow-down" size={24} color="#666" />
+            <Ionicons name="timer-outline" size={24} color="#666" />
           </TouchableOpacity>
         </View>
 

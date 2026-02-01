@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -19,7 +19,9 @@ import { registerSchema } from '../../utils/validation';
 import { RegisterRequest } from '../../types/auth';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParamList } from '../../navigation/AuthNavigator';
-import Ionicons from '@react-native-vector-icons/ionicons'; // ← FIX IMPORT
+import Ionicons from '@react-native-vector-icons/ionicons'; 
+
+// Import components animation
 import SuccessToast from '../../components/common/SuccesToast';
 import LoadingOverlay from '../../components/common/LoadingOverlay';
 import AnimatedButton from '../../components/common/AnimatedButton';
@@ -34,11 +36,172 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [showSuccess, setShowSuccess] = useState(false);
   
+  // Animation values
+  const headerSlideAnim = useRef(new Animated.Value(-50)).current;
+  const formSlideAnim = useRef(new Animated.Value(30)).current;
+  const formFadeAnim = useRef(new Animated.Value(0)).current;
+  const buttonScaleAnim = useRef(new Animated.Value(1)).current;
+  const errorShakeAnim = useRef(new Animated.Value(0)).current;
+  
+  // For error message animations
+  const nameErrorAnim = useRef(new Animated.Value(0)).current;
+  const emailErrorAnim = useRef(new Animated.Value(0)).current;
+  const passwordErrorAnim = useRef(new Animated.Value(0)).current;
+  const termsFadeAnim = useRef(new Animated.Value(0)).current;
+  const loginFadeAnim = useRef(new Animated.Value(0)).current;
+  const demoFadeAnim = useRef(new Animated.Value(0)).current;
+
+  // Entry animations
+  useEffect(() => {
+    // Header slide in
+    Animated.spring(headerSlideAnim, {
+      toValue: 0,
+      friction: 8,
+      tension: 40,
+      useNativeDriver: true,
+    }).start();
+
+    // Form slide up + fade in
+    Animated.parallel([
+      Animated.timing(formFadeAnim, {
+        toValue: 1,
+        duration: 500,
+        delay: 200,
+        useNativeDriver: true,
+      }),
+      Animated.spring(formSlideAnim, {
+        toValue: 0,
+        friction: 8,
+        tension: 40,
+        delay: 200,
+        useNativeDriver: true,
+      }),
+    ]).start();
+    
+    // Staggered animations for other elements
+    setTimeout(() => {
+      Animated.timing(termsFadeAnim, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }).start();
+    }, 600);
+    
+    setTimeout(() => {
+      Animated.timing(loginFadeAnim, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }).start();
+    }, 700);
+    
+    setTimeout(() => {
+      Animated.timing(demoFadeAnim, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }).start();
+    }, 800);
+  }, []);
+
+  // Error shake animation
+  const triggerErrorShake = () => {
+    Animated.sequence([
+      Animated.timing(errorShakeAnim, {
+        toValue: 10,
+        duration: 50,
+        useNativeDriver: true,
+      }),
+      Animated.timing(errorShakeAnim, {
+        toValue: -10,
+        duration: 50,
+        useNativeDriver: true,
+      }),
+      Animated.timing(errorShakeAnim, {
+        toValue: 10,
+        duration: 50,
+        useNativeDriver: true,
+      }),
+      Animated.timing(errorShakeAnim, {
+        toValue: 0,
+        duration: 50,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  // Show error with animation
+  const showErrorAnimation = (field: string) => {
+    let animRef;
+    switch (field) {
+      case 'fullName':
+        animRef = nameErrorAnim;
+        break;
+      case 'email':
+        animRef = emailErrorAnim;
+        break;
+      case 'password':
+        animRef = passwordErrorAnim;
+        break;
+      default:
+        return;
+    }
+    
+    Animated.sequence([
+      Animated.timing(animRef, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  // Hide error with animation
+  const hideErrorAnimation = (field: string) => {
+    let animRef;
+    switch (field) {
+      case 'fullName':
+        animRef = nameErrorAnim;
+        break;
+      case 'email':
+        animRef = emailErrorAnim;
+        break;
+      case 'password':
+        animRef = passwordErrorAnim;
+        break;
+      default:
+        return;
+    }
+    
+    Animated.timing(animRef, {
+      toValue: 0,
+      duration: 150,
+      useNativeDriver: true,
+    }).start();
+  };
+
   const handleRegister = async (values: RegisterRequest) => {
     try {
       setLoading(true);
       setFormErrors({});
+      
+      // Button loading animation
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(buttonScaleAnim, {
+            toValue: 1.05,
+            duration: 500,
+            useNativeDriver: true,
+          }),
+          Animated.timing(buttonScaleAnim, {
+            toValue: 1,
+            duration: 500,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
       
       // Validate with Yup
       await registerSchema.validate(values, { abortEarly: false });
@@ -48,22 +211,45 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
       // SIMULASI API CALL - BERHASIL
       await new Promise<void>(resolve => setTimeout(resolve, 1500));
       
-      // Langsung navigasi ke OTP Screen setelah registrasi berhasil
-      navigation.navigate('Otp', {
-        email: values.email,
-        userId: Date.now(), // Mock user ID
-      });
+      // Stop loading animation
+      buttonScaleAnim.stopAnimation();
+      Animated.timing(buttonScaleAnim, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
+      
+      // Show success toast
+      setShowSuccess(true);
+      
+      // Navigate to OTP after 1.5 seconds
+      setTimeout(() => {
+        navigation.navigate('Otp', {
+          email: values.email,
+          userId: Date.now(), // Mock user ID
+        });
+      }, 1500);
       
     } catch (error: any) {
       console.log('Register error:', error);
+      
+      // Stop loading animation
+      buttonScaleAnim.stopAnimation();
+      Animated.timing(buttonScaleAnim, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
       
       // Handle Yup validation errors
       if (error.name === 'ValidationError') {
         const errors: Record<string, string> = {};
         error.inner.forEach((err: any) => {
           errors[err.path] = err.message;
+          showErrorAnimation(err.path);
         });
         setFormErrors(errors);
+        triggerErrorShake(); // Trigger shake animation
         return;
       }
       
@@ -72,17 +258,23 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
         const errors: Record<string, string> = {};
         Object.keys(error.errors).forEach(key => {
           errors[key] = error.errors[key][0];
+          showErrorAnimation(key);
         });
         setFormErrors(errors);
+        triggerErrorShake(); // Trigger shake animation
         return;
       }
       
       // Handle duplicate email error
       if (values.email === 'existing@test.com') {
         setFormErrors({ email: 'Email sudah terdaftar' });
+        showErrorAnimation('email');
+        triggerErrorShake(); // Trigger shake animation
         return;
       }
       
+      // Other errors
+      triggerErrorShake(); // Trigger shake animation
       Alert.alert('Error', 'Registrasi gagal. Silakan coba lagi.');
       
     } finally {
@@ -90,13 +282,27 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  // Clear error when user starts typing
+  // Clear error with animation
   const clearError = (field: string) => {
     if (formErrors[field]) {
-      setFormErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[field];
-        return newErrors;
+      hideErrorAnimation(field);
+      
+      Animated.timing(formFadeAnim, {
+        toValue: 0.5,
+        duration: 150,
+        useNativeDriver: true,
+      }).start(() => {
+        setFormErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors[field];
+          return newErrors;
+        });
+        
+        Animated.timing(formFadeAnim, {
+          toValue: 1,
+          duration: 150,
+          useNativeDriver: true,
+        }).start();
       });
     }
   };
@@ -104,6 +310,19 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar backgroundColor="#007AFF" barStyle="light-content" />
+      
+      {/* Success Toast */}
+      <SuccessToast
+        message="Registrasi berhasil! Mengarahkan ke OTP..."
+        visible={showSuccess}
+        onHide={() => setShowSuccess(false)}
+      />
+      
+      {/* Loading Overlay */}
+      <LoadingOverlay 
+        visible={loading} 
+        message="Mendaftarkan akun Anda..." 
+      />
       
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -114,8 +333,13 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* HEADER WITH BACK BUTTON */}
-          <View style={styles.header}>
+          {/* HEADER WITH BACK BUTTON - ANIMATED */}
+          <Animated.View 
+            style={[
+              styles.header,
+              { transform: [{ translateY: headerSlideAnim }] }
+            ]}
+          >
             <TouchableOpacity 
               style={styles.backButton}
               onPress={() => navigation.goBack()}
@@ -129,13 +353,24 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
               <Text style={styles.headerTitle}>Daftar Akun Baru</Text>
               <Text style={styles.headerSubtitle}>Mulai kelola keuangan Anda</Text>
             </View>
-          </View>
+          </Animated.View>
 
-          {/* FORM */}
-          <View style={styles.formContainer}>
+          {/* FORM - ANIMATED */}
+          <Animated.View 
+            style={[
+              styles.formContainer,
+              {
+                opacity: formFadeAnim,
+                transform: [
+                  { translateY: formSlideAnim },
+                  { translateX: errorShakeAnim }
+                ]
+              }
+            ]}
+          >
             <Formik
               initialValues={{ fullName: '', email: '', password: '' }}
-              validationSchema={registerSchema} // ← TAMBAH INI untuk client-side validation
+              validationSchema={registerSchema}
               onSubmit={handleRegister}
             >
               {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
@@ -168,12 +403,25 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                       />
                     </View>
                     {(formErrors.fullName || (errors.fullName && touched.fullName)) && (
-                      <View style={styles.errorContainer}>
+                      <Animated.View 
+                        style={[
+                          styles.errorContainer,
+                          {
+                            opacity: nameErrorAnim,
+                            transform: [{
+                              translateY: nameErrorAnim.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [10, 0]
+                              })
+                            }]
+                          }
+                        ]}
+                      >
                         <Ionicons name="alert-circle" size={14} color="#FF3B30" />
                         <Text style={styles.errorText}>
                           {formErrors.fullName || errors.fullName}
                         </Text>
-                      </View>
+                      </Animated.View>
                     )}
                   </View>
 
@@ -206,12 +454,25 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                       />
                     </View>
                     {(formErrors.email || (errors.email && touched.email)) && (
-                      <View style={styles.errorContainer}>
+                      <Animated.View 
+                        style={[
+                          styles.errorContainer,
+                          {
+                            opacity: emailErrorAnim,
+                            transform: [{
+                              translateY: emailErrorAnim.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [10, 0]
+                              })
+                            }]
+                          }
+                        ]}
+                      >
                         <Ionicons name="alert-circle" size={14} color="#FF3B30" />
                         <Text style={styles.errorText}>
                           {formErrors.email || errors.email}
                         </Text>
-                      </View>
+                      </Animated.View>
                     )}
                   </View>
 
@@ -254,46 +515,68 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                       </TouchableOpacity>
                     </View>
                     {(formErrors.password || (errors.password && touched.password)) && (
-                      <View style={styles.errorContainer}>
+                      <Animated.View 
+                        style={[
+                          styles.errorContainer,
+                          {
+                            opacity: passwordErrorAnim,
+                            transform: [{
+                              translateY: passwordErrorAnim.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [10, 0]
+                              })
+                            }]
+                          }
+                        ]}
+                      >
                         <Ionicons name="alert-circle" size={14} color="#FF3B30" />
                         <Text style={styles.errorText}>
                           {formErrors.password || errors.password}
                         </Text>
-                      </View>
+                      </Animated.View>
                     )}
                   </View>
 
                   {/* TERMS & CONDITIONS */}
-                  <View style={styles.termsContainer}>
+                  <Animated.View 
+                    style={[
+                      styles.termsContainer,
+                      { opacity: termsFadeAnim }
+                    ]}
+                  >
                     <Text style={styles.termsText}>
                       Dengan mendaftar, Anda menyetujui{' '}
                       <Text style={styles.termsLink}>Syarat & Ketentuan</Text>{' '}
                       dan{' '}
                       <Text style={styles.termsLink}>Kebijakan Privasi</Text>
                     </Text>
-                  </View>
+                  </Animated.View>
 
-                  {/* REGISTER BUTTON - FIXED! */}
-                  <TouchableOpacity
-                    style={[styles.button, loading && styles.buttonDisabled]}
-                    onPress={handleSubmit} // ← INI YANG DIPERBAIKI!
-                    disabled={loading}
+                  {/* REGISTER BUTTON - ANIMATED */}
+                  <Animated.View
+                    style={{ transform: [{ scale: buttonScaleAnim }] }}
                   >
-                    {loading ? (
-                      <ActivityIndicator color="#fff" />
-                    ) : (
-                      <>
-                        <Ionicons name="person-add-outline" size={20} color="#fff" />
-                        <Text style={styles.buttonText}>  Daftar Sekarang</Text>
-                      </>
-                    )}
-                  </TouchableOpacity>
+                    <AnimatedButton
+                      title="Daftar Sekarang"
+                      onPress={handleSubmit}
+                      loading={loading}
+                      type="primary"
+                      icon={<Ionicons name="person-add-outline" size={20} color="#fff" />}
+                      style={styles.button}
+                      disabled={loading}
+                    />
+                  </Animated.View>
                 </>
               )}
             </Formik>
 
             {/* LOGIN LINK */}
-            <View style={styles.loginContainer}>
+            <Animated.View 
+              style={[
+                styles.loginContainer,
+                { opacity: loginFadeAnim }
+              ]}
+            >
               <Text style={styles.loginText}>Sudah punya akun? </Text>
               <TouchableOpacity 
                 onPress={() => navigation.navigate('Login', {})}
@@ -301,16 +584,9 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
               >
                 <Text style={styles.loginLink}>Login sekarang</Text>
               </TouchableOpacity>
-            </View>
+            </Animated.View>
 
-            {/* DEMO CREDENTIALS
-            <View style={styles.demoContainer}>
-              <Text style={styles.demoTitle}>Demo Testing:</Text>
-              <Text style={styles.demoText}>• Email: existing@test.com → Error "Email sudah terdaftar"</Text>
-              <Text style={styles.demoText}>• Email lain → Success → OTP Screen</Text>
-              <Text style={styles.demoText}>• OTP Code: 123456 → Success → Login</Text>
-            </View> */}
-          </View>
+          </Animated.View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -423,22 +699,11 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   button: {
-    backgroundColor: '#007AFF',
-    borderRadius: 8,
-    padding: 16,
-    alignItems: 'center',
     marginBottom: 20,
-    flexDirection: 'row',
-    justifyContent: 'center',
   },
   buttonDisabled: {
     backgroundColor: '#6c757d',
     opacity: 0.7,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
   },
   loginContainer: {
     flexDirection: 'row',

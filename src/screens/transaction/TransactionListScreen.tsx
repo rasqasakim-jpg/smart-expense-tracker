@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   FlatList,
   TouchableOpacity,
   TextInput,
+  Animated,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Ionicons from '@react-native-vector-icons/ionicons';
@@ -15,6 +16,7 @@ import TransactionItem from '../../components/transaction/TransactionItem';
 import ScreenHeader from '../../components/layout/ScreenHeader';
 import TransactionFilterModal from '../../components/transaction/TransactionFilterModal';
 import SkeletonLoader from '../../components/common/SkeletonLoader';
+import AnimatedButton from '../../components/common/AnimatedButton';
 import { colors, typography, spacing, borderRadius, shadows } from '../../styles/designSystem';
 
 type TransactionListScreenNavigationProp = StackNavigationProp<
@@ -44,10 +46,45 @@ const mockWallets = [
 const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sections, setSections] = useState<TransactionSection[]>([]);
-  const [loading, setLoading] = useState(true); // Set true initially
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [activeFilters, setActiveFilters] = useState<any>({});
+  
+  // Animation refs
+  const searchSlideAnim = useRef(new Animated.Value(-100)).current;
+  const listFadeAnim = useRef(new Animated.Value(0)).current;
+  const itemScaleAnim = useRef(new Animated.Value(0.95)).current;
+
+  // Entry animations
+  useEffect(() => {
+    if (!loading) {
+      Animated.stagger(50, [
+        // Search bar slide in
+        Animated.spring(searchSlideAnim, {
+          toValue: 0,
+          friction: 8,
+          tension: 40,
+          useNativeDriver: true,
+        }),
+        
+        // List fade in
+        Animated.timing(listFadeAnim, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+        
+        // Items scale in
+        Animated.spring(itemScaleAnim, {
+          toValue: 1,
+          friction: 8,
+          tension: 40,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [loading]);
 
   useEffect(() => {
     loadTransactions();
@@ -164,22 +201,23 @@ const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
     </View>
   );
 
-  const renderSeparator = () => (
-    <View style={styles.separator}>
-      <View style={styles.separatorLine} />
-    </View>
-  );
-
-  const renderTransactionItem = ({ item }: { item: Transaction }) => (
-    <TransactionItem
-      transaction={item}
-      onPress={() => handleTransactionPress(item)}
-    />
+  const renderTransactionItem = ({ item, index }: { item: Transaction; index: number }) => (
+    <Animated.View
+      style={{
+        opacity: listFadeAnim,
+        transform: [{ scale: itemScaleAnim }],
+      }}
+    >
+      <TransactionItem
+        transaction={item}
+        onPress={() => handleTransactionPress(item)}
+      />
+    </Animated.View>
   );
 
   const hasActiveFilters = Object.keys(activeFilters).length > 0;
 
-  // ==================== SKELETON LOADER RENDER ====================
+  // Skeleton Loader
   const renderSkeletonLoader = () => (
     <View style={styles.skeletonContainer}>
       {/* Search Bar Skeleton */}
@@ -194,7 +232,6 @@ const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
       {/* Section Skeletons */}
       {[1, 2, 3].map((sectionIndex) => (
         <View key={sectionIndex} style={styles.skeletonSection}>
-          {/* Section Title Skeleton */}
           <SkeletonLoader 
             width={120} 
             height={20} 
@@ -202,10 +239,8 @@ const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
             style={{ marginBottom: spacing.md }}
           />
           
-          {/* Transaction Items Skeletons */}
           {[1, 2, 3, 4].map((itemIndex) => (
             <View key={itemIndex} style={styles.skeletonItem}>
-              {/* Icon Skeleton */}
               <SkeletonLoader 
                 width={40} 
                 height={40} 
@@ -214,7 +249,6 @@ const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
               />
               
               <View style={styles.skeletonItemContent}>
-                {/* Description Skeleton */}
                 <SkeletonLoader 
                   width={180} 
                   height={16} 
@@ -222,7 +256,6 @@ const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
                   style={{ marginBottom: spacing.xs }}
                 />
                 
-                {/* Category & Date Skeleton */}
                 <View style={styles.skeletonMeta}>
                   <SkeletonLoader 
                     width={80} 
@@ -238,7 +271,6 @@ const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
                 </View>
               </View>
               
-              {/* Amount Skeleton */}
               <SkeletonLoader 
                 width={100} 
                 height={20} 
@@ -246,16 +278,6 @@ const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
               />
             </View>
           ))}
-          
-          {/* Separator Skeleton */}
-          {sectionIndex < 3 && (
-            <SkeletonLoader 
-              width="100%" 
-              height={1} 
-              borderRadius={0}
-              style={{ marginVertical: spacing.lg }}
-            />
-          )}
         </View>
       ))}
     </View>
@@ -263,22 +285,25 @@ const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <ScreenHeader
-        title="Semua Transaksi"
-      />
+      <ScreenHeader title="Semua Transaksi" />
 
       {loading ? (
-        // Show skeleton loader during initial load
         renderSkeletonLoader()
       ) : (
-        // Show actual content when data is loaded
         <>
-          <View style={styles.searchContainer}>
+          {/* Search Bar dengan slide animation */}
+          <Animated.View 
+            style={[
+              styles.searchContainer,
+              { transform: [{ translateX: searchSlideAnim }] }
+            ]}
+          >
             <View style={styles.searchInputContainer}>
-              <Ionicons name="search" size={20} color="#999" style={styles.searchIcon} />
+              <Ionicons name="search" size={20} color={colors.secondary} style={styles.searchIcon} />
               <TextInput
                 style={styles.searchInput}
                 placeholder="Cari transaksi..."
+                placeholderTextColor={colors.secondary}
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 onSubmitEditing={handleSearch}
@@ -286,7 +311,7 @@ const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
               />
               {searchQuery.length > 0 && (
                 <TouchableOpacity onPress={() => setSearchQuery('')}>
-                  <Ionicons name="close" size={20} color="#999" />
+                  <Ionicons name="close" size={20} color={colors.secondary} />
                 </TouchableOpacity>
               )}
             </View>
@@ -295,17 +320,22 @@ const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
               style={styles.filterButton}
               onPress={() => setShowFilterModal(true)}
             >
-              <Ionicons name="funnel-outline" size={24} color="#007bff" />
-              {hasActiveFilters && (
-                <View style={styles.filterBadge}>
-                  <Text style={styles.filterBadgeText}>✓</Text>
-                </View>
-              )}
-            </TouchableOpacity>
-          </View>
+             <Ionicons name="funnel-outline" size={24} color={colors.primary} />
+             {hasActiveFilters && (
+             <View style={styles.filterBadge}>
+              <Text style={styles.filterBadgeText}>✓</Text>
+            </View>
+  )}
+           </TouchableOpacity>
+          </Animated.View>
 
           {hasActiveFilters && (
-            <View style={styles.filterInfoContainer}>
+            <Animated.View 
+              style={[
+                styles.filterInfoContainer,
+                { opacity: listFadeAnim }
+              ]}
+            >
               <Text style={styles.filterInfoText}>
                 Filter aktif • 
                 {activeFilters.type && ` ${activeFilters.type === 'INCOME' ? 'Pemasukan' : 'Pengeluaran'}`}
@@ -315,42 +345,86 @@ const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
               <TouchableOpacity onPress={handleClearFilters}>
                 <Text style={styles.clearFilterText}>Hapus</Text>
               </TouchableOpacity>
-            </View>
+            </Animated.View>
           )}
 
-          <FlatList
-            data={sections}
-            keyExtractor={(item, index) => `${item.title}-${index}`}
-            renderItem={({ item: section }) => (
-              <View>
-                {renderSectionHeader(section.title)}
-                <FlatList
-                  data={section.data}
-                  renderItem={renderTransactionItem}
-                  keyExtractor={(item) => item.id.toString()}
-                  scrollEnabled={false}
-                />
-                {section.data.length > 0 && renderSeparator()}
-              </View>
-            )}
-            contentContainerStyle={styles.listContainer}
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            ListEmptyComponent={
-              <View style={styles.emptyContainer}>
-                <Ionicons name="receipt-outline" size={64} color="#ccc" />
-                <Text style={styles.emptyText}>
-                  {hasActiveFilters ? 'Tidak ada transaksi dengan filter ini' : 'Belum ada transaksi'}
-                </Text>
-                <Text style={styles.emptySubtext}>
-                  {hasActiveFilters 
-                    ? 'Coba ubah filter atau hapus filter'
-                    : 'Tambah transaksi pertama Anda'
-                  }
-                </Text>
-              </View>
-            }
-          />
+          {/* Transaction List dengan fade animation */}
+          <Animated.View style={{ flex: 1, opacity: listFadeAnim }}>
+            <FlatList
+              data={sections}
+              keyExtractor={(item, index) => `${item.title}-${index}`}
+              renderItem={({ item: section, index: sectionIndex }) => (
+                <Animated.View
+                  style={{
+                    opacity: listFadeAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, 1],
+                    }),
+                    transform: [
+                      {
+                        translateY: listFadeAnim.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [20 * sectionIndex, 0],
+                        }),
+                      },
+                    ],
+                  }}
+                >
+                  {renderSectionHeader(section.title)}
+                  <FlatList
+                    data={section.data}
+                    renderItem={renderTransactionItem}
+                    keyExtractor={(item) => item.id.toString()}
+                    scrollEnabled={false}
+                  />
+                  {section.data.length > 0 && sectionIndex < sections.length - 1 && (
+                    <View style={styles.separator} />
+                  )}
+                </Animated.View>
+              )}
+              contentContainerStyle={styles.listContainer}
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              ListEmptyComponent={
+                <Animated.View 
+                  style={[
+                    styles.emptyContainer,
+                    { opacity: listFadeAnim }
+                  ]}
+                >
+                  <Ionicons name="receipt-outline" size={64} color={colors.secondary} />
+                  <Text style={styles.emptyText}>
+                    {hasActiveFilters ? 'Tidak ada transaksi dengan filter ini' : 'Belum ada transaksi'}
+                  </Text>
+                  <Text style={styles.emptySubtext}>
+                    {hasActiveFilters 
+                      ? 'Coba ubah filter atau hapus filter'
+                      : 'Tambah transaksi pertama Anda'
+                    }
+                  </Text>
+                  {!hasActiveFilters && (
+                    <AnimatedButton
+                      title="Tambah Transaksi"
+                      onPress={handleAddTransaction}
+                      type="primary"
+                      icon={<Ionicons name="add" size={18} color={colors.white} />}
+                      style={{ marginTop: spacing.lg }}
+                    />
+                  )}
+                </Animated.View>
+              }
+              ListHeaderComponent={
+                sections.length > 0 ? (
+                  <TouchableOpacity 
+                    style={styles.floatingAddButton}
+                    onPress={handleAddTransaction}
+                  >
+                    <Ionicons name="add" size={24} color={colors.white} />
+                  </TouchableOpacity>
+                ) : null
+              }
+            />
+          </Animated.View>
         </>
       )}
 
@@ -369,41 +443,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
-    paddingTop: spacing.xxl
+    paddingTop: 50
   },
-  skeletonContainer: {
-    flex: 1,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-  },
-  skeletonSearchContainer: {
-    marginBottom: spacing.lg,
-  },
-  skeletonSection: {
-    marginBottom: spacing.xl,
-  },
-  skeletonItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.md,
-  },
-  skeletonItemContent: {
-    flex: 1,
-  },
-  skeletonMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: spacing.md,
-    color: colors.textSecondary,
-    fontSize: typography.body,
-  },
+  
+  // ============ SEARCH BAR STYLES ============
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -432,8 +475,7 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   filterButton: {
-    padding: spacing.sm,
-    position: 'relative',
+    paddingHorizontal: spacing.md,
   },
   filterBadge: {
     position: 'absolute',
@@ -451,6 +493,8 @@ const styles = StyleSheet.create({
     fontSize: typography.tiny,
     fontWeight: typography.bold,
   },
+  
+  // ============ FILTER INFO STYLES ============
   filterInfoContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -472,9 +516,11 @@ const styles = StyleSheet.create({
     fontWeight: typography.semiBold,
     marginLeft: spacing.md,
   },
+  
+  // ============ LIST STYLES ============
   listContainer: {
     padding: spacing.lg,
-    paddingBottom: spacing.xl,
+    paddingBottom: spacing.xl + 60, // Extra space for floating button
   },
   sectionHeader: {
     marginTop: spacing.lg,
@@ -486,14 +532,25 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   separator: {
-    alignItems: 'center',
-    marginVertical: spacing.lg,
-  },
-  separatorLine: {
-    width: '100%',
     height: 1,
     backgroundColor: colors.borderLight,
+    marginVertical: spacing.lg,
   },
+  floatingAddButton: {
+    position: 'absolute',
+    right: spacing.lg,
+    bottom: spacing.xl,
+    width: 56,
+    height: 56,
+    borderRadius: borderRadius.round,
+    backgroundColor: colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...shadows.lg,
+    zIndex: 100,
+  },
+  
+  // ============ EMPTY STATE STYLES ============
   emptyContainer: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -509,6 +566,32 @@ const styles = StyleSheet.create({
     fontSize: typography.body,
     color: colors.darkGray,
     marginTop: spacing.sm,
+    textAlign: 'center',
+  },
+  
+  // ============ SKELETON STYLES ============
+  skeletonContainer: {
+    flex: 1,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+  },
+  skeletonSearchContainer: {
+    marginBottom: spacing.lg,
+  },
+  skeletonSection: {
+    marginBottom: spacing.xl,
+  },
+  skeletonItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
+  skeletonItemContent: {
+    flex: 1,
+  },
+  skeletonMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 });
 
