@@ -87,7 +87,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       type: 'BANK', 
       color: '#0033a0', 
       createdAt: '2024-01-13',
-      icon: 'bank-outline' // Ionicons: bank-outline (custom, bisa pakai business-outline)
+      icon: 'journal-outline' // Ionicons: bank-outline (custom, bisa pakai business-outline)
     },
   ];
 

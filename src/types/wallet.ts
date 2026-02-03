@@ -6,6 +6,7 @@ export interface Wallet {
   color: string;
   createdAt: string;
   updatedAt?: string;
+  icon?: string;
 }
 
 export interface WalletFormData {
@@ -13,6 +14,7 @@ export interface WalletFormData {
   type: 'CASH' | 'BANK' | 'E-WALLET' | 'SAVINGS';
   initialBalance?: number;
   color?: string;
+  icon?: string
 }
 
 export interface WalletResponse {
